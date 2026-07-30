@@ -20,7 +20,7 @@
       </div>
       <div class="svc-hero__media">
         <span class="svc-hero__blob" aria-hidden="true"></span>
-        <img src="{{ base_path }}/assets/img/{{ svc.hero_image }}.webp" alt="{{ svc.title }} — Neva Beauty, Дананг" width="520" height="650">
+        <img src="{{ base_path }}/assets/img/{{ svc.hero_image }}.webp" alt="{{ svc.title }} — {{ site.brand_full }}" width="520" height="650">
       </div>
     </div>
   </div>
@@ -39,7 +39,7 @@
 
 <section class="section pricelist-section">
   <div class="container">
-    <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены</h2><p>Указаны во вьетнамских донгах (đ).</p></div>
+    <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены на услугу «{{ svc.title }}»</h2><p>{{ site.business.currency_note }}</p></div>
     <div class="pricelist" data-pricelist>
       {% if sections|length > 1 %}
       <div class="pricelist__tabs" role="tablist">

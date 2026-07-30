@@ -128,7 +128,17 @@ SEO-оптимизации каждой страницы.
 | `build.py` | текст `llms.txt` про Дананг и Вьетнам | `content.llms_description` |
 | `service.html.j2` | alt «— Neva Beauty, Дананг» | `site.brand_full` |
 | `service.html.j2` | «Указаны во вьетнамских донгах (đ)» | `site.business.currency_note` |
+| `home.html.j2` | номер `+84 357 132 621` в контактной строке | подпись «WhatsApp», номер только в `href` |
+| `home.html.j2` | alt героя, заголовок блока преимуществ | `home.hero_image_alt`, `home.benefits_title` |
+| `home.html.j2` | «Цены указаны во вьетнамских донгах (đ)» | `site.business.currency_note` |
+| `category.html.j2` | alt «в Neva Beauty, Дананг» | `site.brand_full` |
+| `footer.html.j2` | «© Neva Beauty — Da Nang, Vietnam» | `site.brand_full` |
+| `privacy.html.j2` | домен `vn.neva.beauty`, номер `+84`, аккаунты салона в Дананге | `site.base_url`, `site.contacts.*` |
 | `check_prices.py` | путь `vn.neva.beauty` | путь выходной папки |
+
+Подписи мессенджеров в политике конфиденциальности собираются из самих ссылок
+фильтром `handle` (`https://t.me/shyrakras` → `@shyrakras`) — чтобы текст ссылки
+не разошёлся с адресом при смене аккаунта.
 
 ### 2. Прайс переверстывается в таблицу
 

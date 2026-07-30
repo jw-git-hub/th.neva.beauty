@@ -10,7 +10,7 @@
   <div class="related-grid" data-reveal-children>
     {% for slug in cat.services %}{% set r = services.get(slug) %}{% if r %}
     <a class="related-card card" href="{{ base_path }}/{{ slug }}/">
-      <div class="related-card__media"><img src="{{ base_path }}/assets/img/{{ r.hero_image }}.webp" alt="{{ r.title }} — {{ cat.title }} в Neva Beauty, Дананг" width="400" height="300" loading="lazy"></div>
+      <div class="related-card__media"><img src="{{ base_path }}/assets/img/{{ r.hero_image }}.webp" alt="{{ r.title }} — {{ cat.title }}, {{ site.brand_full }}" width="400" height="300" loading="lazy"></div>
       <div class="related-card__body"><h3>{{ r.title }}</h3><span class="related-card__more">Подробнее {{ icon('arrow-right') }}</span></div>
     </a>
     {% endif %}{% endfor %}

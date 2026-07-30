@@ -1,0 +1,40 @@
+brand: "Neva Beauty"                    # короткая форма — для title
+brand_full: "Neva Beauty — Koh Samui"   # полная форма — шапка, футер, schema, тексты
+brand_location: "Koh Samui"
+tagline: "Салон красоты · Самуи"
+location: "о. Самуи, Таиланд"
+hours: "Приём по записи"
+base_url: "https://th.neva.beauty"
+# Префикс пути для ссылок на ассеты/внутренние страницы (не SEO-URL, те всегда base_url).
+# Пусто = сайт в корне домена (боевой). "/th.neva.beauty" = превью на GitHub Pages по подпути.
+base_path: ""
+# Яндекс.Метрика: счётчик перенесён со старого сайта doctor-cosmetolog.pro.
+metrika_id: 99850063
+contacts:
+  whatsapp_number: "79990289115"
+  whatsapp_url: "https://wa.me/79990289115"
+  telegram_url: "https://t.me/shyrakras"
+  # Аккаунт со старым брендом — переименование отложено решением заказчика.
+  instagram_url: "https://www.instagram.com/avocado.beauty.samui/"
+
+# Единый источник фактов о бизнесе для JSON-LD (schema.org). Только реальные
+# данные; чего нет — не выдумываем.
+business:
+  type: "BeautySalon"                 # салон красоты, не мед-клиника
+  telephone: "+79990289115"           # основной телефон, он же WhatsApp
+  price_range: "฿฿"                   # качественный ориентир (Google priceRange)
+  currency: "THB"
+  currency_note: "Указаны в тайских батах (฿)."
+  language: ["Russian", "English"]    # языки обслуживания → availableLanguage в ContactPoint
+  language_code: "ru"
+  image: "/assets/img/hero.jpg"
+  logo: "/favicon.svg"                # брендовая буква N (отдельного логотипа нет)
+  same_as:
+    - "https://www.instagram.com/avocado.beauty.samui/"
+  address:
+    locality: "Koh Samui"
+    region: "Surat Thani"
+    country: "TH"
+    # streetAddress не публикуем — решение заказчика; адрес выдаётся при записи
+  # geo не публикуем (адрес по записи)
+  # openingHours не задаём — приём по записи (см. site.hours)
