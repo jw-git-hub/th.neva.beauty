@@ -51,7 +51,8 @@ def _opening_hours(hours):
 def business_nodes(site):
     """Общие узлы бизнеса — одинаковы на всех страницах (entity consistency)."""
     base = site["base_url"]
-    brand = site["brand"]
+    # Полная форма — сущность бизнеса для поиска и ИИ должна называться одинаково везде.
+    brand = site.get("brand_full", site["brand"])
     b = site["business"]
     org_ref = {"@id": base + "/" + ORG_ID}
 

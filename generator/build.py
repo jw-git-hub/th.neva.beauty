@@ -25,6 +25,10 @@ def icon(name, cls="icon"):
     svg = re.sub(r'<svg ([^>]*?)class="[^"]*"', f'<svg class="{cls}"', svg, count=1)
     return Markup(svg)
 
+def social_handle(profile_url):
+    """@имя из ссылки на профиль: подпись всегда совпадает с самой ссылкой."""
+    return "@" + profile_url.rstrip("/").rsplit("/", 1)[-1]
+
 def load():
     site = yaml.safe_load((ROOT/"data/site.yml").read_text(encoding="utf-8"))
     content = yaml.safe_load((ROOT/"data/content.yml").read_text(encoding="utf-8"))
@@ -35,6 +39,7 @@ def env():
     e = Environment(loader=FileSystemLoader(ROOT/"templates"),
                     autoescape=select_autoescape(["html","j2"]))
     e.filters["urlencode"] = lambda s: urllib.parse.quote(str(s))
+    e.filters["handle"] = social_handle
     e.tests["match"] = lambda s, pat: re.match(pat, s) is not None
     e.globals["icon"] = icon
     return e
@@ -147,11 +152,9 @@ def build_llms(site, content):
     base = site["base_url"]
     c = site["contacts"]
     lines = [
-        f"# {site['brand']}",
+        f"# {site['brand_full']}",
         "",
-        "> Центр красоты в Дананге (Вьетнам): аппаратная косметология, лазерная "
-        "эпиляция, лифтинг и омоложение, уход за лицом и коррекция фигуры. "
-        "Обслуживание на русском языке для русскоязычных клиентов.",
+        f"> {content['llms_description']}",
         "",
         "## Направления",
     ]
@@ -164,6 +167,7 @@ def build_llms(site, content):
         "",
         "## Контакты",
         f"- Локация: {site['location']}",
+        f"- Режим работы: {site['hours']}",
         f"- WhatsApp: {c['whatsapp_url']}",
         f"- Telegram: {c['telegram_url']}",
         f"- Instagram: {c['instagram_url']}",
@@ -202,7 +206,7 @@ def main():
         home_schema = schema.render(site, [schema.faq_node(home_faq)])
     else:
         home_schema = base_schema
-    page = {"url":"/", "seo_title": content["home"].get("seo_title","Neva Beauty — центр красоты в Дананге"),
+    page = {"url": "/", "seo_title": content["home"].get("seo_title", site["brand_full"]),
             "seo_desc": content["home"].get("seo_desc",""), "schema_json": home_schema,
             "hero_image": "/assets/img/hero.webp"}  # LCP-элемент → preload в base.html.j2
     write(OUT/"index.html", e.get_template("home.html.j2").render(
@@ -255,19 +259,19 @@ def main():
         write(OUT/cat["slug"]/"index.html", cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"]))
     # privacy (служебная — не индексируем)
-    page = {"url":"/privacy/", "seo_title":"Политика конфиденциальности — Neva Beauty", "seo_desc":"",
-            "schema_json": base_schema, "noindex": True}
+    page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
+            "seo_desc": "", "schema_json": base_schema, "noindex": True}
     write(OUT/"privacy"/"index.html", e.get_template("privacy.html.j2").render(site=site, page=page))
     # 404 (служебная — не индексируем)
-    page = {"url": "/404.html", "seo_title": "Страница не найдена — Neva Beauty", "seo_desc": "",
-            "schema_json": base_schema, "noindex": True}
+    page = {"url": "/404.html", "seo_title": f"Страница не найдена — {site['brand']}",
+            "seo_desc": "", "schema_json": base_schema, "noindex": True}
     write(OUT/"404.html", e.get_template("404.html.j2").render(site=site, page=page))
     # sitemap
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
     # /privacy/ и /404.html — noindex, в sitemap не включаем
     urls = ["/"] + [f"/{slug}/" for slug in content["services"]] + cat_urls
     today = date.today().isoformat()
-    rows = "\n".join(f'  <url><loc>https://vn.neva.beauty{u}</loc><lastmod>{today}</lastmod></url>' for u in urls)
+    rows = "\n".join(f'  <url><loc>{base_url}{u}</loc><lastmod>{today}</lastmod></url>' for u in urls)
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + rows + '\n</urlset>\n'
     write(OUT/"sitemap.xml", sitemap)
     # llms.txt — карта сайта для ИИ-ассистентов

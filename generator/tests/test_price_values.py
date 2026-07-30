@@ -21,7 +21,7 @@ def test_price_without_space_before_symbol():
 
 
 def test_thousands_separator_is_one_number():
-    assert price_values("1 600 000 đ") == [1600000]
+    assert price_values("1 600 000 ฿") == [1600000]
 
 
 def test_range_with_hyphen_gives_both_bounds():

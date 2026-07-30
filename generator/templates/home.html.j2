@@ -19,7 +19,7 @@
     </div>
     <div class="hero__media">
       <span class="hero__blob" aria-hidden="true"></span>
-      <img class="hero__photo" src="{{ base_path }}/assets/img/hero.webp" alt="Безупречная кожа и макияж — центр красоты Neva Beauty" width="560" height="700">
+      <img class="hero__photo" src="{{ base_path }}/assets/img/hero.webp" alt="{{ home.hero_image_alt }}" width="560" height="700">
     </div>
   </div>
 </section>
@@ -28,7 +28,7 @@
   <div class="contact-strip">
     <div class="contact-strip__item">{{ icon('map-pin') }}<span>{{ site.location }}</span></div>
     <div class="contact-strip__item">{{ icon('clock') }}<span>{{ site.hours }}</span></div>
-    <a class="contact-strip__item" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>+84 357 132 621</span></a>
+    <a class="contact-strip__item" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
   </div>
 </section>
 
@@ -46,7 +46,7 @@
 
 <section class="section benefits-section">
   <div class="container">
-    <div class="section-head" data-reveal><p class="eyebrow">Почему Neva Beauty</p><h2>Забота в каждой детали</h2></div>
+    <div class="section-head" data-reveal><p class="eyebrow">Почему {{ site.brand }}</p><h2>{{ home.benefits_title }}</h2></div>
     <div class="benefits-grid" data-reveal-children>
       {% for b in home.benefits %}
       <div class="benefit"><span class="benefit__icon">{{ icon(b.icon) }}</span><h3>{{ b.title }}</h3><p>{{ b.text }}</p></div>
@@ -56,7 +56,7 @@
 </section>
 
 <section class="section container">
-  <div class="section-head" data-reveal><p class="eyebrow">Популярное</p><h2>Частые процедуры</h2><p>Цены указаны во вьетнамских донгах (đ).</p></div>
+  <div class="section-head" data-reveal><p class="eyebrow">Популярное</p><h2>Частые процедуры</h2><p>Цены {{ site.business.currency_note | lower }}</p></div>
   <div class="popular-grid" data-reveal-children>
     {% for p in home.popular %}
     <a class="popular-card card" href="{{ base_path }}/{{ p.slug }}/">
@@ -73,7 +73,7 @@
 <section class="section container" id="faq">
   <div class="section-head" data-reveal>
     <p class="eyebrow">Вопросы и ответы</p>
-    <h2>Коротко о Neva Beauty</h2>
+    <h2>Коротко о {{ site.brand }}</h2>
     <p>{{ home.about_lead }}</p>
   </div>
   <div class="faq" data-reveal-children>
