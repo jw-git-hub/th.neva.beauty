@@ -2,7 +2,7 @@
 
 Цены и перечень услуг переносятся со старого сайта без изменений. Тест фиксирует
 число позиций по каждой услуге: если извлечение потеряет или задвоит позицию,
-тест упадёт. Числа взяты подсчётом строк с символом ฿ на страницах Tilda-выгрузки.
+тест упадёт. Числа взяты подсчётом позиций прайса на страницах Tilda-выгрузки.
 """
 import json
 from pathlib import Path
@@ -13,7 +13,7 @@ PRICES = json.loads(
 
 EXPECTED_ITEMS = {
     "lazernaya-epilyaciya": 32,
-    "elektroepilyaciya": 5,
+    "elektroepilyaciya": 6,
     "saharnaya-epilyaciya": 18,
     "uhod-za-volosami": 40,
     "tokio-inkarami": 3,
@@ -31,7 +31,12 @@ EXPECTED_ITEMS = {
     "massazh": 4,
 }
 
-TOTAL_ITEMS = 203
+TOTAL_ITEMS = 204
+
+# Позиции без денежной цены. На старом сайте такая одна — бесплатная обработка
+# после электроэпиляции. Она остаётся в прайсе: бесплатная услуга это выгода
+# клиента, терять её при переносе нельзя.
+FREE_PRICES = {"бесплатно"}
 
 
 def item_count(slug):
@@ -60,9 +65,13 @@ def test_every_item_has_name_and_price():
 
 
 def test_prices_are_in_baht():
+    """Все денежные цены — в батах. Исключение — позиции без денежной цены
+    («бесплатно»): они есть на старом сайте и переносятся дословно."""
     for slug, sections in PRICES.items():
         for section in sections:
             for item in section["items"]:
+                if item["price"] in FREE_PRICES:
+                    continue
                 assert "฿" in item["price"], f"{slug}: {item['name']} — цена не в батах"
 
 
