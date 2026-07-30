@@ -1,0 +1,11 @@
+.venv/
+.env
+.superpowers/
+__pycache__/
+*.pyc
+.DS_Store
+
+# внутреннее, не для публикации
+OLD - doctor.cosmetolog.pro/
+Данные и промты /
+Временные скриншоты/
