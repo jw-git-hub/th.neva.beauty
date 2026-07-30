@@ -108,19 +108,38 @@ def render_faq_contacts(faq, contacts, base_path=""):
     return result
 
 
+# Число цены: первая цифра и дальше цифры с разделителями разрядов (обычный
+# и неразрывный пробел). «1 600 000» — одно число, «600 -1200» — два.
+_PRICE_NUMBER_RE = re.compile(r"\d[\d\s ]*")
+
+
+def price_values(price):
+    """Самостоятельные цены из строки прайса, числами.
+
+    Цена выводится на странице дословно, поэтому в прайсе встречаются формы
+    «600 -1200 ฿», «от 2500 ฿», «+500 ฿», «35 ฿/минута». В диапазон для
+    AggregateOffer идут только самостоятельные цены: доплата к другой процедуре
+    и тариф за единицу времени ценой услуги не являются."""
+    text = price.strip()
+    if not text or text.startswith("+") or "/" in text:
+        return []
+    return [int(re.sub(r"\D", "", m)) for m in _PRICE_NUMBER_RE.findall(text)]
+
+
 def price_aggregate(sections, currency):
-    """Диапазон цен услуги (min/max/кол-во) для AggregateOffer — из строк прайса.
+    """Диапазон цен услуги (min/max/кол-во позиций) для AggregateOffer.
     Возвращает None, если цен нет (числа не выдумываем, берём ровно из прайса)."""
-    values = []
+    values, offers = [], 0
     for sec in sections:
         for item in sec["items"]:
-            digits = re.sub(r"[^\d]", "", item["price"])
-            if digits:
-                values.append(int(digits))
+            numbers = price_values(item["price"])
+            if numbers:
+                values.extend(numbers)
+                offers += 1
     if not values:
         return None
     return {"low": min(values), "high": max(values),
-            "count": len(values), "currency": currency}
+            "count": offers, "currency": currency}
 
 
 def build_llms(site, content):
