@@ -16,11 +16,11 @@
   <meta property="og:title" content="{{ page.seo_title }}">
   <meta property="og:description" content="{{ page.seo_desc }}">
   <meta property="og:url" content="{{ site.base_url }}{{ page.url }}">
-  <meta property="og:image" content="{{ site.base_url }}{{ page.og_image | default('/assets/img/hero.jpg') }}">
+  <meta property="og:image" content="{{ site.base_url }}{{ page.og_image | default('/assets/img/og-cover.jpg') }}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ page.seo_title }}">
   <meta name="twitter:description" content="{{ page.seo_desc }}">
-  <meta name="twitter:image" content="{{ site.base_url }}{{ page.og_image | default('/assets/img/hero.jpg') }}">
+  <meta name="twitter:image" content="{{ site.base_url }}{{ page.og_image | default('/assets/img/og-cover.jpg') }}">
   {% if page.schema_json %}<script type="application/ld+json">{{ page.schema_json }}</script>{% endif %}
   <link rel="icon" href="{{ base_path }}/favicon.svg" type="image/svg+xml">
   {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" fetchpriority="high">{% endif %}
