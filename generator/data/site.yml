@@ -27,7 +27,7 @@ business:
   currency_note: "Указаны в тайских батах (฿)."
   language: ["Russian", "English"]    # языки обслуживания → availableLanguage в ContactPoint
   language_code: "ru"
-  image: "/assets/img/hero.jpg"
+  image: "/assets/img/og-cover.jpg"  # Google ждёт для бизнеса кадр от 1200px по ширине
   logo: "/favicon.svg"                # брендовая буква N (отдельного логотипа нет)
   same_as:
     - "https://www.instagram.com/avocado.beauty.samui/"
