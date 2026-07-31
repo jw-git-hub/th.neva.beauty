@@ -131,18 +131,75 @@ def price_values(price):
     return [int(re.sub(r"\D", "", m)) for m in _PRICE_NUMBER_RE.findall(text)]
 
 
-def price_aggregate(sections, currency):
-    """Диапазон цен услуги (min/max/кол-во позиций) для AggregateOffer.
-    Возвращает None, если цен нет (числа не выдумываем, берём ровно из прайса)."""
-    values, offers = [], 0
-    for sec in sections:
-        for item in sec["items"]:
-            numbers = price_values(item["price"])
-            if numbers:
-                values.extend(numbers)
-                offers += 1
+def price_offer(price):
+    """Цена одной позиции прайса как предложение, или None, если она им не является.
+
+    {"price": n} — фиксированная цена, {"min": a, "max": b} — диапазон,
+    {"min": a} — форма «от 2500 ฿». Отсев тот же, что у price_values():
+    доплату и тариф за минуту отдельно купить нельзя, предложением они не будут."""
+    values = price_values(price)
     if not values:
         return None
+    if len(values) > 1:
+        return {"min": values[0], "max": values[-1]}
+    if price.strip().lower().startswith("от"):
+        return {"min": values[0]}
+    return {"price": values[0]}
+
+
+def item_offer(item):
+    """Позиция прайса как предложение, или None, если купить её отдельно нельзя.
+
+    Часть надбавок видна по строке цены («+500 ฿», «35 ฿/минута»), часть — нет:
+    «Одноразовая игла — 100 ฿» или «Доплата за густоту — 500-1000 ฿» выглядят
+    обычной ценой. Такие позиции помечены в прайсе флагом addon вручную."""
+    if item.get("addon"):
+        return None
+    return price_offer(item["price"])
+
+
+def price_catalog(sections):
+    """Разделы прайса с разобранными ценами — сырьё для OfferCatalog.
+    Позиции без самостоятельной цены и опустевшие разделы отбрасываются."""
+    catalog = []
+    for sec in sections:
+        items = [
+            {"name": item["name"], "desc": item["desc"], "offer": offer}
+            for item in sec["items"]
+            if (offer := item_offer(item))
+        ]
+        if items:
+            catalog.append({"section": sec["section"], "items": items})
+    return catalog
+
+
+def service_offer_catalog(service_title, sections, currency, url):
+    """OfferCatalog страницы услуги, или None, если предлагать нечего."""
+    catalog = price_catalog(sections)
+    if not catalog:
+        return None
+    return schema.offer_catalog_node(service_title, catalog, currency, url)
+
+
+def offer_bounds(offer):
+    """Нижняя и верхняя границы цены предложения."""
+    if "price" in offer:
+        return offer["price"], offer["price"]
+    return offer["min"], offer.get("max", offer["min"])
+
+
+def price_aggregate(sections, currency):
+    """Диапазон цен услуги (min/max/кол-во позиций) для AggregateOffer.
+
+    Считается из того же каталога, что и попозиционная разметка, поэтому
+    диапазон не может разойтись с ценами конкретных услуг. Возвращает None,
+    если самостоятельных цен нет (числа не выдумываем, берём ровно из прайса)."""
+    bounds = [offer_bounds(item["offer"])
+              for section in price_catalog(sections) for item in section["items"]]
+    if not bounds:
+        return None
+    values = [value for pair in bounds for value in pair]
+    offers = len(bounds)
     return {"low": min(values), "high": max(values),
             "count": offers, "currency": currency}
 
@@ -227,8 +284,11 @@ def main():
         crumbs.append({"name": svc["title"], "url": base_url + f"/{slug}/"})
         nodes = [
             schema.breadcrumb_node(crumbs),
-            schema.service_node(svc["title"], svc["intro"], provider_ref, area_name,
-                                price_aggregate(sections, currency)),
+            schema.service_node(
+                svc["title"], svc["intro"], provider_ref, area_name,
+                price_aggregate(sections, currency),
+                service_offer_catalog(svc["title"], sections, currency,
+                                      base_url + f"/{slug}/")),
         ]
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path)
