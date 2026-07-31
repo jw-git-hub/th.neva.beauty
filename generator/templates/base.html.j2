@@ -26,7 +26,7 @@
   {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" fetchpriority="high">{% endif %}
   <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/manrope-400-cyrillic.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/cormorant-600-cyrillic.woff2" crossorigin>
-  <link rel="stylesheet" href="{{ base_path }}/assets/css/bundle.min.css">
+  <link rel="stylesheet" href="{{ asset('/assets/css/bundle.min.css') }}">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -37,9 +37,9 @@
   {% include 'partials/drawer.html.j2' %}
   <main id="main">{% block content %}{% endblock %}</main>
   {% include 'partials/footer.html.j2' %}
-  <script type="module" src="{{ base_path }}/assets/js/nav.js"></script>
-  <script type="module" src="{{ base_path }}/assets/js/reveal.js"></script>
-  <script type="module" src="{{ base_path }}/assets/js/aurora.js"></script>
+  <script type="module" src="{{ asset('/assets/js/nav.js') }}"></script>
+  <script type="module" src="{{ asset('/assets/js/reveal.js') }}"></script>
+  <script type="module" src="{{ asset('/assets/js/aurora.js') }}"></script>
   {% block extra_js %}{% endblock %}
   {% include 'partials/metrika.html.j2' %}
 </body>

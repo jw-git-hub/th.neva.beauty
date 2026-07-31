@@ -41,16 +41,21 @@
   <div class="container">
     <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены на услугу «{{ svc.title }}»</h2><p>{{ site.business.currency_note }}</p></div>
     <div class="pricelist" data-pricelist>
-      {% if sections|length > 1 %}
-      <div class="pricelist__tabs" role="tablist">
+      {% set tabbed = sections|length > 1 %}
+      {% if tabbed %}
+      <div class="pricelist__tabs" role="tablist" aria-label="Разделы прайса — {{ svc.title }}">
         {% for sec in sections %}
         <button class="pricelist__tab{{ ' is-active' if loop.first }}" type="button" role="tab"
+          id="tab-{{ slug }}-{{ loop.index0 }}" aria-controls="panel-{{ slug }}-{{ loop.index0 }}"
+          tabindex="{{ '0' if loop.first else '-1' }}"
           aria-selected="{{ 'true' if loop.first else 'false' }}" data-tab="{{ loop.index0 }}">{{ sec.section or 'Цены' }}</button>
         {% endfor %}
       </div>
       {% endif %}
       {% for sec in sections %}
-      <div class="pricelist__panel{{ ' is-active' if loop.first }}" data-panel="{{ loop.index0 }}">
+      <div class="pricelist__panel{{ ' is-active' if loop.first }}" data-panel="{{ loop.index0 }}"
+        {%- if tabbed %} id="panel-{{ slug }}-{{ loop.index0 }}" role="tabpanel"
+        aria-labelledby="tab-{{ slug }}-{{ loop.index0 }}" tabindex="0"{% endif %}>
         {% set combos = sec['items'] | selectattr('name','match','^(КОМБО|Комбо)') | list %}
         {% set rows = sec['items'] | rejectattr('name','match','^(КОМБО|Комбо)') | list %}
         {% if combos %}
@@ -126,4 +131,4 @@
 </section>
 {% endif %}
 {% endblock %}
-{% block extra_js %}<script src="{{ base_path }}/assets/js/price-tabs.js" defer></script>{% endblock %}
+{% block extra_js %}<script type="module" src="{{ asset('/assets/js/price-tabs.js') }}"></script>{% endblock %}

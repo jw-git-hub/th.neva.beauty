@@ -1,4 +1,4 @@
-import json, re, urllib.parse, yaml, rcssmin
+import hashlib, json, re, urllib.parse, yaml, rcssmin
 from datetime import date
 from pathlib import Path
 from markupsafe import Markup
@@ -61,6 +61,16 @@ def build_css_bundle():
     out = css_dir / "bundle.min.css"
     out.write_text(bundle, encoding="utf-8")
     print("→", out.relative_to(OUT.parent), f"({len(bundle) // 1024} KB minified)")
+
+def asset_url(base_path, path):
+    """Ссылка на ассет с отпечатком содержимого: `?v=1a2b3c4d`.
+
+    Имена файлов постоянные, поэтому без отпечатка вернувшийся посетитель после
+    деплоя получает из кэша старый CSS или JS. Отпечаток меняется вместе с файлом
+    и заставляет браузер скачать новую версию."""
+    digest = hashlib.sha1((OUT / path.lstrip("/")).read_bytes()).hexdigest()[:8]
+    return f"{base_path}{path}?v={digest}"
+
 
 def enrich_categories(content):
     """Обогащает категории (url, is_page) и переопределяет svc.category — единая таксономия."""
@@ -251,6 +261,7 @@ def main():
     base_path = site.get("base_path", "").rstrip("/")
     e.globals["base_path"] = base_path
     build_css_bundle()  # единый минифицированный bundle.min.css
+    e.globals["asset"] = lambda path: asset_url(base_path, path)  # после сборки bundle
     enrich_categories(content)
     fill_related(content)
     site["nav"] = build_nav(content["categories"], content["services"])
