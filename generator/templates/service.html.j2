@@ -64,14 +64,22 @@
           {% endfor %}
         </div>
         {% endif %}
-        <div class="pricelist__rows">
-          {% for it in rows %}
-          <div class="pricelist__row">
-            <span class="pricelist__name">{{ it.name }}{% if it.desc %}<span class="pricelist__desc">{{ it.desc }}</span>{% endif %}</span>
-            <span class="pricelist__price">{{ it.price }}</span>
-          </div>
-          {% endfor %}
-        </div>
+        {% if rows %}
+        <table class="pricelist__table">
+          <caption class="visually-hidden">{{ sec.section or 'Цены' }} — {{ svc.title }}, {{ site.brand_full }}</caption>
+          <thead class="visually-hidden">
+            <tr><th scope="col">Услуга</th><th scope="col">Цена</th></tr>
+          </thead>
+          <tbody>
+            {% for it in rows %}
+            <tr class="pricelist__row">
+              <th class="pricelist__name" scope="row">{{ it.name }}{% if it.desc %}<span class="pricelist__desc">{{ it.desc }}</span>{% endif %}</th>
+              <td class="pricelist__price">{{ it.price }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
