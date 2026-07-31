@@ -38,7 +38,7 @@ def new_side():
     for slug in PRICES:
         soup = BeautifulSoup((NEW / slug / "index.html").read_text(encoding="utf-8"), "html.parser")
         n = 0
-        for row in soup.select(".pricelist__row"):
+        for row in soup.select("tr.pricelist__row"):
             name_el = row.select_one(".pricelist__name")
             d = name_el.select_one(".pricelist__desc")
             if d:

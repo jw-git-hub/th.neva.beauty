@@ -52,13 +52,19 @@
 .combo__name{font-weight:700;color:var(--rose-deep);font-size:var(--fs-300)}
 .combo__desc{font-size:var(--fs-200);color:var(--muted);margin:var(--sp-1) 0}
 .combo__price{font-weight:700;font-variant-numeric:tabular-nums;margin-top:var(--sp-2)}
-.pricelist__rows{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:0 var(--sp-5)}
-.pricelist__row{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-4);
-  padding:var(--sp-4) 0;border-bottom:1px dashed var(--line)}
-.pricelist__row:last-child{border-bottom:none}
-.pricelist__name{display:flex;flex-direction:column;color:var(--ink)}
-.pricelist__desc{font-size:var(--fs-200);color:var(--muted);font-weight:400;margin-top:2px}
-.pricelist__price{font-weight:700;color:var(--rose-deep);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* border-collapse:separate, а не collapse: только в раздельной модели у таблицы
+   работают border-radius и боковой padding, за счёт которого разделители строк
+   не доходят до краёв карточки. */
+.pricelist__table{width:100%;background:var(--white);border:1px solid var(--line);
+  border-radius:var(--radius-lg);border-collapse:separate;border-spacing:0;padding:0 var(--sp-5)}
+/* Разделитель на ячейках, а не на строке: border у tr в раздельной модели не рисуется. */
+.pricelist__row>*{border-bottom:1px dashed var(--line)}
+.pricelist__row:last-child>*{border-bottom:none}
+.pricelist__name{color:var(--ink);font-weight:400;text-align:left;
+  vertical-align:baseline;padding:var(--sp-4) 0}
+.pricelist__desc{display:block;font-size:var(--fs-200);color:var(--muted);font-weight:400;margin-top:2px}
+.pricelist__price{font-weight:700;color:var(--rose-deep);font-variant-numeric:tabular-nums;
+  white-space:nowrap;text-align:right;vertical-align:baseline;padding:var(--sp-4) 0 var(--sp-4) var(--sp-4)}
 
 /* ===== RELATED ===== */
 .related-grid{display:grid;gap:var(--sp-6);grid-template-columns:1fr}
