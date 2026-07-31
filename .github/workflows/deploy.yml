@@ -31,6 +31,18 @@ jobs:
       - name: Generate site
         run: python generator/build.py
 
+      # Ворота перед деплоем: сломанные цены, битая ссылка или след старого
+      # бренда роняют сборку и в прод не уезжают.
+      - name: Check prices
+        working-directory: generator
+        run: python check_prices.py
+
+      - name: Check content
+        run: python generator/check_content.py
+
+      - name: Unit tests
+        run: pytest generator/tests -q
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
