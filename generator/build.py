@@ -72,6 +72,15 @@ def asset_url(base_path, path):
     return f"{base_path}{path}?v={digest}"
 
 
+def og_image_path(slug):
+    """Превью страницы для мессенджеров: `og-<slug>.jpg`, иначе общая обложка.
+
+    Ссылку на услугу чаще всего пересылают в WhatsApp, и карточка должна
+    показывать именно эту процедуру, а не общий кадр салона."""
+    path = f"/assets/img/og-{slug}.jpg"
+    return path if (OUT / path.lstrip("/")).exists() else None
+
+
 def enrich_categories(content):
     """Обогащает категории (url, is_page) и переопределяет svc.category — единая таксономия."""
     categories = content["categories"]
@@ -276,7 +285,8 @@ def main():
         home_schema = base_schema
     page = {"url": "/", "seo_title": content["home"].get("seo_title", site["brand_full"]),
             "seo_desc": content["home"].get("seo_desc",""), "schema_json": home_schema,
-            "hero_image": "/assets/img/hero.webp"}  # LCP-элемент → preload в base.html.j2
+            "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
+            "og_image_alt": content["home"].get("hero_image_alt", site["brand_full"])}
     write(OUT/"index.html", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"], prices=prices))
     # услуги
@@ -306,7 +316,9 @@ def main():
             nodes.append(schema.faq_node(svc["faq"]))
         page = {"url": f"/{slug}/", "seo_title": svc["seo_title"], "seo_desc": svc["seo_desc"],
                 "schema_json": schema.render(site, nodes),
-                "hero_image": f"/assets/img/{svc['hero_image']}.webp"}  # LCP → preload
+                "hero_image": f"/assets/img/{svc['hero_image']}.webp",  # LCP → preload
+                "og_image": og_image_path(slug),
+                "og_image_alt": f"{svc['title']} — {site['brand_full']}"}
         write(OUT/slug/"index.html", tpl.render(
             site=site, page=page, svc=svc, slug=slug, category=cat,
             sections=sections, services=content["services"]))
@@ -326,16 +338,22 @@ def main():
             cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path)
             nodes.append(schema.faq_node(cat["faq"]))
         page = {"url": cat["url"], "seo_title": cat["seo_title"], "seo_desc": cat["seo_desc"],
-                "schema_json": schema.render(site, nodes)}
+                "schema_json": schema.render(site, nodes),
+                "og_image": og_image_path(cat["slug"]),
+                "og_image_alt": f"{cat['title']} — {site['brand_full']}"}
         write(OUT/cat["slug"]/"index.html", cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"]))
-    # privacy (служебная — не индексируем)
+    # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
-            "seo_desc": "", "schema_json": base_schema, "noindex": True}
+            "seo_desc": f"Как {site['brand_full']} обрабатывает персональные данные "
+                        "посетителей сайта и как отозвать согласие.",
+            "schema_json": base_schema, "noindex": True}
     write(OUT/"privacy"/"index.html", e.get_template("privacy.html.j2").render(site=site, page=page))
     # 404 (служебная — не индексируем)
     page = {"url": "/404.html", "seo_title": f"Страница не найдена — {site['brand']}",
-            "seo_desc": "", "schema_json": base_schema, "noindex": True}
+            "seo_desc": "Такой страницы нет. Загляните в услуги и цены "
+                        f"салона {site['brand_full']}.",
+            "schema_json": base_schema, "noindex": True}
     write(OUT/"404.html", e.get_template("404.html.j2").render(site=site, page=page))
     # sitemap
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
