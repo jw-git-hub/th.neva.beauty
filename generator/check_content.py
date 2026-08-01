@@ -12,9 +12,12 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from bs4 import BeautifulSoup
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent
 SITE = ROOT.parent / "th.neva.beauty"
+BASE_URL = "https://th.neva.beauty"
+OG_SIZE = ("1200", "630")  # формат карточки в WhatsApp, Telegram и Facebook
 
 # Следы старого бренда. Instagram-аккаунт avocado.beauty.samui — исключение:
 # переименование отложено решением заказчика, ссылка на него легальна.
@@ -91,6 +94,40 @@ def check_schema(path, soup):
             report(rel(path), f"невалидный JSON-LD: {exc}")
 
 
+def og_content(soup, prop):
+    tag = soup.select_one(f'meta[property="{prop}"]') or soup.select_one(f'meta[name="{prop}"]')
+    return tag.get("content", "").strip() if tag else ""
+
+
+def check_open_graph(path, soup):
+    """Превью ссылки в мессенджерах: картинка на месте и заявленного размера.
+
+    Карточку рисует краулер, который читает только <head>: файла нет или размер
+    в разметке разошёлся с настоящим — и вместо превью придёт пустая рамка."""
+    canonical = soup.select_one('link[rel="canonical"]')
+    if canonical and og_content(soup, "og:url") != canonical.get("href", ""):
+        report(rel(path), "og:url не совпадает с canonical")
+    image = og_content(soup, "og:image")
+    if not image.startswith(BASE_URL + "/"):
+        report(rel(path), f"og:image не абсолютный: {image!r}")
+        return
+    if og_content(soup, "twitter:image") != image:
+        report(rel(path), "twitter:image не совпадает с og:image")
+    if not og_content(soup, "og:image:alt"):
+        report(rel(path), "нет og:image:alt")
+    target = SITE / image[len(BASE_URL) + 1:]
+    if not target.exists():
+        report(rel(path), f"нет файла превью: {image}")
+        return
+    declared = (og_content(soup, "og:image:width"), og_content(soup, "og:image:height"))
+    with Image.open(target) as im:
+        real = tuple(str(side) for side in im.size)
+    if declared != real:
+        report(rel(path), f"размер превью в разметке {declared}, у файла {real}")
+    if real != OG_SIZE:
+        report(rel(path), f"превью {real}, соцсети ждут {OG_SIZE}")
+
+
 def check_meta(path, soup, titles, descriptions):
     title_el = soup.select_one("title")
     title = title_el.get_text(strip=True) if title_el else ""
@@ -133,6 +170,7 @@ def main():
         check_links(path, soup)
         check_schema(path, soup)
         check_meta(path, soup, titles, descriptions)
+        check_open_graph(path, soup)
     check_duplicates("title", titles)
     check_duplicates("meta description", descriptions)
 
