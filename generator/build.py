@@ -155,6 +155,16 @@ def render_prices(text, index):
     return _PRICE_TOKEN_RE.sub(replace, text)
 
 
+def render_page_prices(entry, index):
+    """Подставляет цены в тексты страницы — лид первого экрана и описание для поиска.
+
+    Оба уходят дальше по сборке: лид — в описание Service, описание — в сниппет
+    и Open Graph. Цены подставляются здесь, до сборки графа, чтобы во всех трёх
+    местах стояла одна цифра из прайса."""
+    for field in ("intro", "seo_desc"):
+        entry[field] = render_prices(entry[field], index)
+
+
 def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
     """Финализирует HTML-ответы FAQ: подставляет URL мессенджеров вместо плейсхолдеров
     {whatsapp}/{telegram}/{instagram} (единый источник — site.yml), цены из прайса
@@ -346,9 +356,7 @@ def main():
     for slug, svc in content["services"].items():
         sections = prices.get(slug, [])
         cat = category_by_slug[slug]
-        # Лид первого экрана уходит и в текст, и в описание Service — цены
-        # подставляем до сборки графа, чтобы они не разошлись между ними.
-        svc["intro"] = render_prices(svc["intro"], prices_index)
+        render_page_prices(svc, prices_index)
         crumbs = [{"name": "Главная", "url": base_url + "/"}]
         if cat["is_page"]:
             crumbs.append({"name": cat["title"], "url": base_url + cat["url"]})
@@ -377,7 +385,7 @@ def main():
     for cat in content["categories"]:
         if not cat["is_page"]:
             continue
-        cat["intro"] = render_prices(cat["intro"], prices_index)
+        render_page_prices(cat, prices_index)
         nodes = [
             schema.breadcrumb_node([
                 {"name": "Главная", "url": base_url + "/"},
