@@ -112,10 +112,37 @@ def fill_related(content):
                     related.append(candidate)
         svc["related"] = related[:RELATED_COUNT]
 
-def render_faq_contacts(faq, contacts, base_path=""):
+# Цена позиции прайса прямо в тексте: {price:слаг-услуги:Точное название позиции}.
+# Цифры в content.yml не дублируются — их подставляет сборка из prices.json,
+# поэтому текст не может разойтись с прайсом.
+_PRICE_TOKEN_RE = re.compile(r"\{price:([a-z0-9-]+):([^}]+)\}")
+
+
+def price_by_name(prices):
+    """Указатель «слаг услуги + название позиции → цена строкой» по всему прайсу."""
+    return {(slug, item["name"]): item["price"]
+            for slug, sections in prices.items()
+            for section in sections for item in section["items"]}
+
+
+def render_prices(text, index):
+    """Подставляет цены вместо {price:...}.
+
+    Неизвестная позиция роняет сборку: молча оставленный плейсхолдер ушёл бы
+    и в текст страницы, и в JSON-LD."""
+    def replace(match):
+        key = (match.group(1), match.group(2))
+        if key not in index:
+            raise KeyError(f"нет позиции прайса {key[1]!r} у услуги {key[0]!r}")
+        return index[key]
+    return _PRICE_TOKEN_RE.sub(replace, text)
+
+
+def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
     """Финализирует HTML-ответы FAQ: подставляет URL мессенджеров вместо плейсхолдеров
-    {whatsapp}/{telegram}/{instagram} (единый источник — site.yml) и префиксует внутренние
-    ссылки href="/..." на base_path — чтобы они работали и на превью по подпути."""
+    {whatsapp}/{telegram}/{instagram} (единый источник — site.yml), цены из прайса
+    вместо {price:...} и префиксует внутренние ссылки href="/..." на base_path —
+    чтобы они работали и на превью по подпути."""
     tokens = {
         "{whatsapp}": contacts["whatsapp_url"],
         "{telegram}": contacts["telegram_url"],
@@ -126,6 +153,8 @@ def render_faq_contacts(faq, contacts, base_path=""):
         answer = item["a"]
         for token, url in tokens.items():
             answer = answer.replace(token, url)
+        if prices_index:
+            answer = render_prices(answer, prices_index)
         if base_path:
             answer = answer.replace('href="/', f'href="{base_path}/')
         result.append({"q": item["q"], "a": answer})
@@ -269,6 +298,7 @@ def main():
     # "/th.neva.beauty" для превью на GitHub Pages по подпути проекта. SEO-URL (base_url) не трогает.
     base_path = site.get("base_path", "").rstrip("/")
     e.globals["base_path"] = base_path
+    prices_index = price_by_name(prices)  # цены для плейсхолдеров {price:...} в текстах
     build_css_bundle()  # единый минифицированный bundle.min.css
     e.globals["asset"] = lambda path: asset_url(base_path, path)  # после сборки bundle
     enrich_categories(content)
@@ -278,7 +308,7 @@ def main():
     # главная
     home_faq = content["home"].get("faq", [])
     if home_faq:
-        home_faq = render_faq_contacts(home_faq, site["contacts"], base_path)
+        home_faq = render_faq_contacts(home_faq, site["contacts"], base_path, prices_index)
         content["home"]["faq"] = home_faq
         home_schema = schema.render(site, [schema.faq_node(home_faq)])
     else:
@@ -312,7 +342,7 @@ def main():
                                       base_url + f"/{slug}/")),
         ]
         if svc.get("faq"):
-            svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path)
+            svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
             nodes.append(schema.faq_node(svc["faq"]))
         page = {"url": f"/{slug}/", "seo_title": svc["seo_title"], "seo_desc": svc["seo_desc"],
                 "schema_json": schema.render(site, nodes),
@@ -338,12 +368,12 @@ def main():
             ]),
         ]
         if cat.get("faq"):
-            cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path)
+            cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path, prices_index)
             nodes.append(schema.faq_node(cat["faq"]))
         page = {"url": cat["url"], "seo_title": cat["seo_title"], "seo_desc": cat["seo_desc"],
                 "schema_json": schema.render(site, nodes),
                 "og_image": og_image_path(cat["slug"]),
-                "og_image_alt": f"{cat['title']} — {site['brand_full']}"}
+                "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
         write(OUT/cat["slug"]/"index.html", cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"]))
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)

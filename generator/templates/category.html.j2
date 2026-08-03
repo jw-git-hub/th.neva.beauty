@@ -7,7 +7,8 @@
     <span class="breadcrumbs__sep" aria-hidden="true">/</span>
     <span aria-current="page">{{ cat.title }}</span>
   </nav>
-  <div class="section-head" data-reveal><p class="eyebrow">Направление</p><h1>{{ cat.title }}</h1><p>{{ cat.intro }}</p></div>
+  <div class="section-head" data-reveal><p class="eyebrow">Направление</p><h1>{{ cat.h1 | default(cat.title, true) }}</h1><p>{{ cat.intro }}</p></div>
+  <h2 class="visually-hidden">Услуги раздела «{{ cat.title }}»</h2>
   <div class="related-grid" data-reveal-children>
     {% for slug in cat.services %}{% set r = services.get(slug) %}{% if r %}
     <a class="related-card card" href="{{ base_path }}/{{ slug }}/">
@@ -17,6 +18,28 @@
     {% endif %}{% endfor %}
   </div>
 </section>
+
+{% if cat.compare %}
+<section class="section container" id="sravnenie">
+  <div class="section-head" data-reveal><p class="eyebrow">Сравнение</p><h2>{{ cat.compare.title }}</h2></div>
+  <div class="compare" data-reveal>
+    <table class="compare__table">
+      <caption class="visually-hidden">{{ cat.compare.title }} — {{ cat.title }}, {{ site.brand_full }}</caption>
+      <thead>
+        <tr><th scope="col">Метод</th>{% for col in cat.compare.columns %}<th scope="col">{{ col }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for row in cat.compare.rows %}
+        <tr>
+          <th scope="row"><a href="{{ base_path }}/{{ row.slug }}/">{{ row.label }}</a></th>
+          {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 {% if cat.faq %}
 <section class="section container" id="faq">

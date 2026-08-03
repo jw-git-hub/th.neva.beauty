@@ -6,6 +6,7 @@
 Запуск: .venv/bin/python generator/check_content.py
 """
 import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -24,7 +25,26 @@ OG_SIZE = ("1200", "630")  # формат карточки в WhatsApp, Telegram
 FORBIDDEN = ["Avocado", "avocado", "doctor-cosmetolog.pro", "Дананг", "Da Nang"]
 ALLOWED_BRAND_TRACE = "avocado.beauty.samui"
 
+# Аппараты и методики — поисковые сущности: их ищут точным написанием, и «РФ лифтинг»
+# без дефиса или кириллическая «М22» для поиска и ИИ уже другие слова.
+# Слева — что нашли на странице, справа — единственно верная форма.
+ENTITY_SPELLING = {
+    "RF-лифтинг": "РФ-лифтинг",
+    "RF лифтинг": "РФ-лифтинг",
+    "РФ лифтинг": "РФ-лифтинг",
+    "SMAS лифтинг": "SMAS-лифтинг",
+    "Смас": "SMAS",
+    "М22": "M22",  # кириллическая М вместо латинской
+    "Morpheus8": "Morpheus 8",
+    "Морфеус": "Morpheus 8",
+    "Скарлет": "Scarlet S",
+}
+
+# Плейсхолдеры контента, которые обязана раскрыть сборка (build.py: render_faq_contacts).
+PLACEHOLDER_RE = re.compile(r"\{(?:whatsapp|telegram|instagram|price:[^}]*)\}")
+
 TITLE_MAX = 65
+TITLE_PREFIX = 20  # по такому началу заголовка поиск схлопывает похожие страницы
 DESC_MIN, DESC_MAX = 120, 170
 
 problems = []
@@ -49,10 +69,42 @@ def check_forbidden(path, text):
             report(rel(path), f"след старого бренда или города: {needle!r}")
 
 
+def check_entity_spelling(path, text):
+    """Написание аппаратов и методик — одно на весь сайт.
+
+    Разнобой рассыпает одну поисковую сущность на несколько: «M22» латиницей
+    и «М22» кириллицей для поиска и ИИ — разные слова."""
+    for wrong, right in ENTITY_SPELLING.items():
+        if wrong in text:
+            report(rel(path), f"написание сущности: {wrong!r} → нужно {right!r}")
+
+
+def check_placeholders(path, text):
+    """Нераскрытый плейсхолдер — это цена или ссылка, которых посетитель не увидит.
+
+    Опечатка в имени позиции прайса или в токене оставляет «{price:...}» прямо
+    в тексте страницы и в JSON-LD, а сборка при этом проходит молча."""
+    for token in sorted(set(PLACEHOLDER_RE.findall(text))):
+        report(rel(path), f"нераскрытый плейсхолдер в тексте: {token}")
+
+
 def check_headings(path, soup):
     h1s = soup.select("main h1")
     if len(h1s) != 1:
         report(rel(path), f"заголовков h1 в main: {len(h1s)}, нужен ровно один")
+
+
+def check_heading_order(path, soup):
+    """Уровни заголовков в <main> идут без пропусков: h1 → h2 → h3.
+
+    Прыжок h1 → h3 робот и скринридер читают как пропущенный раздел: список
+    оказывается вложен в заголовок, которого на странице нет."""
+    previous = 0
+    for heading in soup.select("main h1, main h2, main h3, main h4, main h5, main h6"):
+        level = int(heading.name[1])
+        if previous and level > previous + 1:
+            report(rel(path), f"пропуск уровня заголовка: h{previous} → h{level}")
+        previous = level
 
 
 def check_images(path, soup):
@@ -168,6 +220,22 @@ def check_meta(path, soup, titles, descriptions):
     descriptions[desc].append(rel(path))
 
 
+def check_title_prefixes(titles):
+    """Два title с одинаковым началом — заявка на каннибализацию.
+
+    Поиск показывает по запросу одну страницу из пары и выбирает её сам;
+    так раздел и его услуга отбирают друг у друга показы."""
+    seen = {}
+    for title, where in titles.items():
+        if not title:
+            continue
+        prefix = title[:TITLE_PREFIX].lower()
+        if prefix in seen:
+            problems.append(
+                f"одинаковое начало title у {seen[prefix]} и {where[0]}: {prefix!r}")
+        seen[prefix] = where[0]
+
+
 def check_duplicates(label, groups):
     for value, where in groups.items():
         if value and len(where) > 1:
@@ -184,7 +252,10 @@ def main():
         text = path.read_text(encoding="utf-8")
         soup = BeautifulSoup(text, "html.parser")
         check_forbidden(path, text)
+        check_entity_spelling(path, text)
+        check_placeholders(path, text)
         check_headings(path, soup)
+        check_heading_order(path, soup)
         check_images(path, soup)
         check_links(path, soup)
         check_schema(path, soup)
@@ -192,6 +263,7 @@ def main():
         check_open_graph(path, soup)
         check_faq(path, soup)
     check_duplicates("title", titles)
+    check_title_prefixes(titles)
     check_duplicates("meta description", descriptions)
 
     if problems:
