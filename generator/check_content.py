@@ -48,6 +48,9 @@ ENTITY_SPELLING = {
 # Плейсхолдеры контента, которые обязана раскрыть сборка (build.py: render_faq_contacts).
 PLACEHOLDER_RE = re.compile(r"\{(?:whatsapp|telegram|instagram|price:[^}]*)\}")
 
+# Слово, повторённое подряд через пробел (обычный или неразрывный).
+DOUBLED_WORD_RE = re.compile(r"\b(\w+)[  ]+\1\b", re.IGNORECASE)
+
 TITLE_MAX = 65
 TITLE_PREFIX = 20  # по такому началу заголовка поиск схлопывает похожие страницы
 DESC_MIN, DESC_MAX = 120, 170
@@ -91,6 +94,18 @@ def check_placeholders(path, text):
     в тексте страницы и в JSON-LD, а сборка при этом проходит молча."""
     for token in sorted(set(PLACEHOLDER_RE.findall(text))):
         report(rel(path), f"нераскрытый плейсхолдер в тексте: {token}")
+
+
+def check_doubled_words(path, soup):
+    """Слово, повторённое подряд: «от от 3000 ฿», «в в салоне».
+
+    Такое рождается при подстановке цен и правке фраз: в прайсе «от 3000 ฿»,
+    а в тексте перед плейсхолдером уже написано «от». Глазами в длинном ответе
+    FAQ это не видно. Проверяется внутри одного текстового узла — соседние
+    подписи в меню и в дровере законно повторяют друг друга."""
+    for node in soup.stripped_strings:
+        for match in DOUBLED_WORD_RE.finditer(node):
+            report(rel(path), f"слово повторено дважды: {match.group(0)!r}")
 
 
 def check_headings(path, soup):
@@ -276,6 +291,7 @@ def main():
         check_forbidden(path, text)
         check_entity_spelling(path, text)
         check_placeholders(path, text)
+        check_doubled_words(path, soup)
         check_headings(path, soup)
         check_heading_order(path, soup)
         check_images(path, soup)
