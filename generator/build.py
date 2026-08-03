@@ -332,7 +332,10 @@ def main():
                 {"name": "Главная", "url": base_url + "/"},
                 {"name": cat["title"], "url": base_url + cat["url"]},
             ]),
-            schema.item_list_node(cat["title"], [f"{base_url}/{slug}/" for slug in cat["services"]]),
+            schema.item_list_node(cat["title"], [
+                {"name": content["services"][slug]["title"], "url": f"{base_url}/{slug}/"}
+                for slug in cat["services"]
+            ]),
         ]
         if cat.get("faq"):
             cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path)
