@@ -216,3 +216,21 @@ body.no-scroll{overflow:hidden}
 .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
   transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease),border-color var(--t-mid) var(--ease)}
 .card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(74,59,56,.14);border-color:var(--rose-soft)}
+
+/* ===== COMPARE ===== */
+/* Прокрутка у обёртки, а не у страницы: на узком экране таблица уезжает вбок
+   внутри себя и не тянет за собой горизонтальную прокрутку всего документа. */
+.compare{max-width:960px;margin-inline:auto;overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* border-collapse:separate — как у прайса: только так работают border-radius
+   и боковой padding, за счёт которого разделители не доходят до краёв карточки. */
+.compare__table{width:100%;min-width:600px;background:var(--white);border:1px solid var(--line);
+  border-radius:var(--radius-lg);border-collapse:separate;border-spacing:0;padding:0 var(--sp-5)}
+.compare__table th,.compare__table td{text-align:left;vertical-align:top;padding:var(--sp-4) var(--sp-4) var(--sp-4) 0}
+.compare__table thead th{font-size:var(--fs-200);font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted)}
+.compare__table tbody th{font-weight:600;color:var(--ink)}
+.compare__table tbody th a{color:var(--rose-deep)}
+.compare__table tbody th a:hover{color:var(--rose)}
+.compare__table td{font-size:var(--fs-300);color:var(--muted)}
+.compare__table tr>*{border-bottom:1px dashed var(--line)}
+.compare__table tbody tr:last-child>*{border-bottom:none}
