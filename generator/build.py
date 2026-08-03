@@ -118,22 +118,37 @@ def fill_related(content):
 _PRICE_TOKEN_RE = re.compile(r"\{price:([a-z0-9-]+):([^}]+)\}")
 
 
+AMBIGUOUS_PRICE = None  # название позиции встречается у услуги дважды — цену не выбрать
+
+
 def price_by_name(prices):
-    """Указатель «слаг услуги + название позиции → цена строкой» по всему прайсу."""
-    return {(slug, item["name"]): item["price"]
-            for slug, sections in prices.items()
-            for section in sections for item in section["items"]}
+    """Указатель «слаг услуги + название позиции → цена строкой» по всему прайсу.
+
+    Одно название в двух секциях прайса (зоны РФ-лифтинга у Morpheus 8 и Scarlet S,
+    чистка спины для женщин и мужчин) — цены разные, и выбрать за автора текста
+    нельзя. Такой ключ помечается и роняет сборку при обращении к нему."""
+    index = {}
+    for slug, sections in prices.items():
+        for section in sections:
+            for item in section["items"]:
+                key = (slug, item["name"])
+                index[key] = AMBIGUOUS_PRICE if key in index else item["price"]
+    return index
 
 
 def render_prices(text, index):
     """Подставляет цены вместо {price:...}.
 
-    Неизвестная позиция роняет сборку: молча оставленный плейсхолдер ушёл бы
-    и в текст страницы, и в JSON-LD."""
+    Неизвестная или неоднозначная позиция роняет сборку: молча оставленный
+    плейсхолдер ушёл бы и в текст страницы, и в JSON-LD, а молча выбранная
+    цена разошлась бы с прайсом."""
     def replace(match):
         key = (match.group(1), match.group(2))
         if key not in index:
             raise KeyError(f"нет позиции прайса {key[1]!r} у услуги {key[0]!r}")
+        if index[key] is AMBIGUOUS_PRICE:
+            raise KeyError(f"позиция прайса {key[1]!r} у услуги {key[0]!r} встречается "
+                           "дважды с разными ценами — назовите цену в тексте иначе")
         return index[key]
     return _PRICE_TOKEN_RE.sub(replace, text)
 
