@@ -38,6 +38,11 @@ ENTITY_SPELLING = {
     "Morpheus8": "Morpheus 8",
     "Морфеус": "Morpheus 8",
     "Скарлет": "Scarlet S",
+    "Tokyo Inkarami": "Tokio Inkarami",  # марка пишется Tokio, а не как город
+    "Токио Инкарами": "Tokio Inkarami",
+    "Natural Tech": "Naturaltech",
+    "Lebel": "LEBEL",
+    "Давинес": "Davines",
 }
 
 # Плейсхолдеры контента, которые обязана раскрыть сборка (build.py: render_faq_contacts).
@@ -105,6 +110,23 @@ def check_heading_order(path, soup):
         if previous and level > previous + 1:
             report(rel(path), f"пропуск уровня заголовка: h{previous} → h{level}")
         previous = level
+
+
+def check_preloaded_image(path, soup):
+    """У предзагруженной картинки первого экрана есть fetchpriority="high".
+
+    preload поднимает приоритет самой загрузки, но встреченная ниже <img> без
+    приоритета всё равно встаёт в общую очередь отрисовки — LCP-кадр появляется
+    позже. Атрибут легко потерять при правке шаблона, а в вёрстке это не видно."""
+    preload = soup.select_one('link[rel="preload"][as="image"]')
+    if not preload:
+        return
+    href = preload.get("href", "")
+    img = soup.select_one(f'main img[src="{href}"]')
+    if img is None:
+        report(rel(path), f"предзагружено изображение, которого нет в main: {href}")
+    elif img.get("fetchpriority") != "high":
+        report(rel(path), f'у предзагруженного изображения нет fetchpriority="high": {href}')
 
 
 def check_images(path, soup):
@@ -257,6 +279,7 @@ def main():
         check_headings(path, soup)
         check_heading_order(path, soup)
         check_images(path, soup)
+        check_preloaded_image(path, soup)
         check_links(path, soup)
         check_schema(path, soup)
         check_meta(path, soup, titles, descriptions)
