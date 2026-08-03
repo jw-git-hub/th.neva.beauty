@@ -149,7 +149,9 @@ def render_prices(text, index):
         if index[key] is AMBIGUOUS_PRICE:
             raise KeyError(f"позиция прайса {key[1]!r} у услуги {key[0]!r} встречается "
                            "дважды с разными ценами — назовите цену в тексте иначе")
-        return index[key]
+        # Пробелы внутри цены — неразрывные: в потоке текста «2000 ฿» иначе
+        # разрывается переносом строки и знак бата уезжает на следующую строку.
+        return index[key].replace(" ", " ")
     return _PRICE_TOKEN_RE.sub(replace, text)
 
 
@@ -344,6 +346,9 @@ def main():
     for slug, svc in content["services"].items():
         sections = prices.get(slug, [])
         cat = category_by_slug[slug]
+        # Лид первого экрана уходит и в текст, и в описание Service — цены
+        # подставляем до сборки графа, чтобы они не разошлись между ними.
+        svc["intro"] = render_prices(svc["intro"], prices_index)
         crumbs = [{"name": "Главная", "url": base_url + "/"}]
         if cat["is_page"]:
             crumbs.append({"name": cat["title"], "url": base_url + cat["url"]})
@@ -363,7 +368,7 @@ def main():
                 "schema_json": schema.render(site, nodes),
                 "hero_image": f"/assets/img/{svc['hero_image']}.webp",  # LCP → preload
                 "og_image": og_image_path(slug),
-                "og_image_alt": f"{svc['title']} — {site['brand_full']}"}
+                "og_image_alt": svc.get("image_alt") or f"{svc['title']} — {site['brand_full']}"}
         write(OUT/slug/"index.html", tpl.render(
             site=site, page=page, svc=svc, slug=slug, category=cat,
             sections=sections, services=content["services"]))
@@ -372,6 +377,7 @@ def main():
     for cat in content["categories"]:
         if not cat["is_page"]:
             continue
+        cat["intro"] = render_prices(cat["intro"], prices_index)
         nodes = [
             schema.breadcrumb_node([
                 {"name": "Главная", "url": base_url + "/"},
