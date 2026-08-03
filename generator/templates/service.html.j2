@@ -1,4 +1,5 @@
 {% extends "base.html.j2" %}
+{% from "partials/faq.html.j2" import faq_list %}
 {% block content %}
 <section class="svc-hero">
   <div class="container">
@@ -94,14 +95,7 @@
 {% if svc.faq %}
 <section class="section container" id="faq">
   <div class="section-head" data-reveal><p class="eyebrow">Вопросы и ответы</p><h2>Частые вопросы — {{ svc.title }}</h2></div>
-  <div class="faq" data-reveal-children>
-    {% for item in svc.faq %}
-    <details class="faq__item"{% if loop.first %} open{% endif %}>
-      <summary class="faq__q">{{ item.q }}</summary>
-      <p class="faq__a">{{ item.a | safe }}</p>
-    </details>
-    {% endfor %}
-  </div>
+  {{ faq_list(svc.faq) }}
 </section>
 {% endif %}
 

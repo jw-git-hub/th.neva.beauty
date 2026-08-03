@@ -1,0 +1,12 @@
+{# Список вопросов-ответов. Вопрос — настоящий h3: и поиск, и ИИ ищут ответ
+   под заголовком-вопросом, а голый <summary> заголовком не считается. #}
+{% macro faq_list(items) -%}
+<div class="faq" data-reveal-children>
+  {% for item in items %}
+  <details class="faq__item"{% if loop.first %} open{% endif %}>
+    <summary class="faq__q"><h3>{{ item.q }}</h3></summary>
+    <p class="faq__a">{{ item.a | safe }}</p>
+  </details>
+  {% endfor %}
+</div>
+{%- endmacro %}
