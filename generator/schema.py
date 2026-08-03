@@ -133,14 +133,23 @@ def breadcrumb_node(items):
     }
 
 
-def item_list_node(name, urls):
-    """ItemList из URL услуг категории — связывает раздел с входящими услугами."""
+def item_list_node(name, items):
+    """ItemList услуг категории из [{name, url}, ...] — связывает раздел с услугами.
+
+    Название звена и адрес в двух полях — как в `breadcrumb_node`: голый URL
+    заставляет робота идти на страницу, чтобы узнать, что это за услуга."""
     return {
         "@type": "ItemList",
         "name": name,
         "itemListElement": [
-            {"@type": "ListItem", "position": i + 1, "item": url}
-            for i, url in enumerate(urls)
+            {
+                "@type": "ListItem",
+                "position": i + 1,
+                "name": item["name"],
+                "item": item["url"],
+                "url": item["url"],
+            }
+            for i, item in enumerate(items)
         ],
     }
 
