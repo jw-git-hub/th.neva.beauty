@@ -1,4 +1,5 @@
 {% extends "base.html.j2" %}
+{% from "partials/faq.html.j2" import faq_list %}
 {% macro price_of(prices, slug, name) -%}
   {%- set ns = namespace(found=false) -%}
   {%- for sec in prices.get(slug, []) -%}{%- for it in sec['items'] -%}
@@ -19,7 +20,7 @@
     </div>
     <div class="hero__media">
       <span class="hero__blob" aria-hidden="true"></span>
-      <img class="hero__photo" src="{{ base_path }}/assets/img/hero.webp" alt="{{ home.hero_image_alt }}" width="560" height="700">
+      <img class="hero__photo" src="{{ base_path }}/assets/img/hero.webp" alt="{{ home.hero_image_alt }}" width="560" height="700" fetchpriority="high">
     </div>
   </div>
 </section>
@@ -37,7 +38,7 @@
   <div class="cat-grid" data-reveal-children>
     {% for c in categories %}
     <a class="cat-card card" href="{{ base_path }}{{ c.url }}">
-      <div class="cat-card__media"><img src="{{ base_path }}/assets/img/{{ c.image }}.webp" alt="{{ c.title }}" width="600" height="440" loading="lazy"></div>
+      <div class="cat-card__media"><img src="{{ base_path }}/assets/img/{{ c.image }}.webp" alt="{{ c.image_alt | default(c.title, true) }}" width="600" height="440" loading="lazy"></div>
       <div class="cat-card__body"><h3>{{ c.title }}</h3><span class="cat-card__more">Подробнее {{ icon('arrow-right') }}</span></div>
     </a>
     {% endfor %}
@@ -76,14 +77,7 @@
     <h2>Коротко о {{ site.brand }}</h2>
     <p>{{ home.about_lead }}</p>
   </div>
-  <div class="faq" data-reveal-children>
-    {% for item in home.faq %}
-    <details class="faq__item"{% if loop.first %} open{% endif %}>
-      <summary class="faq__q">{{ item.q }}</summary>
-      <p class="faq__a">{{ item.a | safe }}</p>
-    </details>
-    {% endfor %}
-  </div>
+  {{ faq_list(home.faq) }}
 </section>
 
 <section class="section">

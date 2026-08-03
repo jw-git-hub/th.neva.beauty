@@ -197,6 +197,8 @@ body.no-scroll{overflow:hidden}
   box-shadow:var(--shadow-sm);padding:var(--sp-5) var(--sp-6)}
 .faq__q{font-size:var(--fs-500);font-weight:600;color:var(--ink);cursor:pointer;list-style:none;
   display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)}
+/* Вопрос — заголовок h3 ради структуры страницы, а выглядит как строка вопроса. */
+.faq__q h3{font:inherit;color:inherit;margin:0}
 .faq__q::-webkit-details-marker{display:none}
 .faq__q::after{content:"+";color:var(--rose);font-size:1.4em;line-height:1;flex:none;
   transition:transform var(--t-mid) var(--ease)}

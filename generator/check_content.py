@@ -94,6 +94,25 @@ def check_schema(path, soup):
             report(rel(path), f"невалидный JSON-LD: {exc}")
 
 
+def check_faq(path, soup):
+    """Вопросы из FAQPage должны быть на странице заголовками, слово в слово.
+
+    Разметка без видимого вопроса — обещание поиску, которого страница не держит;
+    вопрос не заголовком ИИ и поиск за вопрос не считают."""
+    marked = []
+    for script in soup.select('script[type="application/ld+json"]'):
+        try:
+            graph = json.loads(script.string or "").get("@graph", [])
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            return
+        for node in graph:
+            if node.get("@type") == "FAQPage":
+                marked += [q["name"] for q in node["mainEntity"]]
+    visible = [h.get_text(strip=True) for h in soup.select(".faq__q h3")]
+    if marked != visible:
+        report(rel(path), f"вопросы FAQ в разметке {marked} ≠ заголовки на странице {visible}")
+
+
 def og_content(soup, prop):
     tag = soup.select_one(f'meta[property="{prop}"]') or soup.select_one(f'meta[name="{prop}"]')
     return tag.get("content", "").strip() if tag else ""
@@ -171,6 +190,7 @@ def main():
         check_schema(path, soup)
         check_meta(path, soup, titles, descriptions)
         check_open_graph(path, soup)
+        check_faq(path, soup)
     check_duplicates("title", titles)
     check_duplicates("meta description", descriptions)
 
