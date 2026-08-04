@@ -115,7 +115,10 @@ def fill_related(content):
 # Цена позиции прайса прямо в тексте: {price:слаг-услуги:Точное название позиции}.
 # Цифры в content.yml не дублируются — их подставляет сборка из prices.json,
 # поэтому текст не может разойтись с прайсом.
-_PRICE_TOKEN_RE = re.compile(r"\{price:([a-z0-9-]+):([^}]+)\}")
+# Позицию с неуникальным названием уточняют секцией прайса или подписью строки
+# после «|»: {price:biozavivka-volos:Длинные волосы со стрижкой|До поясницы}.
+# Разделитель не двоеточие: в названиях позиций оно встречается — «Диспорт (1:3)».
+_PRICE_TOKEN_RE = re.compile(r"\{price:([a-z0-9-]+):([^}|]+)(?:\|([^}]+))?\}")
 
 
 AMBIGUOUS_PRICE = None  # название позиции встречается у услуги дважды — цену не выбрать
@@ -126,13 +129,18 @@ def price_by_name(prices):
 
     Одно название в двух секциях прайса (зоны РФ-лифтинга у Morpheus 8 и Scarlet S,
     чистка спины для женщин и мужчин) — цены разные, и выбрать за автора текста
-    нельзя. Такой ключ помечается и роняет сборку при обращении к нему."""
+    нельзя. Такой ключ помечается и роняет сборку при обращении к нему, а адресовать
+    строку можно уточнённым ключом «название + секция» или «название + подпись»."""
     index = {}
     for slug, sections in prices.items():
         for section in sections:
             for item in section["items"]:
-                key = (slug, item["name"])
-                index[key] = AMBIGUOUS_PRICE if key in index else item["price"]
+                keys = [(slug, item["name"])]
+                for qualifier in (section["section"], item["desc"]):
+                    if qualifier:
+                        keys.append((slug, item["name"], qualifier))
+                for key in keys:
+                    index[key] = AMBIGUOUS_PRICE if key in index else item["price"]
     return index
 
 
@@ -143,12 +151,15 @@ def render_prices(text, index):
     плейсхолдер ушёл бы и в текст страницы, и в JSON-LD, а молча выбранная
     цена разошлась бы с прайсом."""
     def replace(match):
-        key = (match.group(1), match.group(2))
+        slug, name, qualifier = match.group(1), match.group(2), match.group(3)
+        key = (slug, name, qualifier) if qualifier else (slug, name)
+        label = f"{name}|{qualifier}" if qualifier else name
         if key not in index:
-            raise KeyError(f"нет позиции прайса {key[1]!r} у услуги {key[0]!r}")
+            raise KeyError(f"нет позиции прайса {label!r} у услуги {slug!r}")
         if index[key] is AMBIGUOUS_PRICE:
-            raise KeyError(f"позиция прайса {key[1]!r} у услуги {key[0]!r} встречается "
-                           "дважды с разными ценами — назовите цену в тексте иначе")
+            raise KeyError(f"позиция прайса {label!r} у услуги {slug!r} встречается "
+                           "дважды с разными ценами — уточните строку секцией прайса "
+                           "или подписью: {price:слаг:Название|Уточнение}")
         # Пробелы внутри цены — неразрывные: в потоке текста «2000 ฿» иначе
         # разрывается переносом строки и знак бата уезжает на следующую строку.
         return index[key].replace(" ", " ")
