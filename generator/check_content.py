@@ -56,6 +56,7 @@ DOUBLED_WORD_RE = re.compile(r"\b(\w+)[  ]+\1\b", re.IGNORECASE)
 
 TITLE_MAX = 65
 TITLE_PREFIX = 20  # по такому началу заголовка поиск схлопывает похожие страницы
+BRAND_SUFFIX = " — Neva Beauty"  # единая связка названия салона с заголовком
 DESC_MIN, DESC_MAX = 120, 170
 
 problems = []
@@ -115,6 +116,45 @@ def check_headings(path, soup):
     h1s = soup.select("main h1")
     if len(h1s) != 1:
         report(rel(path), f"заголовков h1 в main: {len(h1s)}, нужен ровно один")
+
+
+def collect_h2(path, soup, headings):
+    """Копит h2 по всему сайту — дубли ловит check_shared_headings()."""
+    for h2 in soup.select("main h2"):
+        headings[h2.get_text(strip=True)].append(rel(path))
+
+
+def check_shared_headings(headings):
+    """Один и тот же h2 на нескольких страницах — заголовок ни о чём.
+
+    «Запишитесь на консультацию» стояло на 23 страницах из 23, «Почему это
+    работает» — на 17: такой заголовок не говорит ни клиенту, ни роботу, что
+    именно под ним, и место в структуре страницы тратится впустую."""
+    for text, where in headings.items():
+        if len(where) > 1:
+            problems.append(
+                f"один и тот же h2 на {len(where)} страницах ({', '.join(where[:3])}…): {text!r}"
+                if len(where) > 3 else
+                f"один и тот же h2 на страницах {', '.join(where)}: {text!r}")
+
+
+def check_brand_in_title(path, soup):
+    """Название салона обязано быть в title каждой индексируемой страницы.
+
+    Без него страница выглядит в выдаче чужой: человек видит запрос и не видит,
+    чей это сайт. Форма связки одна на весь сайт — « — Neva Beauty» в конце."""
+    if soup.select_one('meta[name="robots"][content*="noindex"]'):
+        return
+    title_el = soup.select_one("title")
+    title = title_el.get_text(strip=True) if title_el else ""
+    if not title.endswith(BRAND_SUFFIX):
+        report(rel(path), f"title не заканчивается на {BRAND_SUFFIX!r}: {title!r}")
+
+
+def check_og_title(path, soup):
+    """og:title — заголовок карточки в мессенджере, он есть всегда."""
+    if not og_content(soup, "og:title"):
+        report(rel(path), "нет og:title")
 
 
 def check_heading_order(path, soup):
@@ -283,7 +323,7 @@ def check_duplicates(label, groups):
 
 
 def main():
-    titles, descriptions = defaultdict(list), defaultdict(list)
+    titles, descriptions, headings = defaultdict(list), defaultdict(list), defaultdict(list)
     files = pages()
     if not files:
         print("Сайт не собран — нечего проверять. Запустите generator/build.py")
@@ -297,6 +337,9 @@ def main():
         check_doubled_words(path, soup)
         check_headings(path, soup)
         check_heading_order(path, soup)
+        collect_h2(path, soup, headings)
+        check_brand_in_title(path, soup)
+        check_og_title(path, soup)
         check_images(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)
@@ -307,6 +350,7 @@ def main():
     check_duplicates("title", titles)
     check_title_prefixes(titles)
     check_duplicates("meta description", descriptions)
+    check_shared_headings(headings)
 
     if problems:
         print(f"НАЙДЕНО ПРОБЛЕМ: {len(problems)}")

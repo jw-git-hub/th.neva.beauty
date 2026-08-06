@@ -23,7 +23,7 @@
 .site-header__logo{color:var(--ink)}
 .site-header__logo:hover .brand-mark__name{color:var(--rose)}
 
-/* brand lockup: название + строка локации (Da Nang) */
+/* brand lockup: название + строка локации */
 .brand-mark{display:inline-flex;flex-direction:column;gap:.34em;line-height:1}
 .brand-mark__name{font-family:var(--font-head);font-size:var(--fs-600);font-weight:600;
   letter-spacing:.05em;color:var(--ink);transition:color var(--t-fast) var(--ease)}

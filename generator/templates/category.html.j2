@@ -64,14 +64,14 @@
 </section>
 {% endif %}
 
-{{ booking(site, 'Напишите, какая процедура раздела «' ~ cat.title ~ '» вам интересна, — подберём и метод, и время.', cat.title) }}
+{{ booking(site, cat.booking_title, 'Напишите, какая процедура раздела «' ~ cat.title ~ '» вам интересна, — подберём и метод, и время.', cat.title) }}
 
 {# Переход в соседний раздел: со страницы услуги назад ведут и крошки,
    и «Смотрите также», а с раздела в соседний — только через меню в шапке. #}
 {% set siblings = categories | rejectattr('slug', 'equalto', cat.slug) | list %}
 {% if siblings %}
 <section class="section container">
-  <div class="section-head" data-reveal><p class="eyebrow">Другие направления</p><h2>Чем ещё занимается салон</h2></div>
+  <div class="section-head" data-reveal><p class="eyebrow">Другие направления</p><h2>Что ещё делают в Neva Beauty кроме раздела «{{ cat.title }}»</h2></div>
   <nav class="cat-links" aria-label="Другие направления">
     {% for other in siblings %}
     <a class="cat-links__item" href="{{ base_path }}{{ other.url }}">{{ other.title }} {{ icon('arrow-right') }}</a>

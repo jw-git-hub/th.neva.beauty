@@ -33,7 +33,7 @@
 
 {% if svc.benefits %}
 <section class="section container">
-  <div class="section-head" data-reveal><p class="eyebrow">Преимущества</p><h2>Почему это работает</h2></div>
+  <div class="section-head" data-reveal><p class="eyebrow">Преимущества</p><h2>{{ svc.benefits_title }}</h2></div>
   <div class="svc-benefits" data-reveal-children>
     {% for b in svc.benefits %}
     <div class="svc-benefit"><span class="svc-benefit__icon">{{ icon(b.icon) }}</span><h3>{{ b.title }}</h3><p>{{ b.text }}</p></div>
@@ -91,11 +91,13 @@
 </section>
 {% endif %}
 
-{{ booking(site, 'Напишите — уточним, подходит ли вам «' ~ svc.title ~ '», и предложим свободное время.', svc.title) }}
+{{ booking(site, svc.booking_title, 'Напишите — уточним, подходит ли вам «' ~ svc.title ~ '», и предложим свободное время.', svc.title) }}
 
 {% if svc.related %}
 <section class="section container">
-  <div class="section-head" data-reveal><p class="eyebrow">Дополните уход</p><h2>Смотрите также</h2></div>
+  {# «Смотрите также» стояло заголовком на 17 страницах и не говорило ни клиенту,
+     ни роботу, что именно внизу. Формула из названия услуги делает h2 своим. #}
+  <div class="section-head" data-reveal><p class="eyebrow">Дополните уход</p><h2>Что выбирают вместе с услугой «{{ svc.title }}»</h2></div>
   <div class="related-grid" data-reveal-children>
     {% for rslug in svc.related %}{% set r = services.get(rslug) %}{% if r %}
     <a class="related-card card" href="{{ base_path }}/{{ rslug }}/">

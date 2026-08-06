@@ -82,6 +82,16 @@ def og_image_path(slug):
     return path if (OUT / path.lstrip("/")).exists() else None
 
 
+def og_title(entry, site):
+    """Заголовок карточки ссылки в мессенджере — из h1, а не из title.
+
+    Это разные задачи: title пишется под выдачу и несёт поисковый запрос,
+    а карточку в WhatsApp читает человек, которому ссылку прислали. Заголовок
+    страницы для него понятнее строки с перечислением ключей."""
+    heading = entry.get("h1") or entry["title"]
+    return f"{heading} — {site['brand']}"
+
+
 def enrich_categories(content):
     """Обогащает категории (url, is_page) и переопределяет svc.category — единая таксономия."""
     categories = content["categories"]
@@ -140,8 +150,11 @@ def price_by_name(prices):
                 for qualifier in (section["section"], item["desc"]):
                     if qualifier:
                         keys.append((slug, item["name"], qualifier))
+                # Та же типографика, что в таблице: иначе одна сумма выглядит
+                # «30 000 ฿» в прайсе и «30000 ฿» в тексте на той же странице.
+                price = format_price(item["price"])
                 for key in keys:
-                    index[key] = AMBIGUOUS_PRICE if key in index else item["price"]
+                    index[key] = AMBIGUOUS_PRICE if key in index else price
     return index
 
 
@@ -365,33 +378,119 @@ def price_from(sections, currency_sign):
     return f"от {format_price(str(min(low for low, _ in bounds)))}{NBSP}{currency_sign}"
 
 
-def build_llms(site, content):
-    """llms.txt — краткая карта сайта для ИИ-ассистентов (llmstxt.org)."""
+def price_span(sections_list, currency_sign):
+    """Диапазон цен по нескольким прайсам строкой «300–35 000 ฿», или None.
+
+    Границы берутся из того же каталога, что уходит в AggregateOffer, поэтому
+    выжимка для ИИ не может назвать цену, которой нет в прайсе."""
+    bounds = [offer_bounds(item["offer"])
+              for sections in sections_list
+              for section in price_catalog(sections) for item in section["items"]]
+    if not bounds:
+        return None
+    low = format_price(str(min(low for low, _ in bounds)))
+    high = format_price(str(max(high for _, high in bounds)))
+    span = low if low == high else f"{low}–{high}"
+    return f"{span}{NBSP}{currency_sign}"
+
+
+def build_llms(site, content, prices):
+    """llms.txt — выжимка сайта для ИИ-ассистентов (llmstxt.org).
+
+    Кроме карты ссылок файл несёт короткий блок фактов и цены: ассистент,
+    который прочитал только его, должен уметь ответить, где салон, на каком
+    языке говорят и сколько стоит направление. Разделы без своей страницы
+    (одна услуга) в карту не выводятся — их адрес это адрес самой услуги,
+    и второй раз тот же URL под другой подписью только путает."""
     base = site["base_url"]
+    b = site["business"]
     c = site["contacts"]
+    sign = b["currency_sign"]
     lines = [
         f"# {site['brand_full']}",
         "",
         f"> {content['llms_description']}",
         "",
-        "## Направления",
+        "## Коротко",
+        f"- Локация: {site['location']}, провинция {b['address']['region']}",
+        f"- Как попасть: {site['hours'].lower()}",
+        "- Языки обслуживания: русский, английский",
+        f"- Валюта прайса: тайский бат ({sign})",
+        f"- Телефон и WhatsApp: {b['telephone']}",
+        "",
+        "## Страницы",
+        f"- [{content['home']['seo_title']}]({base}/)",
     ]
     for cat in content["categories"]:
-        lines.append(f"- [{cat['title']}]({base}{cat['url']})")
+        if not cat["is_page"]:
+            continue
+        span = price_span([prices.get(slug, []) for slug in cat["services"]], sign)
+        note = f" — раздел из {len(cat['services'])} услуг, цены {span}" if span else " — раздел"
+        lines.append(f"- [{cat['title']}]({base}{cat['url']}){note}")
     lines += ["", "## Услуги"]
     for slug, svc in content["services"].items():
-        lines.append(f"- [{svc['title']}]({base}/{slug}/)")
+        span = price_span([prices.get(slug, [])], sign)
+        note = f" — цены {span}" if span else ""
+        lines.append(f"- [{svc['title']}]({base}/{slug}/){note}")
     lines += [
         "",
         "## Контакты",
-        f"- Локация: {site['location']}",
-        f"- Режим работы: {site['hours']}",
         f"- WhatsApp: {c['whatsapp_url']}",
         f"- Telegram: {c['telegram_url']}",
         f"- Instagram: {c['instagram_url']}",
         "",
     ]
     return "\n".join(lines)
+
+
+# Дата последнего изменения страницы для sitemap. Проставлять во все записи дату
+# сборки — значит объявлять весь сайт изменённым при каждой пересборке; поисковик
+# после двух-трёх таких обходов перестаёт доверять полю целиком. Поэтому дата
+# хранится вместе с отпечатком страницы и обновляется только вместе с ней.
+LASTMOD_PATH = ROOT / "data" / "lastmod.json"
+# Отпечатки ассетов (?v=1a2b3c4d) из отпечатка страницы вырезаем: правка CSS
+# меняет ссылку на бандл на всех 23 страницах, но текст страницы не трогает.
+_ASSET_VERSION_RE = re.compile(r"\?v=[0-9a-f]+")
+
+
+def page_digest(html):
+    return hashlib.sha1(_ASSET_VERSION_RE.sub("", html).encode("utf-8")).hexdigest()
+
+
+def page_file(url):
+    """Файл собранной страницы по её адресу: «/» → index.html, «/slug/» → slug/index.html."""
+    return OUT / url.strip("/") / "index.html" if url.strip("/") else OUT / "index.html"
+
+
+def lastmod_history():
+    if LASTMOD_PATH.exists():
+        return json.loads(LASTMOD_PATH.read_text(encoding="utf-8"))
+    return {}
+
+
+def lastmod_dates(urls, today):
+    """Даты изменения страниц и обновлённый журнал отпечатков."""
+    history = lastmod_history()
+    journal = {}
+    for url in urls:
+        digest = page_digest(page_file(url).read_text(encoding="utf-8"))
+        known = history.get(url)
+        date_str = known["date"] if known and known["hash"] == digest else today
+        journal[url] = {"hash": digest, "date": date_str}
+    return journal
+
+
+def build_sitemap(urls, base_url, today):
+    journal = lastmod_dates(urls, today)
+    LASTMOD_PATH.write_text(
+        json.dumps(journal, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    rows = "\n".join(
+        f'  <url><loc>{base_url}{url}</loc>'
+        f'<lastmod>{journal[url]["date"]}</lastmod></url>' for url in urls)
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            + rows + '\n</urlset>\n')
 
 
 def build_nav(categories, services):
@@ -425,22 +524,25 @@ def main():
                           for slug, sections in prices.items()}
     e.globals["price_from"] = price_from_by_slug.get
     # главная
-    home_faq = content["home"].get("faq", [])
+    base_url = site["base_url"]
+    home = content["home"]
+    home_url = base_url + "/"
+    home_nodes = [schema.webpage_node(home_url, base_url, home["seo_title"],
+                                      home["seo_desc"],
+                                      image=base_url + "/assets/img/hero.webp")]
+    home_faq = home.get("faq", [])
     if home_faq:
-        home_faq = render_faq_contacts(home_faq, site["contacts"], base_path, prices_index)
-        content["home"]["faq"] = home_faq
-        home_schema = schema.render(site, [schema.faq_node(home_faq)])
-    else:
-        home_schema = base_schema
-    page = {"url": "/", "seo_title": content["home"].get("seo_title", site["brand_full"]),
-            "seo_desc": content["home"].get("seo_desc",""), "schema_json": home_schema,
+        home["faq"] = render_faq_contacts(home_faq, site["contacts"], base_path, prices_index)
+        home_nodes.append(schema.faq_node(home["faq"], home_url))
+    page = {"url": "/", "seo_title": home["seo_title"],
+            "seo_desc": home["seo_desc"], "og_title": home.get("og_title"),
+            "schema_json": schema.render(site, home_nodes),
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
-            "og_image_alt": content["home"].get("hero_image_alt", site["brand_full"])}
+            "og_image_alt": home.get("hero_image_alt", site["brand_full"])}
     write(OUT/"index.html", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"], prices=prices))
     # услуги
     tpl = e.get_template("service.html.j2")
-    base_url = site["base_url"]
     provider_ref = {"@id": base_url + "/" + schema.BUSINESS_ID}
     area_name = site["business"]["address"]["locality"]
     currency = site["business"].get("currency")
@@ -449,22 +551,28 @@ def main():
         sections = prices.get(slug, [])
         cat = category_by_slug[slug]
         render_page_prices(svc, prices_index)
+        url = base_url + f"/{slug}/"
+        hero = base_url + f"/assets/img/{svc['hero_image']}.webp"
         crumbs = [{"name": "Главная", "url": base_url + "/"}]
         if cat["is_page"]:
             crumbs.append({"name": cat["title"], "url": base_url + cat["url"]})
-        crumbs.append({"name": svc["title"], "url": base_url + f"/{slug}/"})
+        crumbs.append({"name": svc["title"], "url": url})
         nodes = [
-            schema.breadcrumb_node(crumbs),
+            schema.webpage_node(url, base_url, svc["seo_title"], svc["seo_desc"],
+                                breadcrumb=True, image=hero,
+                                main_entity_id=url + schema.SERVICE_ID),
+            schema.breadcrumb_node(crumbs, url),
             schema.service_node(
                 svc["title"], svc["intro"], provider_ref, area_name,
                 price_aggregate(sections, currency),
-                service_offer_catalog(svc["title"], sections, currency,
-                                      base_url + f"/{slug}/")),
+                service_offer_catalog(svc["title"], sections, currency, url),
+                page_url=url),
         ]
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
-            nodes.append(schema.faq_node(svc["faq"]))
+            nodes.append(schema.faq_node(svc["faq"], url))
         page = {"url": f"/{slug}/", "seo_title": svc["seo_title"], "seo_desc": svc["seo_desc"],
+                "og_title": svc.get("og_title") or og_title(svc, site),
                 "schema_json": schema.render(site, nodes),
                 "hero_image": f"/assets/img/{svc['hero_image']}.webp",  # LCP → preload
                 "og_image": og_image_path(slug),
@@ -478,20 +586,26 @@ def main():
         if not cat["is_page"]:
             continue
         render_page_prices(cat, prices_index)
+        url = base_url + cat["url"]
         nodes = [
+            schema.webpage_node(url, base_url, cat["seo_title"], cat["seo_desc"],
+                                breadcrumb=True,
+                                image=base_url + f"/assets/img/{cat['image']}.webp",
+                                main_entity_id=url + schema.ITEMLIST_ID),
             schema.breadcrumb_node([
                 {"name": "Главная", "url": base_url + "/"},
-                {"name": cat["title"], "url": base_url + cat["url"]},
-            ]),
+                {"name": cat["title"], "url": url},
+            ], url),
             schema.item_list_node(cat["title"], [
                 {"name": content["services"][slug]["title"], "url": f"{base_url}/{slug}/"}
                 for slug in cat["services"]
-            ]),
+            ], url),
         ]
         if cat.get("faq"):
             cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path, prices_index)
-            nodes.append(schema.faq_node(cat["faq"]))
+            nodes.append(schema.faq_node(cat["faq"], url))
         page = {"url": cat["url"], "seo_title": cat["seo_title"], "seo_desc": cat["seo_desc"],
+                "og_title": cat.get("og_title") or og_title(cat, site),
                 "schema_json": schema.render(site, nodes),
                 "og_image": og_image_path(cat["slug"]),
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
@@ -510,16 +624,13 @@ def main():
                         f"салона {site['brand_full']}.",
             "schema_json": base_schema, "noindex": True}
     write(OUT/"404.html", e.get_template("404.html.j2").render(site=site, page=page))
-    # sitemap
+    # sitemap (собирается после страниц: дата берётся из отпечатка готового HTML)
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
     # /privacy/ и /404.html — noindex, в sitemap не включаем
     urls = ["/"] + [f"/{slug}/" for slug in content["services"]] + cat_urls
-    today = date.today().isoformat()
-    rows = "\n".join(f'  <url><loc>{base_url}{u}</loc><lastmod>{today}</lastmod></url>' for u in urls)
-    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + rows + '\n</urlset>\n'
-    write(OUT/"sitemap.xml", sitemap)
-    # llms.txt — карта сайта для ИИ-ассистентов
-    write(OUT/"llms.txt", build_llms(site, content))
+    write(OUT/"sitemap.xml", build_sitemap(urls, base_url, date.today().isoformat()))
+    # llms.txt — выжимка сайта для ИИ-ассистентов
+    write(OUT/"llms.txt", build_llms(site, content, prices))
     # CNAME — боевой домен для GitHub Pages. Кладём в артефакт, иначе workflow-деплой
     # каждый раз сбрасывает кастомный домен в настройках Pages. Хост берём из base_url.
     write(OUT/"CNAME", urllib.parse.urlsplit(base_url).netloc + "\n")
