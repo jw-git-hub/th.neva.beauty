@@ -1,0 +1,33 @@
+{# Блок записи. Одинаковый на всех страницах текст «Ответим в мессенджере
+   и подберём удобное время» клиент читает по третьему разу и перестаёт видеть,
+   поэтому подводка приходит от страницы. Кнопки разного веса: WhatsApp —
+   действие, остальное — запасные каналы, иначе три равные кнопки подряд
+   заставляют выбирать вместо того, чтобы написать. #}
+{% macro booking(site, lead, subject=None) %}
+{%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
+<section class="section">
+  <div class="container booking">
+    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>Запишитесь на консультацию</h2><p>{{ lead }}</p></div>
+    <div class="booking__actions">
+      <a class="btn btn--primary booking__main" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Написать в WhatsApp</a>
+    </div>
+    <p class="booking__alt">Или так:
+      <a href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">Telegram</a>,
+      <a href="tel:{{ site.business.telephone }}">по телефону</a>,
+      <a href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">Instagram</a>
+    </p>
+    <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
+  </div>
+</section>
+{% endmacro %}
+
+{# Короткий призыв в потоке страницы — там, где клиент только что получил
+   ответ на свой вопрос: сразу под ценами и под списком услуг раздела.
+   Без него ближайшая кнопка записи лежит через два экрана вниз. #}
+{% macro cta_inline(site, text, subject=None) %}
+{%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
+<p class="cta-inline">
+  <span class="cta-inline__text">{{ text }}</span>
+  <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Записаться</a>
+</p>
+{% endmacro %}

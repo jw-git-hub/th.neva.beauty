@@ -33,6 +33,7 @@ business:
   telephone: "+79990289115"           # основной телефон, он же WhatsApp
   price_range: "฿฿"                   # качественный ориентир (Google priceRange)
   currency: "THB"
+  currency_sign: "฿"                  # подпись цены на карточках услуг
   currency_note: "Указаны в тайских батах (฿)."
   language: ["Russian", "English"]    # языки обслуживания → availableLanguage в ContactPoint
   language_code: "ru"

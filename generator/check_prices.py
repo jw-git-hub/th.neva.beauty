@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from bs4 import BeautifulSoup
 
+from build import PROMO_PREFIX, format_price, price_name_parts
+
 ROOT = Path(__file__).resolve().parent
 NEW = ROOT.parent / "th.neva.beauty"
 PRICES = json.loads((ROOT / "data" / "prices.json").read_text(encoding="utf-8"))
@@ -16,6 +18,18 @@ PRICES = json.loads((ROOT / "data" / "prices.json").read_text(encoding="utf-8"))
 
 def clean(s):
     return re.sub(r"\s+", " ", s).strip()
+
+
+def displayed_name(name):
+    """Название позиции так, как его читает клиент в таблице.
+
+    Строка прайса и строка на странице отличаются подачей: суффикс из выгрузки
+    Tilda уходит в подпись, префикс «Акция» — в метку. Сверять надо именно вид
+    на странице, иначе парити-тест ловил бы собственное оформление, а не
+    расхождение с прайсом."""
+    parts = price_name_parts(name)
+    prefix = f"{PROMO_PREFIX} " if parts["promo"] else ""
+    return clean(f"{prefix}{parts['name']} {parts['note']}")
 
 
 def expected_side():
@@ -27,7 +41,7 @@ def expected_side():
             for it in sec["items"]:
                 if not clean(it["price"]):
                     continue
-                cnt[(slug, clean(it["name"]), clean(it["price"]))] += 1; n += 1
+                cnt[(slug, displayed_name(it["name"]), clean(format_price(it["price"])))] += 1; n += 1
         counts[slug] = n
     return cnt, counts
 
@@ -45,9 +59,6 @@ def new_side():
                 d.extract()
             price = row.select_one(".pricelist__price")
             cnt[(slug, clean(name_el.get_text()), clean(price.get_text()))] += 1; n += 1
-        for c in soup.select(".combo"):
-            cnt[(slug, clean(c.select_one(".combo__name").get_text()),
-                 clean(c.select_one(".combo__price").get_text()))] += 1; n += 1
         counts[slug] = n
     return cnt, counts
 
