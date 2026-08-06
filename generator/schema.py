@@ -19,6 +19,14 @@ def _plain(text):
 ORG_ID = "#organization"
 BUSINESS_ID = "#business"
 WEBSITE_ID = "#website"
+# Якоря узлов страницы. Адрес страницы + якорь даёт узлу глобальный идентификатор:
+# без него из графа не следует, какой странице принадлежит конкретный Service,
+# и связать услугу с её ценами и вопросами робот может только догадкой.
+WEBPAGE_ID = "#webpage"
+BREADCRUMB_ID = "#breadcrumb"
+SERVICE_ID = "#service"
+FAQ_ID = "#faq"
+ITEMLIST_ID = "#services"
 
 
 def _postal_address(addr):
@@ -112,7 +120,32 @@ def business_nodes(site):
     return [organization, business, website]
 
 
-def breadcrumb_node(items):
+def webpage_node(url, site_base, name, description, breadcrumb=False,
+                 main_entity_id=None, image=None, language="ru"):
+    """WebPage — сама страница как узел графа, к которому крепится всё остальное.
+
+    Без неё Service, FAQPage и BreadcrumbList висят в графе без адреса: видно,
+    что услуга принадлежит бизнесу, но не видно, на какой странице её искать."""
+    node = {
+        "@type": "WebPage",
+        "@id": url + WEBPAGE_ID,
+        "url": url,
+        "name": name,
+        "description": _plain(description),
+        "isPartOf": {"@id": site_base + "/" + WEBSITE_ID},
+        "about": {"@id": site_base + "/" + BUSINESS_ID},
+        "inLanguage": language,
+    }
+    if image:
+        node["primaryImageOfPage"] = image
+    if breadcrumb:
+        node["breadcrumb"] = {"@id": url + BREADCRUMB_ID}
+    if main_entity_id:
+        node["mainEntity"] = {"@id": main_entity_id}
+    return node
+
+
+def breadcrumb_node(items, page_url=None):
     """BreadcrumbList из [{name, url}, ...] — абсолютные URL, порядок = вложенность.
 
     Адрес звена дублируется в двух полях: `item` — обязательное для Google/schema.org,
@@ -120,6 +153,7 @@ def breadcrumb_node(items):
     """
     return {
         "@type": "BreadcrumbList",
+        **({"@id": page_url + BREADCRUMB_ID} if page_url else {}),
         "itemListElement": [
             {
                 "@type": "ListItem",
@@ -133,13 +167,14 @@ def breadcrumb_node(items):
     }
 
 
-def item_list_node(name, items):
+def item_list_node(name, items, page_url=None):
     """ItemList услуг категории из [{name, url}, ...] — связывает раздел с услугами.
 
     Название звена и адрес в двух полях — как в `breadcrumb_node`: голый URL
     заставляет робота идти на страницу, чтобы узнать, что это за услуга."""
     return {
         "@type": "ItemList",
+        **({"@id": page_url + ITEMLIST_ID} if page_url else {}),
         "name": name,
         "itemListElement": [
             {
@@ -154,10 +189,12 @@ def item_list_node(name, items):
     }
 
 
-def faq_node(faq):
+def faq_node(faq, page_url=None):
     """FAQPage из списка [{q, a}, ...] — только реальные вопросы-ответы."""
     return {
         "@type": "FAQPage",
+        **({"@id": page_url + FAQ_ID, "url": page_url,
+            "mainEntityOfPage": {"@id": page_url + WEBPAGE_ID}} if page_url else {}),
         "mainEntity": [
             {
                 "@type": "Question",
@@ -214,13 +251,15 @@ def offer_catalog_node(service_name, catalog, currency, url):
 
 
 def service_node(name, description, provider_ref, area_name, aggregate_offer=None,
-                 offer_catalog=None):
+                 offer_catalog=None, page_url=None):
     """Service — профильная услуга страницы. provider ссылается на узел бизнеса,
     areaServed — город. Если передан aggregate_offer {low, high, count, currency},
     добавляется AggregateOffer с диапазоном цен (числа считаются из прайса).
     offer_catalog — тот же прайс попозиционно, цена каждой услуги без догадок."""
     node = {
         "@type": "Service",
+        **({"@id": page_url + SERVICE_ID, "url": page_url,
+            "mainEntityOfPage": {"@id": page_url + WEBPAGE_ID}} if page_url else {}),
         "name": name,
         "description": _plain(description),
         "provider": provider_ref,

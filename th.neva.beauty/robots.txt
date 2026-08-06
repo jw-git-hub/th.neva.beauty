@@ -1,26 +1,9 @@
+# Сайт открыт всем роботам, включая ИИ-ассистентов: цель — попадать и в поиск,
+# и в ИИ-ответы. Правило User-agent: * покрывает и GPTBot, и PerplexityBot,
+# и Google-Extended, и Applebot-Extended, и любого нового бота. Перечислять
+# их поимённо смысла нет: список всё равно неполный, а поведение то же самое.
+# Поимённое правило появится здесь тогда, когда кому-то понадобится запрет.
 User-agent: *
-Allow: /
-
-# ИИ-ассистенты: разрешаем обход и цитирование — цель попадать в ИИ-ответы.
-User-agent: GPTBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: YandexBot
 Allow: /
 
 Sitemap: https://th.neva.beauty/sitemap.xml

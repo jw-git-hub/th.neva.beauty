@@ -1,13 +1,15 @@
 {# Блок записи. Одинаковый на всех страницах текст «Ответим в мессенджере
    и подберём удобное время» клиент читает по третьему разу и перестаёт видеть,
-   поэтому подводка приходит от страницы. Кнопки разного веса: WhatsApp —
+   поэтому и заголовок, и подводка приходят от страницы: h2 «Запишитесь
+   на консультацию» стоял на всех 23 страницах и не работал ни на клиента,
+   ни на робота. Кнопки разного веса: WhatsApp —
    действие, остальное — запасные каналы, иначе три равные кнопки подряд
    заставляют выбирать вместо того, чтобы написать. #}
-{% macro booking(site, lead, subject=None) %}
+{% macro booking(site, title, lead, subject=None) %}
 {%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
 <section class="section">
   <div class="container booking">
-    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>Запишитесь на консультацию</h2><p>{{ lead }}</p></div>
+    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
     <div class="booking__actions">
       <a class="btn btn--primary booking__main" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Написать в WhatsApp</a>
     </div>
