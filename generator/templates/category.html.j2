@@ -2,6 +2,7 @@
 {% from "partials/faq.html.j2" import faq_list %}
 {% from "partials/contact_strip.html.j2" import contact_strip %}
 {% from "partials/booking.html.j2" import booking, cta_inline %}
+{% from "partials/picture.html.j2" import responsive_img %}
 {% block content %}
 <section class="section container">
   <nav class="breadcrumbs" aria-label="Хлебные крошки">
@@ -21,7 +22,7 @@
   <div class="related-grid" data-reveal-children>
     {% for slug in cat.services %}{% set r = services.get(slug) %}{% if r %}
     <a class="related-card card" href="{{ base_path }}/{{ slug }}/">
-      <div class="related-card__media"><img src="{{ base_path }}/assets/img/{{ r.hero_image }}.webp" alt="{{ r.image_alt | default(r.title ~ ' — ' ~ cat.title ~ ', ' ~ site.brand_full, true) }}" width="400" height="300" loading="lazy"></div>
+      <div class="related-card__media">{{ responsive_img(card_image(r.hero_image), 'related_card', r.image_alt | default(r.title ~ ' — ' ~ cat.title ~ ', ' ~ site.brand_full, true)) }}</div>
       <div class="related-card__body">
         <h3>{{ r.title }}</h3>
         {% if price_from(slug) %}<span class="related-card__price">{{ price_from(slug) }}</span>{% endif %}
