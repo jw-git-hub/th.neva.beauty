@@ -1,16 +1,21 @@
 /* ===== SERVICE HERO ===== */
 /* Фон прозрачный → сквозь hero течёт единый слой «Аврора»; тёплый фокус даёт .svc-hero__blob. */
 .svc-hero{background:transparent}
-/* Крошки ведут герой: отступ от шапки сверху, снизу гэп даёт padding самого героя. */
-.svc-hero .breadcrumbs{padding-top:var(--sp-8);margin-bottom:0}
-.svc-hero__inner{display:grid;gap:var(--sp-8);align-items:center;padding-block:var(--sp-12)}
+/* Крошки ведут герой: отступ от шапки сверху, снизу гэп даёт padding самого героя.
+   До 768 px отступы поджаты — каждый лишний rem выталкивает «Записаться»
+   за нижнюю кромку первого экрана. */
+.svc-hero .breadcrumbs{padding-top:var(--sp-5);margin-bottom:0}
+@media(min-width:768px){.svc-hero .breadcrumbs{padding-top:var(--sp-8)}}
+.svc-hero__inner{display:grid;gap:var(--sp-8);align-items:center;padding-block:var(--sp-8)}
 @media(min-width:768px){.svc-hero__inner{grid-template-columns:1.1fr .9fr;gap:var(--sp-10);padding-block:var(--sp-14)}}
 @media(min-width:1024px){.svc-hero__inner{gap:var(--sp-12);padding-block:var(--sp-16)}}
 .svc-hero__text{max-width:580px}
 .svc-hero__text h1{font-size:clamp(2.25rem,5.5vw,var(--fs-800));margin:var(--sp-3) 0 var(--sp-4)}
 .svc-hero__intro{font-size:var(--fs-500);color:var(--ink);margin-bottom:var(--sp-6)}
-.svc-hero__media{position:relative;display:flex;justify-content:center;order:-1}
-@media(min-width:768px){.svc-hero__media{order:0;align-self:start;margin-top:var(--sp-8)}}
+/* Фото после текста и на мобильном — см. .hero__media в home.css:
+   с order:-1 кнопка записи уезжала из первого экрана. */
+.svc-hero__media{position:relative;display:flex;justify-content:center}
+@media(min-width:768px){.svc-hero__media{align-self:start;margin-top:var(--sp-8)}}
 .svc-hero__blob{position:absolute;width:min(98%,480px);aspect-ratio:1;border-radius:50%;
   background:radial-gradient(circle at 50% 42%, #EBC9BC 0%, rgba(206,155,145,.45) 40%, transparent 70%);
   filter:blur(52px);opacity:.8;z-index:0}
@@ -44,14 +49,13 @@
   background:var(--white);border:1px solid var(--line);border-radius:var(--radius-pill);
   padding:.6rem 1.4rem;min-height:44px;cursor:pointer;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
 .pricelist__tab.is-active{background:var(--rose);color:var(--white);border-color:var(--rose)}
+/* Счётчик на вкладке: без него клиент видит первые 24 позиции из 32 и не знает,
+   что за соседней вкладкой лежат ещё цены — вкладки читаются как фильтр. */
+.pricelist__tab-count{margin-left:.5em;font-size:var(--fs-200);font-weight:600;
+  color:var(--rose);font-variant-numeric:tabular-nums}
+.pricelist__tab.is-active .pricelist__tab-count{color:color-mix(in srgb,var(--white) 80%,transparent)}
 .pricelist__panel{display:none}
 .pricelist__panel.is-active{display:block}
-.pricelist__combos{display:grid;gap:var(--sp-3);grid-template-columns:1fr;margin-bottom:var(--sp-6)}
-@media(min-width:600px){.pricelist__combos{grid-template-columns:repeat(3,1fr)}}
-.combo{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-4);text-align:center}
-.combo__name{font-weight:700;color:var(--rose-deep);font-size:var(--fs-300)}
-.combo__desc{font-size:var(--fs-200);color:var(--muted);margin:var(--sp-1) 0}
-.combo__price{font-weight:700;font-variant-numeric:tabular-nums;margin-top:var(--sp-2)}
 /* border-collapse:separate, а не collapse: только в раздельной модели у таблицы
    работают border-radius и боковой padding, за счёт которого разделители строк
    не доходят до краёв карточки. */
@@ -62,7 +66,15 @@
 .pricelist__row:last-child>*{border-bottom:none}
 .pricelist__name{color:var(--ink);font-weight:400;text-align:left;
   vertical-align:baseline;padding:var(--sp-4) 0}
+/* Уточнение цены («Длинные / густые волосы», «3x5 см») — подстрокой, а не через
+   дефис в названии: это вариант одной услуги, а не отдельная строка базы. */
+.pricelist__note{display:block;font-size:var(--fs-300);color:var(--ink);opacity:.75;font-weight:400;margin-top:2px}
 .pricelist__desc{display:block;font-size:var(--fs-200);color:var(--muted);font-weight:400;margin-top:2px}
+/* Акция: самая заметная позиция прайса лежала в общем списке неотличимо от прочих. */
+.pricelist__badge{display:inline-block;margin-right:.6em;padding:.15em .6em;border-radius:var(--radius-pill);
+  background:var(--rose);color:var(--white);font-size:var(--fs-200);font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;vertical-align:1px}
+.pricelist__row.is-promo .pricelist__name,.pricelist__row.is-promo .pricelist__price{font-weight:700}
 .pricelist__price{font-weight:700;color:var(--rose-deep);font-variant-numeric:tabular-nums;
   white-space:nowrap;text-align:right;vertical-align:baseline;padding:var(--sp-4) 0 var(--sp-4) var(--sp-4)}
 
@@ -76,6 +88,9 @@
 .related-card:hover .related-card__media img{transform:scale(1.05)}
 .related-card__body{padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2)}
 .related-card__body h3{font-size:var(--fs-500)}
+/* «от N ฿» на карточке: раньше цену раздела нельзя было узнать, не открыв
+   каждую услугу по очереди. */
+.related-card__price{color:var(--rose-deep);font-weight:700;font-variant-numeric:tabular-nums}
 .related-card__more{display:inline-flex;align-items:center;gap:6px;color:var(--rose);font-weight:600;font-size:var(--fs-300)}
 .related-card__more .icon{width:16px;height:16px;transition:transform var(--t-mid) var(--ease)}
 .related-card:hover .related-card__more .icon{transform:translateX(4px)}

@@ -1,5 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "partials/faq.html.j2" import faq_list %}
+{% from "partials/contact_strip.html.j2" import contact_strip %}
+{% from "partials/booking.html.j2" import booking, cta_inline %}
 {% macro price_of(prices, slug, name) -%}
   {%- set ns = namespace(found=false) -%}
   {%- for sec in prices.get(slug, []) -%}{%- for it in sec['items'] -%}
@@ -25,13 +27,7 @@
   </div>
 </section>
 
-<section class="container">
-  <div class="contact-strip">
-    <div class="contact-strip__item">{{ icon('map-pin') }}<span>{{ site.location }}</span></div>
-    <div class="contact-strip__item">{{ icon('clock') }}<span>{{ site.hours }}</span></div>
-    <a class="contact-strip__item" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
-  </div>
-</section>
+{{ contact_strip(site) }}
 
 <section class="section container" id="services">
   <div class="section-head" data-reveal><p class="eyebrow">Услуги</p><h2>Направления красоты</h2><p>Аппаратные и уходовые процедуры под ваши задачи.</p></div>
@@ -43,6 +39,7 @@
     </a>
     {% endfor %}
   </div>
+  {{ cta_inline(site, 'Знаете, что хотите? Напишите — подберём время.') }}
 </section>
 
 <section class="section benefits-section">
@@ -65,10 +62,11 @@
         <span class="popular-card__cat">{{ p.label }}</span>
         <span class="popular-card__name">{{ p.name }}</span>
       </span>
-      <span class="popular-card__price">{{ price_of(prices, p.slug, p.name) }}</span>
+      <span class="popular-card__price">{{ price_of(prices, p.slug, p.name) | price }}</span>
     </a>
     {% endfor %}
   </div>
+  {{ cta_inline(site, 'Не нашли свою процедуру? Спросите — подскажем цену и время.') }}
 </section>
 
 <section class="section container" id="faq">
@@ -80,15 +78,5 @@
   {{ faq_list(home.faq) }}
 </section>
 
-<section class="section">
-  <div class="container booking">
-    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>Запишитесь на консультацию</h2><p>Ответим в мессенджере и подберём удобное время.</p></div>
-    <div class="booking__actions">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} WhatsApp</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }} Telegram</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">{{ icon('instagram') }} Instagram</a>
-    </div>
-    <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
-  </div>
-</section>
+{{ booking(site, 'Напишите, какая процедура интересует, — ответим в мессенджере, назовём цену и предложим свободное время.') }}
 {% endblock %}

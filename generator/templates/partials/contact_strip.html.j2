@@ -1,0 +1,14 @@
+{# Полоса контактов: локация, формат приёма и два способа связаться.
+   Стоит на всех страницах, а не только на главной: клиент из поиска попадает
+   сразу на услугу или раздел и иначе нигде не видит ни где салон, ни как
+   до него достучаться, кроме как через текст. #}
+{% macro contact_strip(site) %}
+<section class="container">
+  <div class="contact-strip">
+    <div class="contact-strip__item">{{ icon('map-pin') }}<span>{{ site.location }}</span></div>
+    <div class="contact-strip__item">{{ icon('clock') }}<span>{{ site.hours }}</span></div>
+    <a class="contact-strip__item" href="tel:{{ site.business.telephone }}">{{ icon('phone') }}<span>Позвонить</span></a>
+    <a class="contact-strip__item" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
+  </div>
+</section>
+{% endmacro %}

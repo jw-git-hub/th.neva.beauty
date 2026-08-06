@@ -40,6 +40,7 @@ def env():
                     autoescape=select_autoescape(["html","j2"]))
     e.filters["urlencode"] = lambda s: urllib.parse.quote(str(s))
     e.filters["handle"] = social_handle
+    e.filters["price"] = format_price
     e.tests["match"] = lambda s, pat: re.match(pat, s) is not None
     e.globals["icon"] = icon
     return e
@@ -204,6 +205,66 @@ def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
 _PRICE_NUMBER_RE = re.compile(r"\d[\d\s ]*")
 
 
+# --- подача прайса ---------------------------------------------------------
+# Цены и названия хранятся в prices.json ровно как на старом сайте — это
+# источник истины и предмет парити-теста. Всё ниже меняет только подачу
+# на странице: типографику и разбор названия. Значения не трогаются.
+
+# Диапазон в выгрузке записан тремя способами: «600 -1200», «500-1000»,
+# «300–500». Для клиента это одна форма, и выглядеть она должна одинаково.
+_PRICE_RANGE_RE = re.compile(r"(\d)\s*[-–—]\s*(\d)")
+_DIGIT_GROUP_RE = re.compile(r"\d+")
+# С какой разрядности сумма получает разделитель: четырёхзначные в русской
+# типографике пишут слитно, у пятизначных без пробела теряется порядок.
+GROUPED_FROM_DIGITS = 5
+NBSP = " "
+
+
+def _group_digits(match):
+    digits = match.group(0)
+    if len(digits) < GROUPED_FROM_DIGITS:
+        return digits
+    return f"{int(digits):,}".replace(",", NBSP)
+
+
+def format_price(price):
+    """Цена в единой типографике: одно тире в диапазоне, разряды у крупных сумм.
+
+    «600 -1200 ฿» и «500-1000 ฿» приходят к «600–1200 ฿», «20000 ฿» —
+    к «20 000 ฿». Числа не меняются, парити-тест сверяет с этим же видом."""
+    return _DIGIT_GROUP_RE.sub(_group_digits, _PRICE_RANGE_RE.sub(r"\1–\2", price.strip()))
+
+
+NAME_QUALIFIER_SEP = " - "
+PROMO_PREFIX = "Акция"
+
+
+def price_name_parts(name):
+    """Название позиции как «услуга + уточнение цены».
+
+    В выгрузке Tilda модификатор приклеен к названию дефисом: «Женская -
+    Длинные / густые волосы», «Тату - 3x5 см». Это не разные услуги, а варианты
+    одной, и читаться они должны строкой меню, а не строкой базы. Отдельный
+    случай — префикс «Акция»: там уточнением идёт сама услуга, а слово
+    «Акция» работает меткой."""
+    head, sep, tail = name.partition(NAME_QUALIFIER_SEP)
+    if not sep:
+        return {"name": name, "note": "", "promo": False}
+    if head == PROMO_PREFIX:
+        return {"name": tail, "note": "", "promo": True}
+    return {"name": head, "note": tail, "promo": False}
+
+
+def price_view(sections):
+    """Разделы прайса в виде для показа — исходные данные не меняются."""
+    return [{
+        "section": sec["section"],
+        "items": [dict(price_name_parts(item["name"]),
+                       desc=item["desc"], price=format_price(item["price"]))
+                  for item in sec["items"]],
+    } for sec in sections]
+
+
 def price_values(price):
     """Самостоятельные цены из строки прайса, числами.
 
@@ -290,6 +351,20 @@ def price_aggregate(sections, currency):
             "count": offers, "currency": currency}
 
 
+def price_from(sections, currency_sign):
+    """Нижняя цена услуги строкой «от 2500 ฿» — подпись для карточки услуги.
+
+    Карточки на странице раздела и в «Смотрите также» показывают только фото
+    и название: выбирая между тремя видами эпиляции, клиент вынужден открыть
+    каждую страницу, чтобы увидеть цену. Берём ту же нижнюю границу, что уходит
+    в AggregateOffer, — расхождение с прайсом невозможно."""
+    bounds = [offer_bounds(item["offer"])
+              for section in price_catalog(sections) for item in section["items"]]
+    if not bounds:
+        return None
+    return f"от {format_price(str(min(low for low, _ in bounds)))}{NBSP}{currency_sign}"
+
+
 def build_llms(site, content):
     """llms.txt — краткая карта сайта для ИИ-ассистентов (llmstxt.org)."""
     base = site["base_url"]
@@ -343,6 +418,12 @@ def main():
     fill_related(content)
     site["nav"] = build_nav(content["categories"], content["services"])
     base_schema = schema.render(site)  # общий граф бизнеса — на всех страницах
+    # «от N ฿» на карточках услуг — считаем один раз на все страницы,
+    # карточка одной услуги встречается и в разделе, и в «Смотрите также».
+    currency_sign = site["business"]["currency_sign"]
+    price_from_by_slug = {slug: price_from(sections, currency_sign)
+                          for slug, sections in prices.items()}
+    e.globals["price_from"] = price_from_by_slug.get
     # главная
     home_faq = content["home"].get("faq", [])
     if home_faq:
@@ -390,7 +471,7 @@ def main():
                 "og_image_alt": svc.get("image_alt") or f"{svc['title']} — {site['brand_full']}"}
         write(OUT/slug/"index.html", tpl.render(
             site=site, page=page, svc=svc, slug=slug, category=cat,
-            sections=sections, services=content["services"]))
+            sections=price_view(sections), services=content["services"]))
     # категории (только группы с несколькими услугами)
     cat_tpl = e.get_template("category.html.j2")
     for cat in content["categories"]:
@@ -415,7 +496,8 @@ def main():
                 "og_image": og_image_path(cat["slug"]),
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
         write(OUT/cat["slug"]/"index.html", cat_tpl.render(
-            site=site, page=page, cat=cat, services=content["services"]))
+            site=site, page=page, cat=cat, services=content["services"],
+            categories=content["categories"]))
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
             "seo_desc": f"Как {site['brand_full']} обрабатывает персональные данные "

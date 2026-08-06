@@ -1,5 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "partials/faq.html.j2" import faq_list %}
+{% from "partials/contact_strip.html.j2" import contact_strip %}
+{% from "partials/booking.html.j2" import booking, cta_inline %}
 {% block content %}
 <section class="section container">
   <nav class="breadcrumbs" aria-label="Хлебные крошки">
@@ -7,17 +9,30 @@
     <span class="breadcrumbs__sep" aria-hidden="true">/</span>
     <span aria-current="page">{{ cat.title }}</span>
   </nav>
-  <div class="section-head" data-reveal><p class="eyebrow">Направление</p><h1>{{ cat.h1 | default(cat.title, true) }}</h1><p>{{ cat.intro }}</p></div>
+  <div class="section-head" data-reveal>
+    <p class="eyebrow">Направление</p><h1>{{ cat.h1 | default(cat.title, true) }}</h1><p>{{ cat.intro }}</p>
+    {# Кнопка в шапке раздела: до неё первая точка записи на странице лежала
+       на 5.5 экрана, а из поиска сюда приходят не реже, чем на услугу. #}
+    <p class="section-head__action">
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ cat.title) | urlencode }}" target="_blank" rel="noopener">Записаться</a>
+    </p>
+  </div>
   <h2 class="visually-hidden">Услуги раздела «{{ cat.title }}»</h2>
   <div class="related-grid" data-reveal-children>
     {% for slug in cat.services %}{% set r = services.get(slug) %}{% if r %}
     <a class="related-card card" href="{{ base_path }}/{{ slug }}/">
       <div class="related-card__media"><img src="{{ base_path }}/assets/img/{{ r.hero_image }}.webp" alt="{{ r.image_alt | default(r.title ~ ' — ' ~ cat.title ~ ', ' ~ site.brand_full, true) }}" width="400" height="300" loading="lazy"></div>
-      <div class="related-card__body"><h3>{{ r.title }}</h3><span class="related-card__more">Подробнее {{ icon('arrow-right') }}</span></div>
+      <div class="related-card__body">
+        <h3>{{ r.title }}</h3>
+        {% if price_from(slug) %}<span class="related-card__price">{{ price_from(slug) }}</span>{% endif %}
+        <span class="related-card__more">Подробнее {{ icon('arrow-right') }}</span>
+      </div>
     </a>
     {% endif %}{% endfor %}
   </div>
 </section>
+
+{{ contact_strip(site) }}
 
 {% if cat.compare %}
 <section class="section container" id="sravnenie">
@@ -38,6 +53,7 @@
       </tbody>
     </table>
   </div>
+  {{ cta_inline(site, 'Не уверены, какой метод ваш? Опишите задачу — подскажем.', cat.title) }}
 </section>
 {% endif %}
 
@@ -48,15 +64,19 @@
 </section>
 {% endif %}
 
-<section class="section">
-  <div class="container booking">
-    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>Запишитесь на консультацию</h2><p>Ответим в мессенджере и подберём удобное время.</p></div>
-    <div class="booking__actions">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ cat.title) | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} WhatsApp</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }} Telegram</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">{{ icon('instagram') }} Instagram</a>
-    </div>
-    <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
-  </div>
+{{ booking(site, 'Напишите, какая процедура раздела «' ~ cat.title ~ '» вам интересна, — подберём и метод, и время.', cat.title) }}
+
+{# Переход в соседний раздел: со страницы услуги назад ведут и крошки,
+   и «Смотрите также», а с раздела в соседний — только через меню в шапке. #}
+{% set siblings = categories | rejectattr('slug', 'equalto', cat.slug) | list %}
+{% if siblings %}
+<section class="section container">
+  <div class="section-head" data-reveal><p class="eyebrow">Другие направления</p><h2>Чем ещё занимается салон</h2></div>
+  <nav class="cat-links" aria-label="Другие направления">
+    {% for other in siblings %}
+    <a class="cat-links__item" href="{{ base_path }}{{ other.url }}">{{ other.title }} {{ icon('arrow-right') }}</a>
+    {% endfor %}
+  </nav>
 </section>
+{% endif %}
 {% endblock %}

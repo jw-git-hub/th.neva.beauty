@@ -18,7 +18,8 @@
   transition:box-shadow var(--t-mid) var(--ease),background var(--t-mid) var(--ease),border-color var(--t-mid) var(--ease)}
 .site-header.is-scrolled{box-shadow:0 6px 26px rgba(74,59,56,.07);
   background:color-mix(in srgb,var(--bg) 88%,transparent);border-bottom-color:var(--line)}
-.site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-6);min-height:76px}
+.site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);min-height:76px}
+@media(min-width:1024px){.site-header__inner{gap:var(--sp-6)}}
 .site-header__logo{color:var(--ink)}
 .site-header__logo:hover .brand-mark__name{color:var(--rose)}
 
@@ -85,8 +86,16 @@
   .nav__menu .nav__sub{opacity:1;transform:none;transition:background var(--t-fast),color var(--t-fast)}
   .nav__sub::before{transition:none}
 }
-.site-header__cta{display:none}
-@media(min-width:1024px){.site-header__cta{display:inline-flex}}
+/* До 1024 px кнопка сжимается в круг с иконкой: место в шапке занимают логотип
+   и бургер, но действие из неё пропадать не должно. */
+.site-header__cta{padding:0;width:44px;flex:none}
+.site-header__cta .icon{width:20px;height:20px}
+.site-header__cta-text{display:none}
+@media(min-width:1024px){
+  .site-header__cta{padding:.75rem 1.5rem;width:auto}
+  .site-header__cta .icon{display:none}
+  .site-header__cta-text{display:inline}
+}
 
 /* burger */
 .burger{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
@@ -207,12 +216,52 @@ body.no-scroll{overflow:hidden}
 .faq__a a{color:var(--rose-deep);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
 .faq__a a:hover{color:var(--rose)}
 
+/* ===== CONTACT STRIP ===== */
+/* Общая для главной, разделов и услуг: клиент из поиска приходит сразу
+   на внутреннюю страницу и должен видеть, где салон и как до него достучаться. */
+.contact-strip{position:relative;z-index:3;margin-top:var(--sp-8);
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-md);padding:var(--sp-6);display:grid;gap:var(--sp-4);grid-template-columns:1fr}
+@media(min-width:560px){.contact-strip{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.contact-strip{grid-template-columns:repeat(4,1fr);margin-top:0}}
+.contact-strip__item{display:flex;align-items:center;gap:var(--sp-3);color:var(--ink);font-weight:500;justify-content:center}
+.contact-strip__item .icon{width:22px;height:22px;color:var(--rose);flex:none}
+a.contact-strip__item:hover{color:var(--rose-deep)}
+
 /* ===== BOOKING ===== */
+/* Один основной канал и запасные строкой ниже: три равные кнопки подряд
+   превращают призыв в выбор, а выбор клиент откладывает. */
 .booking{text-align:center}
-.booking__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center;margin-bottom:var(--sp-6)}
+.booking__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center;margin-bottom:var(--sp-4)}
 .booking__actions .icon{width:18px;height:18px}
+.booking__alt{color:var(--muted);font-size:var(--fs-300);margin-bottom:var(--sp-6)}
+.booking__alt a{color:var(--rose-deep);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.booking__alt a:hover{color:var(--rose)}
 .booking__loc{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .booking__loc .icon{width:18px;height:18px;color:var(--rose)}
+
+/* ===== INLINE CTA ===== */
+/* Короткий призыв в потоке страницы — сразу за прайсом и за списком услуг,
+   в точке, где клиент уже получил ответ и готов писать. */
+.cta-inline{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:var(--sp-4);margin-top:var(--sp-10);padding:var(--sp-5) var(--sp-6);
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);max-width:760px;margin-inline:auto;text-align:center}
+.cta-inline__text{color:var(--ink);font-weight:500}
+.cta-inline .icon{width:18px;height:18px}
+
+/* Кнопка под заголовком страницы раздела */
+.section-head__action{margin-top:var(--sp-6)}
+
+/* ===== ССЫЛКИ НА СОСЕДНИЕ РАЗДЕЛЫ ===== */
+.cat-links{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center}
+.cat-links__item{display:inline-flex;align-items:center;gap:8px;min-height:44px;
+  padding:.6rem 1.2rem;border:1px solid var(--line);border-radius:var(--radius-pill);
+  background:var(--white);color:var(--ink);font-size:var(--fs-300);font-weight:500;
+  transition:border-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.cat-links__item .icon{width:16px;height:16px;color:var(--rose);transition:transform var(--t-mid) var(--ease)}
+.cat-links__item:hover{border-color:var(--rose-soft);color:var(--rose-deep)}
+.cat-links__item:hover .icon{transform:translateX(4px)}
 .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
   transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease),border-color var(--t-mid) var(--ease)}
 .card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(74,59,56,.14);border-color:var(--rose-soft)}
