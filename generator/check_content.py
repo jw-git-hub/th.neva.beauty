@@ -171,11 +171,14 @@ def check_heading_order(path, soup):
 
 
 def check_preloaded_image(path, soup):
-    """У предзагруженной картинки первого экрана есть fetchpriority="high".
+    """У предзагруженной картинки первого экрана есть fetchpriority="high",
+    а её набор ширин совпадает с набором в разметке.
 
     preload поднимает приоритет самой загрузки, но встреченная ниже <img> без
     приоритета всё равно встаёт в общую очередь отрисовки — LCP-кадр появляется
-    позже. Атрибут легко потерять при правке шаблона, а в вёрстке это не видно."""
+    позже. Атрибут легко потерять при правке шаблона, а в вёрстке это не видно.
+    Расхождение imagesrcset и srcset тише и дороже: браузер скачивает один файл
+    по предзагрузке и второй по разметке — вместо ускорения выходит лишний вес."""
     preload = soup.select_one('link[rel="preload"][as="image"]')
     if not preload:
         return
@@ -183,8 +186,31 @@ def check_preloaded_image(path, soup):
     img = soup.select_one(f'main img[src="{href}"]')
     if img is None:
         report(rel(path), f"предзагружено изображение, которого нет в main: {href}")
-    elif img.get("fetchpriority") != "high":
+        return
+    if img.get("fetchpriority") != "high":
         report(rel(path), f'у предзагруженного изображения нет fetchpriority="high": {href}')
+    for preload_attr, img_attr in (("imagesrcset", "srcset"), ("imagesizes", "sizes")):
+        if preload.get(preload_attr, "") != img.get(img_attr, ""):
+            report(rel(path), f"{preload_attr} предзагрузки не совпадает с {img_attr} картинки: {href}")
+
+
+def check_srcset(path, soup):
+    """Каждый файл из srcset существует, а ширина в дескрипторе — настоящая.
+
+    Набор ширин собирается из имён файлов, поэтому опечатка в лестнице ширин
+    или незапущенный make_images.py дают 404 ровно на тех экранах, где браузер
+    выберет пропавший вариант, — на своём мониторе этого не увидишь."""
+    for img in soup.select("img[srcset]"):
+        for candidate in img["srcset"].split(","):
+            src, _, descriptor = candidate.strip().rpartition(" ")
+            target = SITE / src.lstrip("/")
+            if not target.exists():
+                report(rel(path), f"нет файла из srcset: {src}")
+                continue
+            with Image.open(target) as frame:
+                if f"{frame.width}w" != descriptor:
+                    report(rel(path), f"ширина в srcset ({descriptor}) не совпадает"
+                                      f" с файлом ({frame.width}w): {src}")
 
 
 def check_images(path, soup):
@@ -341,6 +367,7 @@ def main():
         check_brand_in_title(path, soup)
         check_og_title(path, soup)
         check_images(path, soup)
+        check_srcset(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)
         check_schema(path, soup)

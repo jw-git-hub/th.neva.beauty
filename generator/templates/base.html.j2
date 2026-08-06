@@ -33,7 +33,9 @@
   <meta name="twitter:image:alt" content="{{ og_image_alt }}">
   {% if page.schema_json %}<script type="application/ld+json">{{ page.schema_json }}</script>{% endif %}
   <link rel="icon" href="{{ base_path }}/favicon.svg" type="image/svg+xml">
-  {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" fetchpriority="high">{% endif %}
+  {# imagesrcset повторяет набор ширин самой картинки: без него предзагрузка
+     тянет самый большой файл, а вёрстка потом просит другой — два запроса вместо одного. #}
+  {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" imagesrcset="{{ srcset(page.hero_stem, page.hero_slot) }}" imagesizes="{{ img_sizes(page.hero_slot) }}" fetchpriority="high">{% endif %}
   <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/manrope-400-cyrillic.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/cormorant-600-cyrillic.woff2" crossorigin>
   <link rel="stylesheet" href="{{ asset('/assets/css/bundle.min.css') }}">

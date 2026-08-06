@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 from markupsafe import Markup
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import schema
+import images, schema
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT.parent / "th.neva.beauty"
@@ -513,6 +513,12 @@ def main():
     prices_index = price_by_name(prices)  # цены для плейсхолдеров {price:...} в текстах
     build_css_bundle()  # единый минифицированный bundle.min.css
     e.globals["asset"] = lambda path: asset_url(base_path, path)  # после сборки bundle
+    # адаптивные картинки: ширины и sizes из images.py, один набор на разметку и preload
+    e.globals["srcset"] = lambda stem, slot: images.srcset(stem, slot, base_path)
+    e.globals["img_sizes"] = images.sizes
+    e.globals["img_width"] = images.width
+    e.globals["img_height"] = images.height
+    e.globals["card_image"] = images.related_stem
     enrich_categories(content)
     fill_related(content)
     site["nav"] = build_nav(content["categories"], content["services"])
@@ -538,6 +544,7 @@ def main():
             "seo_desc": home["seo_desc"], "og_title": home.get("og_title"),
             "schema_json": schema.render(site, home_nodes),
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
+            "hero_stem": "hero", "hero_slot": "home_hero",
             "og_image_alt": home.get("hero_image_alt", site["brand_full"])}
     write(OUT/"index.html", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"], prices=prices))
@@ -575,6 +582,7 @@ def main():
                 "og_title": svc.get("og_title") or og_title(svc, site),
                 "schema_json": schema.render(site, nodes),
                 "hero_image": f"/assets/img/{svc['hero_image']}.webp",  # LCP → preload
+                "hero_stem": svc["hero_image"], "hero_slot": "service_hero",
                 "og_image": og_image_path(slug),
                 "og_image_alt": svc.get("image_alt") or f"{svc['title']} — {site['brand_full']}"}
         write(OUT/slug/"index.html", tpl.render(
