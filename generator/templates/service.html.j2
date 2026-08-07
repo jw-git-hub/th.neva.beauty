@@ -114,4 +114,6 @@
 </section>
 {% endif %}
 {% endblock %}
-{% block extra_js %}<script type="module" src="{{ asset('/assets/js/price-tabs.js') }}"></script>{% endblock %}
+{# Скрипт нужен только там, где вкладок больше одной: на 12 из 17 страниц с прайсом
+   раздел единственный, и переключать нечего. #}
+{% block extra_js %}{% if sections|length > 1 %}<script type="module" src="{{ asset('/assets/js/price-tabs.js') }}"></script>{% endif %}{% endblock %}

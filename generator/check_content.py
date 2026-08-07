@@ -245,6 +245,31 @@ def check_font_coverage(path, soup):
         report(rel(path), f"знаков нет в шрифтах сайта: {''.join(missing)}")
 
 
+def check_css_variables():
+    """Каждая var(--x) без запасного значения объявлена в CSS сайта.
+
+    Опечатка в имени переменной не ломает сборку и не видна в исходнике: браузер
+    молча выбрасывает всё свойство. Так `gap:var(--sp-10)` при отсутствующем
+    токене давал не 2,5rem, а ноль — зазор между колонками первого экрана
+    пропадал на планшете, и заметить это можно было только замером."""
+    declared, used = set(), {}
+    for css in sorted((SITE / "assets/css").glob("*.css")):
+        if css.name == "bundle.min.css":  # копия остальных, проверять дважды нечего
+            continue
+        text = re.sub(r"/\*.*?\*/", "", css.read_text(encoding="utf-8"), flags=re.S)
+        declared.update(re.findall(r"(--[\w-]+)\s*:", text))
+        # var(--x) без запятой внутри: с запятой есть запасное значение
+        used.update({name: css.name for name in re.findall(r"var\(\s*(--[\w-]+)\s*\)", text)})
+    # Часть переменных приходит из разметки и из JS, а не из CSS-файлов.
+    inline = "".join(path.read_text(encoding="utf-8") for path in pages())
+    inline += "".join(js.read_text(encoding="utf-8") for js in (SITE / "assets/js").glob("*.js"))
+    declared.update(re.findall(r"(--[\w-]+)\s*:", inline))
+    declared.update(re.findall(r'setProperty\(\s*["\'](--[\w-]+)', inline))
+    for name, where in sorted(used.items()):
+        if name not in declared:
+            problems.append(f"assets/css/{where}: переменная {name} не объявлена — свойство не применится")
+
+
 def check_images(path, soup):
     for img in soup.select("img"):
         src = img.get("src", "")
@@ -407,6 +432,7 @@ def main():
         check_meta(path, soup, titles, descriptions)
         check_open_graph(path, soup)
         check_faq(path, soup)
+    check_css_variables()
     check_duplicates("title", titles)
     check_title_prefixes(titles)
     check_duplicates("meta description", descriptions)
