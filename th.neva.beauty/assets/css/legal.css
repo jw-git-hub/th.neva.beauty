@@ -6,7 +6,7 @@
 }
 
 .legal-page h1 {
-  font-family: var(--font-display, 'Cormorant', serif);
+  font-family: var(--font-head);
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 500;
   margin-bottom: 2rem;
@@ -14,7 +14,7 @@
 }
 
 .legal-page h2 {
-  font-family: var(--font-display, 'Cormorant', serif);
+  font-family: var(--font-head);
   font-size: 1.25rem;
   font-weight: 500;
   margin-top: 2rem;

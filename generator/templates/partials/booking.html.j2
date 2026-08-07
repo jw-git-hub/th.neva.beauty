@@ -11,7 +11,7 @@
   <div class="container booking">
     <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
     <div class="booking__actions">
-      <a class="btn btn--primary booking__main" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Написать в WhatsApp</a>
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Написать в WhatsApp</a>
     </div>
     <p class="booking__alt">Или так:
       <a href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">Telegram</a>,
