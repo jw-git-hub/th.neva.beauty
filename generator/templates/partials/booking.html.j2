@@ -25,10 +25,12 @@
 
 {# Короткий призыв в потоке страницы — там, где клиент только что получил
    ответ на свой вопрос: сразу под ценами и под списком услуг раздела.
-   Без него ближайшая кнопка записи лежит через два экрана вниз. #}
-{% macro cta_inline(site, text, subject=None) %}
+   Без него ближайшая кнопка записи лежит через два экрана вниз.
+   `wide` — когда сверху лежит блок во всю ширину контейнера (сетки главной):
+   плашка должна совпадать с ним по краям, иначе выглядит съехавшей. #}
+{% macro cta_inline(site, text, subject=None, wide=false) %}
 {%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
-<p class="cta-inline">
+<p class="cta-inline{{ ' cta-inline--wide' if wide }}">
   <span class="cta-inline__text">{{ text }}</span>
   <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Записаться</a>
 </p>

@@ -244,10 +244,18 @@ a.contact-strip__item:hover{color:var(--rose-deep)}
 /* ===== INLINE CTA ===== */
 /* Короткий призыв в потоке страницы — сразу за прайсом и за списком услуг,
    в точке, где клиент уже получил ответ и готов писать. */
+/* Ширина плашки совпадает с шириной блока, который она закрывает: 760 — это
+   ширина прайса на странице услуги. Под широкой сеткой главной та же плашка
+   читается как съехавшая — её края не совпадают ни с одной колонкой, — поэтому
+   там берётся вариант --wide во всю ширину контейнера. */
 .cta-inline{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  gap:var(--sp-4);margin-top:var(--sp-10);padding:var(--sp-5) var(--sp-6);
+  gap:var(--sp-4);margin:var(--sp-10) auto 0;padding:var(--sp-5) var(--sp-6);
   background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-sm);max-width:760px;margin-inline:auto;text-align:center}
+  box-shadow:var(--shadow-sm);max-width:760px;text-align:center}
+.cta-inline--wide{max-width:none}
+/* На широком экране текст и кнопка расходятся по краям: в полосе за тысячу
+   пикселей центрированная пара снова висит в пустоте. */
+@media(min-width:1024px){.cta-inline--wide{justify-content:space-between;text-align:left}}
 .cta-inline__text{color:var(--ink);font-weight:500}
 .cta-inline .icon{width:18px;height:18px}
 
