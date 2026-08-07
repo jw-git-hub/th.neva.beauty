@@ -4,3 +4,5 @@ PyYAML==6.0.2
 rcssmin==1.2.2
 Pillow==11.0.0
 pytest==8.3.3
+fonttools==4.63.0
+brotli==1.2.0

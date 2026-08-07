@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from bs4 import BeautifulSoup
 from PIL import Image
+from fontTools.ttLib import TTFont
 
 ROOT = Path(__file__).resolve().parent
 SITE = ROOT.parent / "th.neva.beauty"
@@ -59,7 +60,23 @@ TITLE_PREFIX = 20  # по такому началу заголовка поис�
 BRAND_SUFFIX = " — Neva Beauty"  # единая связка названия салона с заголовком
 DESC_MIN, DESC_MAX = 120, 170
 
+# Знаки, которых нет ни в Manrope, ни в Cormorant, — их рисует системный шрифт.
+# Бат в обеих гарнитурах отсутствует, а валюта салона именно тайская.
+FONT_FALLBACK_CHARS = {"฿"}
+
 problems = []
+
+
+def font_charset():
+    """Объединённый набор знаков всех самохостовых шрифтов (читается один раз)."""
+    if not _font_charset:
+        for font_path in sorted((SITE / "assets/fonts").glob("*.woff2")):
+            with TTFont(font_path) as font:
+                _font_charset.update(chr(code) for code in font.getBestCmap())
+    return _font_charset
+
+
+_font_charset = set()
 
 
 def report(page, message):
@@ -211,6 +228,21 @@ def check_srcset(path, soup):
                 if f"{frame.width}w" != descriptor:
                     report(rel(path), f"ширина в srcset ({descriptor}) не совпадает"
                                       f" с файлом ({frame.width}w): {src}")
+
+
+def check_font_coverage(path, soup):
+    """Каждый знак страницы есть в самохостовых шрифтах.
+
+    Шрифты подрезаны под нужный сайту набор знаков (make_fonts.py), поэтому
+    новая буква в тексте — например латинская «z» в названии аппарата —
+    отрисуется системным шрифтом. В вёрстке это выглядит как одна буква не в
+    ту гарнитуру: заметно, только если знать, куда смотреть."""
+    visible = (node for node in soup.find_all(string=True)
+               if node.parent.name not in ("script", "style"))
+    used = {c for text in visible for c in text if c.isprintable() and not c.isspace()}
+    missing = sorted(used - font_charset() - FONT_FALLBACK_CHARS)
+    if missing:
+        report(rel(path), f"знаков нет в шрифтах сайта: {''.join(missing)}")
 
 
 def check_images(path, soup):
@@ -368,6 +400,7 @@ def main():
         check_og_title(path, soup)
         check_images(path, soup)
         check_srcset(path, soup)
+        check_font_coverage(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)
         check_schema(path, soup)

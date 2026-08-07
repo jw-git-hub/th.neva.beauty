@@ -62,7 +62,9 @@ document.querySelectorAll('.drawer__link, .drawer__sub, .drawer__group-label, a.
 });
 
 const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 12);
-onScroll();
+// Первый замер — в кадре отрисовки: сразу после правки классов выше чтение
+// scrollY заставляло браузер пересчитать вёрстку синхронно (37 мс на мобильном).
+requestAnimationFrame(onScroll);
 window.addEventListener('scroll', onScroll, { passive: true });
 
 const navToggles = [...document.querySelectorAll('.nav__toggle')];
