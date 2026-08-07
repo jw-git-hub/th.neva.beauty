@@ -48,7 +48,10 @@
 .pricelist__tab{font-family:inherit;font-size:var(--fs-300);font-weight:600;color:var(--muted);
   background:var(--white);border:1px solid var(--line);border-radius:var(--radius-pill);
   padding:.6rem 1.4rem;min-height:44px;cursor:pointer;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
-.pricelist__tab.is-active{background:var(--rose);color:var(--white);border-color:var(--rose)}
+/* Фон активной вкладки — тёмный тон палитры: на --rose приглушённый счётчик
+   давал контраст 3,81 при норме 4,5, и это было единственное замечание
+   доступности на сайте. На --rose-deep проходят оба: подпись 6,33, счётчик 4,74. */
+.pricelist__tab.is-active{background:var(--rose-deep);color:var(--white);border-color:var(--rose-deep)}
 /* Счётчик на вкладке: без него клиент видит первые 24 позиции из 32 и не знает,
    что за соседней вкладкой лежат ещё цены — вкладки читаются как фильтр. */
 .pricelist__tab-count{margin-left:.5em;font-size:var(--fs-200);font-weight:600;
