@@ -7,7 +7,8 @@ import images, schema
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT.parent / "th.neva.beauty"
-ICONS = OUT / "assets" / "icons"
+SOURCES = ROOT / "sources"
+ICONS = SOURCES / "icons"
 
 RELATED_COUNT = 3  # сколько карточек «Смотрите также» показываем на странице услуги
 
@@ -53,13 +54,16 @@ def write(path: Path, html: str):
 def build_css_bundle():
     """Склеивает CSS-слои в порядке каскада и минифицирует в единый bundle.min.css.
     Один render-blocking запрос вместо шести; относительные url() внутри (../fonts,
-    ../img) работают и на превью по подпути, и на боевом домене."""
-    css_dir = OUT / "assets" / "css"
+    ../img) работают и на превью по подпути, и на боевом домене.
+
+    Слои-исходники лежат в `sources/css/` и в публикуемую папку не копируются:
+    страницы ссылаются только на бандл, отдельные файлы никто не запрашивает."""
     parts = [f.read_text(encoding="utf-8")
              for name in CSS_BUNDLE_ORDER
-             if (f := css_dir / f"{name}.css").exists()]
+             if (f := SOURCES / "css" / f"{name}.css").exists()]
     bundle = rcssmin.cssmin("\n".join(parts))
-    out = css_dir / "bundle.min.css"
+    out = OUT / "assets" / "css" / "bundle.min.css"
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(bundle, encoding="utf-8")
     print("→", out.relative_to(OUT.parent), f"({len(bundle) // 1024} KB minified)")
 
