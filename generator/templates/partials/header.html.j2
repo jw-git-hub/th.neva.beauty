@@ -17,10 +17,9 @@
         {% endif %}
       {% endfor %}
     </nav>
-    {# Шапка липкая и едет за клиентом всю страницу — значит должна нести действие,
-       а не только логотип и бургер. До 1024 px остаётся иконка мессенджера:
-       запись в один тап вместо трёх (бургер → дровер → «Записаться»). #}
-    <a class="btn btn--primary site-header__cta" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener" aria-label="Записаться через WhatsApp">{{ icon('message-circle') }}<span class="site-header__cta-text">Записаться</span></a>
+    {# Кнопка только на десктопе — как на vn.neva.beauty: до 1024 px в шапке
+       остаются логотип и бургер, запись идёт из первого экрана и из дровера. #}
+    <a class="btn btn--primary site-header__cta" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">Записаться</a>
     <button class="burger" data-drawer-open aria-label="Открыть меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>

@@ -86,16 +86,10 @@
   .nav__menu .nav__sub{opacity:1;transform:none;transition:background var(--t-fast),color var(--t-fast)}
   .nav__sub::before{transition:none}
 }
-/* До 1024 px кнопка сжимается в круг с иконкой: место в шапке занимают логотип
-   и бургер, но действие из неё пропадать не должно. */
-.site-header__cta{padding:0;width:44px;flex:none}
-.site-header__cta .icon{width:20px;height:20px}
-.site-header__cta-text{display:none}
-@media(min-width:1024px){
-  .site-header__cta{padding:.75rem 1.5rem;width:auto}
-  .site-header__cta .icon{display:none}
-  .site-header__cta-text{display:inline}
-}
+/* Кнопка записи в шапке — только на десктопе, как на vn.neva.beauty: до 1024 px
+   место занимают логотип и бургер. */
+.site-header__cta{display:none}
+@media(min-width:1024px){.site-header__cta{display:inline-flex}}
 
 /* burger */
 .burger{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
