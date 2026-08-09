@@ -10,10 +10,10 @@
 .hero__sub{font-size:var(--fs-500);color:var(--ink);max-width:34ch;margin-bottom:var(--sp-8)}
 .hero__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center}
 @media(min-width:768px){.hero__actions{justify-content:flex-start}}
-/* Фото идёт после текста и на мобильном: с order:-1 оно поднималось над
-   заголовком и сдвигало «Записаться» за пределы первого экрана. */
-.hero__media{position:relative;display:flex;justify-content:center;align-items:center;min-height:300px}
-@media(min-width:768px){.hero__media{min-height:0;align-self:start;margin-top:var(--sp-8)}}
+/* На мобильном фото идёт перед текстом — как на vn.neva.beauty. На двух
+   колонках порядок возвращается к разметке: текст слева, фото справа. */
+.hero__media{position:relative;display:flex;justify-content:center;align-items:center;min-height:300px;order:-1}
+@media(min-width:768px){.hero__media{order:0;min-height:0;align-self:start;margin-top:var(--sp-8)}}
 .hero__blob{width:min(98%,540px);opacity:.82}
 .hero__photo{width:min(78%,300px);border-radius:200px 200px 24px 24px}
 @media(min-width:768px){.hero__photo{width:min(92%,380px)}}

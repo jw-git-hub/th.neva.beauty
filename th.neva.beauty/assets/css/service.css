@@ -11,10 +11,11 @@
 .svc-hero__text{max-width:580px}
 .svc-hero__text h1{font-size:clamp(2.25rem,5.5vw,var(--fs-800));margin:var(--sp-3) 0 var(--sp-4)}
 .svc-hero__intro{font-size:var(--fs-500);color:var(--ink);margin-bottom:var(--sp-6)}
-/* Фото после текста и на мобильном — см. .hero__media в home.css:
-   с order:-1 кнопка записи уезжала из первого экрана. */
-.svc-hero__media{position:relative;display:flex;justify-content:center}
-@media(min-width:768px){.svc-hero__media{align-self:start;margin-top:var(--sp-8)}}
+/* На мобильном фото идёт перед текстом — как на vn.neva.beauty: первым экраном
+   клиент видит кадр процедуры, а не стену текста. На двух колонках порядок
+   возвращается к разметке: текст слева, фото справа. */
+.svc-hero__media{position:relative;display:flex;justify-content:center;order:-1}
+@media(min-width:768px){.svc-hero__media{order:0;align-self:start;margin-top:var(--sp-8)}}
 .svc-hero__blob{width:min(98%,480px);opacity:.8}
 .svc-hero__media img{width:min(78%,290px);border-radius:190px 190px 24px 24px}
 @media(min-width:768px){.svc-hero__media img{width:min(92%,360px)}}
