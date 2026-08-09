@@ -1,7 +1,7 @@
 """Сборка самохостовых шрифтов: инстансы нужных начертаний + подрезка набора знаков.
 
 Запускается руками, когда меняется набор начертаний: `python generator/make_fonts.py`.
-Результат — `assets/fonts/*.woff2` и `assets/css/fonts.css` — коммитится.
+Результат — `assets/fonts/*.woff2` и `sources/css/fonts.css` — коммитится.
 
 Зачем: с Google Fonts шрифт приезжает разрезанным по алфавитам, и каждое
 начертание тянет два файла — латиницу и кириллицу. Латинский кусок весит больше
@@ -28,7 +28,7 @@ from fontTools.subset import Subsetter, Options
 ROOT = Path(__file__).resolve().parent
 SRC_DIR = ROOT / "sources" / "fonts"
 OUT_DIR = ROOT.parent / "th.neva.beauty" / "assets" / "fonts"
-CSS_PATH = ROOT.parent / "th.neva.beauty" / "assets" / "css" / "fonts.css"
+CSS_PATH = ROOT / "sources" / "css" / "fonts.css"
 
 # Начертания: какой файл-мастер, какие веса и под какую роль в вёрстке.
 FACES = [

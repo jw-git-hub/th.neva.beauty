@@ -253,9 +253,7 @@ def check_css_variables():
     токене давал не 2,5rem, а ноль — зазор между колонками первого экрана
     пропадал на планшете, и заметить это можно было только замером."""
     declared, used = set(), {}
-    for css in sorted((SITE / "assets/css").glob("*.css")):
-        if css.name == "bundle.min.css":  # копия остальных, проверять дважды нечего
-            continue
+    for css in sorted((ROOT / "sources/css").glob("*.css")):
         text = re.sub(r"/\*.*?\*/", "", css.read_text(encoding="utf-8"), flags=re.S)
         declared.update(re.findall(r"(--[\w-]+)\s*:", text))
         # var(--x) без запятой внутри: с запятой есть запасное значение
@@ -267,7 +265,7 @@ def check_css_variables():
     declared.update(re.findall(r'setProperty\(\s*["\'](--[\w-]+)', inline))
     for name, where in sorted(used.items()):
         if name not in declared:
-            problems.append(f"assets/css/{where}: переменная {name} не объявлена — свойство не применится")
+            problems.append(f"sources/css/{where}: переменная {name} не объявлена — свойство не применится")
 
 
 def check_images(path, soup):
