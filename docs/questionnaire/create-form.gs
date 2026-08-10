@@ -14,13 +14,13 @@
 var FORM_TITLE = 'Neva Beauty — Koh Samui: что нужно для сайта';
 
 var FORM_INTRO = [
-  'Сайт th.neva.beauty собран, но восемь вопросов закрыть без вас нельзя — ',
-  'этих фактов нет ни на старом сайте, ни в прайсе. Заполнение занимает ',
-  'примерно 20 минут.',
+  'Сайт th.neva.beauty собран, но часть фактов о процедурах закрыть без вас ',
+  'нельзя — их нет ни на старом сайте, ни в прайсе. Заполнение занимает ',
+  'примерно 15 минут.',
   '\n\n',
   'Отвечайте как есть. Если чего-то не знаете или так не делаете — ',
   'пропускайте строку или пишите «не знаю»: пустой ответ честнее выдуманного. ',
-  'Обязательное поле в форме одно.',
+  'Обязательных полей в форме нет.',
   '\n\n',
   'Отвечать можно в несколько заходов — форма сохраняет черновик, если вы ',
   'вошли в Google-аккаунт.'
@@ -125,18 +125,13 @@ var COURSE_ROWS = [
   'Перманентный макияж (до коррекции)'
 ];
 
-var MASTER_HINT = [
-  'Имя и направления работы. Например: «Анна, перманентный макияж ',
-  'и косметология».'
-].join('');
-
 function createSalonForm() {
   var form = FormApp.create(FORM_TITLE);
   form.setTitle(FORM_TITLE);
   form.setDescription(FORM_INTRO);
   form.setProgressBar(true);
 
-  addMastersSection(form);
+  addSalonSection(form);
   addSafetySection(form);
   addDurationSection(form);
   addIncludedSection(form);
@@ -153,26 +148,17 @@ function createSalonForm() {
 /* Разделы                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Задача 74: на 23 страницах сайта нет ни одного человека, только «мастер». */
-function addMastersSection(form) {
-  addSection(form, 'Кто работает в салоне',
-    'Сейчас на сайте нет ни одного имени — везде безличный «мастер». ' +
-    'Нужны имя и направление, чтобы клиент понимал, к кому идёт. ' +
-    'Ни стажа, ни образования — только имя, что делает и фото.');
+/**
+ * Мастеров на сайте не представляем: состав часто меняется — решение заказчика,
+ * задача 74 закрыта отказом. Остаётся один факт о самом салоне.
+ */
+function addSalonSection(form) {
+  addSection(form, 'О салоне',
+    'Один вопрос, дальше пойдут процедуры.');
 
   addText(form, 'Год, с которого салон работает на Самуи',
-    'Про салон, а не про мастеров. Если и это лишнее — оставьте пустым.');
-
-  for (var i = 1; i <= 4; i++) {
-    var isFirst = i === 1;
-    addParagraph(form, 'Мастер ' + i,
-      isFirst ? MASTER_HINT : 'Если мастеров меньше — оставьте пустым.',
-      isFirst);
-  }
-
-  addChoice(form, 'Есть ли фото мастеров, которые можно поставить на сайт?',
-    ['Да, есть готовые', 'Нет, надо снять', 'Мастера не хотят публиковать фото'],
-    'Портрет в салоне или за работой — годится обычный кадр с телефона.');
+    'Факт есть, но на сайте нигде не заявлен. Про салон, а не про мастеров. ' +
+    'Если и это лишнее — оставьте пустым.');
 }
 
 /** Задача 76: на страницах инъекций и татуажа нет ни слова о препаратах. */
@@ -354,11 +340,8 @@ function addText(form, title, help) {
   form.addTextItem().setTitle(title).setHelpText(help);
 }
 
-function addParagraph(form, title, help, isRequired) {
-  form.addParagraphTextItem()
-    .setTitle(title)
-    .setHelpText(help)
-    .setRequired(isRequired === true);
+function addParagraph(form, title, help) {
+  form.addParagraphTextItem().setTitle(title).setHelpText(help);
 }
 
 function addChoice(form, title, choices, help) {
