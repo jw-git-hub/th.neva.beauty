@@ -626,8 +626,8 @@ def main():
             categories=content["categories"]))
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
-            "seo_desc": f"Как {site['brand_full']} обрабатывает персональные данные "
-                        "посетителей сайта и как отозвать согласие.",
+            "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "
+                        "переписка остаётся в мессенджерах, счёт визитов обезличен.",
             "schema_json": base_schema, "noindex": True}
     write(OUT/"privacy"/"index.html", e.get_template("privacy.html.j2").render(site=site, page=page))
     # 404 (служебная — не индексируем)
