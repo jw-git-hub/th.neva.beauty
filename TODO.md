@@ -1901,6 +1901,36 @@
 
 ## Отдельные задачи
 
+- [ ] 89. Вернуть сайт в сеть. Заказчик попросил 2026-08-13 временно убрать сайт
+      из сети. Сделано в тот же день: сайт Pages удалён
+      (`gh api -X DELETE repos/jw-git-hub/th.neva.beauty/pages`, ответ `204`),
+      деплой-воркфлоу отключён (`gh workflow disable deploy.yml`), чтобы пуш
+      в `main` не публиковал сайт обратно. Репозиторий, содержимое и DNS
+      не тронуты: `th.neva.beauty` по-прежнему резолвится в `jw-git-hub.github.io`
+      и четыре IP Pages, файл `th.neva.beauty/CNAME` на месте.
+      Проверено после удаления: `https://th.neva.beauty/`,
+      `http://th.neva.beauty/`, `https://th.neva.beauty/kosmetologiya/`
+      и `https://jw-git-hub.github.io/th.neva.beauty/` отдают `404`.
+      Отдача гасла не сразу — около трёх минут CDN и origin ещё раздавали
+      прежнюю сборку с `200`.
+      Конфигурация на момент снятия, её и восстанавливать:
+      `build_type: workflow`, `source: main /`, `cname: th.neva.beauty`,
+      `public: true`, `https_enforced: true`, сертификат `approved` на один
+      домен `th.neva.beauty` с `expires_at: 2026-11-01`.
+      Как возвращать: включить воркфлоу (`gh workflow enable deploy.yml`),
+      создать сайт заново (`gh api -X POST repos/jw-git-hub/th.neva.beauty/pages
+      -f build_type=workflow`), вписать домен
+      (`gh api -X PUT repos/jw-git-hub/th.neva.beauty/pages -f cname=th.neva.beauty`),
+      запустить сборку (`gh workflow run deploy.yml`), дождаться выпуска
+      сертификата и только после этого включить `https_enforced`.
+      Важно: сертификат выпускается заново, и до его выдачи `https` будет
+      отдавать ошибку — от нескольких минут до нескольких часов. На это время
+      `Enforce HTTPS` держать выключенным, иначе сайт недоступен совсем.
+      Побочный эффект для задачи 81: прежней записи сертификата больше нет,
+      а DNS для `www` уже существует — значит новый сертификат имеет шанс
+      покрыть оба домена сразу. Проверить `https_certificate.domains` после
+      возврата: если там появился `www.th.neva.beauty`, задача 81 закрыта сама.
+
 - [ ] 88. Финальная чистка рабочих файлов — делать последней, когда закрыты
       остальные пункты. Опросник свою работу отработает и в репозитории не нужен:
       удалить `docs/questionnaire/` целиком (текст опросника, `create-form.gs`
