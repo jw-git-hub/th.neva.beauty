@@ -29,6 +29,20 @@
 .svc-benefit__icon{width:56px;height:56px}
 .svc-benefit__icon .icon{width:24px;height:24px}
 
+/* ===== ФАКТЫ НАД ПРАЙСОМ ===== */
+/* Длительность и «что входит» стоят над таблицей и ровно по её ширине: клиент
+   читает их там, где смотрит на цену, а не ищет в FAQ внизу страницы.
+   Данные от салона, опросник от 2026-08-11. */
+.svc-facts{max-width:760px;margin:0 auto var(--sp-8);display:grid;gap:var(--sp-3)}
+.svc-facts__row{display:grid;gap:var(--sp-1)}
+/* С 560 px подпись уходит в свою колонку: у «Сколько длится» и «Что входит
+   в цену» разная длина, и в потоке их двоеточия не выстраивались в линию. */
+@media(min-width:560px){.svc-facts__row{grid-template-columns:minmax(0,14rem) 1fr;gap:var(--sp-4);align-items:baseline}}
+.svc-facts__term{display:flex;align-items:center;gap:.5em;font-size:var(--fs-300);
+  font-weight:600;color:var(--rose-deep)}
+.svc-facts__term .icon{width:18px;height:18px;flex:none}
+.svc-facts__value{margin:0;color:var(--ink)}
+
 /* ===== PRICELIST ===== */
 .pricelist-section{background:color-mix(in srgb,var(--surface) 72%,transparent)}
 .pricelist{max-width:760px;margin-inline:auto}

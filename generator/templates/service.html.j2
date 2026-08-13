@@ -46,6 +46,22 @@
 <section class="section pricelist-section">
   <div class="container">
     <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены на услугу «{{ svc.title }}»</h2><p>{{ site.business.currency_note }}</p></div>
+    {%- if svc.duration or svc.included %}
+    <dl class="svc-facts" data-reveal>
+      {% if svc.duration %}
+      <div class="svc-facts__row">
+        <dt class="svc-facts__term">{{ icon('clock') }}Сколько длится</dt>
+        <dd class="svc-facts__value">{{ svc.duration }}</dd>
+      </div>
+      {% endif %}
+      {% if svc.included %}
+      <div class="svc-facts__row">
+        <dt class="svc-facts__term">{{ icon('check') }}Что входит в цену</dt>
+        <dd class="svc-facts__value">{{ svc.included }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+    {%- endif %}
     <div class="pricelist" data-pricelist>
       {% set tabbed = sections|length > 1 %}
       {% if tabbed %}
