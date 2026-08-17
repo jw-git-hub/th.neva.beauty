@@ -4,7 +4,9 @@
    на консультацию» стоял на всех 23 страницах и не работал ни на клиента,
    ни на робота. Кнопки разного веса: WhatsApp —
    действие, остальное — запасные каналы, иначе три равные кнопки подряд
-   заставляют выбирать вместо того, чтобы написать. #}
+   заставляют выбирать вместо того, чтобы написать.
+   Правило переноса стоит здесь, а не только в FAQ главной: клиент из поиска
+   попадает сразу на услугу и записывается с неё, главную он не открывает. #}
 {% macro booking(site, title, lead, subject=None) %}
 {%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
 <section class="section">
@@ -18,6 +20,7 @@
       <a href="tel:{{ site.business.telephone }}">по телефону</a>,
       <a href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">Instagram</a>
     </p>
+    <p class="booking__rule">{{ site.booking_rule }}</p>
     <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
   </div>
 </section>
