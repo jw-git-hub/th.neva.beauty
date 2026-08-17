@@ -46,20 +46,22 @@
 <section class="section pricelist-section">
   <div class="container">
     <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены на услугу «{{ svc.title }}»</h2><p>{{ site.business.currency_note }}</p></div>
-    {%- if svc.duration or svc.included %}
+    {#- Полоска фактов: строка появляется только там, где салон назвал число.
+        Порядок строк один на всех страницах, пустые молча выпадают. #}
+    {%- set facts = [
+          ('clock',  'Сколько длится',    svc.duration),
+          ('check',  'Что входит в цену', svc.included),
+          ('sun',    'Солнце и море',     svc.sun),
+          ('repeat', 'Интервал в курсе',  svc.course),
+        ] | selectattr('2') | list %}
+    {%- if facts %}
     <dl class="svc-facts" data-reveal>
-      {% if svc.duration %}
+      {%- for fact_icon, term, value in facts %}
       <div class="svc-facts__row">
-        <dt class="svc-facts__term">{{ icon('clock') }}Сколько длится</dt>
-        <dd class="svc-facts__value">{{ svc.duration }}</dd>
+        <dt class="svc-facts__term">{{ icon(fact_icon) }}{{ term }}</dt>
+        <dd class="svc-facts__value">{{ value }}</dd>
       </div>
-      {% endif %}
-      {% if svc.included %}
-      <div class="svc-facts__row">
-        <dt class="svc-facts__term">{{ icon('check') }}Что входит в цену</dt>
-        <dd class="svc-facts__value">{{ svc.included }}</dd>
-      </div>
-      {% endif %}
+      {%- endfor %}
     </dl>
     {%- endif %}
     <div class="pricelist" data-pricelist>
