@@ -58,6 +58,14 @@
   padding:var(--sp-2);display:flex;flex-direction:column;gap:2px;z-index:1;
   opacity:0;visibility:hidden;transform:translateY(8px);
   transition:opacity var(--t-fast) var(--ease),visibility var(--t-fast),transform var(--t-fast) var(--ease)}
+/* Крайний справа дропдаун раскрывается влево: панель шириной 248 px от левого
+   края своей группы уходила за окно на 43 px (на 1024 px — весь диапазон, где
+   меню уже есть, а кнопки записи ещё нет), и страница получала горизонтальную
+   прокрутку. `visibility:hidden` от `scrollWidth` не спасает. Привязка к правому
+   краю, а не сдвиг меню целиком: так панель не вылезет и если разделов станет
+   больше. Последний ребёнок `.nav` — ссылка «Макияж» без дропдауна, поэтому
+   `:last-of-type`, а не `:last-child`. */
+.nav__group:last-of-type .nav__menu{left:auto;right:0}
 .nav__group:hover .nav__menu,.nav__group.is-open .nav__menu{opacity:1;visibility:visible;transform:translateY(0)}
 .nav__group:hover .nav__chev,.nav__group.is-open .nav__chev{transform:rotate(180deg)}
 .nav__sub{position:relative;padding:.6rem .75rem .6rem .9rem;border-radius:10px;font-size:var(--fs-300);color:var(--ink);
@@ -87,9 +95,15 @@
   .nav__sub::before{transition:none}
 }
 /* Кнопка записи в шапке — только на десктопе, как на vn.neva.beauty: до 1024 px
-   место занимают логотип и бургер. */
+   место занимают логотип и бургер.
+   Порог у кнопки свой, 1100, а не 1024, как у меню: втроём логотип, меню
+   и кнопка требуют 1077 px, и на 1024 (iPad в горизонтали) страница вылезала
+   за окно на 53 px — сжиматься нечему, у ссылок меню `white-space:nowrap`.
+   Прячем кнопку, а не меню: перелинковка важнее дубля кнопки, которая ниже
+   1024 px и так не показывается, а на странице их несколько. Без неё шапке
+   нужно 941 px — влезает с запасом. */
 .site-header__cta{display:none}
-@media(min-width:1024px){.site-header__cta{display:inline-flex}}
+@media(min-width:1100px){.site-header__cta{display:inline-flex}}
 
 /* burger */
 .burger{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
