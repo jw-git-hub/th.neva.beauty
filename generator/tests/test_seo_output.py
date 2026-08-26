@@ -39,9 +39,11 @@ CONTENT = {
     "categories": [
         {"slug": "figura", "title": "Коррекция фигуры", "url": "/figura/",
          "is_page": True, "services": ["massazh"]},
-        # раздел из одной услуги: своей страницы нет, адрес совпадает с адресом услуги
-        {"slug": "makiyazh", "title": "Перманентный макияж", "url": "/permanent/",
-         "is_page": False, "services": ["permanent"]},
+        # раздел из одной услуги: своей страницы нет, адрес совпадает с адресом услуги.
+        # В боевых данных такого раздела сейчас нет — «Макияж» был последним и снят
+        # 2026-08-26, — но правило в генераторе осталось, и проверять его надо.
+        {"slug": "odna-usluga", "title": "Раздел из одной услуги", "url": "/odna-usluga/",
+         "is_page": False, "services": ["odna-usluga"]},
     ],
     "services": {"massazh": {"title": "Профессиональный массаж"}},
 }
@@ -87,7 +89,7 @@ def test_llms_lists_every_url_once():
     urls = [line.split("](")[1].rstrip(")") for line in lines if line.startswith("- [")]
     assert len(urls) == len(set(urls)), urls
     assert "https://th.neva.beauty/" in urls  # главная выведена ссылкой, а не только заголовком
-    assert "https://th.neva.beauty/permanent/" not in urls  # раздел без своей страницы
+    assert "https://th.neva.beauty/odna-usluga/" not in urls  # раздел без своей страницы
 
 
 def test_llms_carries_facts_and_prices():
