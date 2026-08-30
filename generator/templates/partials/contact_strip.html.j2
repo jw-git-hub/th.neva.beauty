@@ -1,14 +1,24 @@
-{# Полоса контактов: локация, формат приёма и два способа связаться.
+{# Полоса контактов: локация, формат приёма и два мессенджера.
    Стоит на всех страницах, а не только на главной: клиент из поиска попадает
    сразу на услугу или раздел и иначе нигде не видит ни где салон, ни как
-   до него достучаться, кроме как через текст. #}
+   до него достучаться, кроме как через текст.
+   Кнопки вместо строк-ссылок: связаться — это действие, а локация и часы —
+   справка, и выглядеть одинаково они не должны.
+   Кнопки «Позвонить» здесь больше нет намеренно: номер российский (+7), для салона
+   в Таиланде звонок по нему клиенту не бесплатен и не привычен, тогда как оба
+   мессенджера работают одинаково откуда угодно. Сам номер никуда не делся —
+   он остаётся ссылкой в блоке записи (partials/booking.html.j2) и в разметке
+   организации. Когда появится тайский номер (задача 69), решение стоит пересмотреть.
+   Текст письма подставлен заранее — так же, как во всех кнопках записи на сайте. #}
 {% macro contact_strip(site) %}
 <section class="container">
   <div class="contact-strip">
     <div class="contact-strip__item">{{ icon('map-pin') }}<span>{{ site.location }}</span></div>
     <div class="contact-strip__item">{{ icon('clock') }}<span>{{ site.hours }}</span></div>
-    <a class="contact-strip__item" href="tel:{{ site.business.telephone }}">{{ icon('phone') }}<span>Позвонить</span></a>
-    <a class="contact-strip__item" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
+    <div class="contact-strip__actions">
+      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }}<span>Telegram</span></a>
+      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
+    </div>
   </div>
 </section>
 {% endmacro %}
