@@ -575,7 +575,7 @@ def main():
             "schema_json": schema.render(site, home_nodes),
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
             "hero_stem": "hero", "hero_slot": "home_hero",
-            "og_image_alt": home.get("hero_image_alt", site["brand_full"])}
+            "og_image_alt": site["og_image"]["default_alt"]}
     write(OUT/"index.html", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"], prices=prices))
     # услуги

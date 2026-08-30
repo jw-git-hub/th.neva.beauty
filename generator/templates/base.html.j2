@@ -20,7 +20,7 @@
   <meta property="og:description" content="{{ page.seo_desc }}">
   <meta property="og:url" content="{{ site.base_url }}{{ page.url }}">
   {%- set og_image = site.base_url ~ (page.og_image | default(site.og_image.default, true)) %}
-  {%- set og_image_alt = page.og_image_alt | default(site.brand_full, true) %}
+  {%- set og_image_alt = page.og_image_alt | default(site.og_image.default_alt, true) %}
   <meta property="og:image" content="{{ og_image }}">
   <meta property="og:image:width" content="{{ site.og_image.width }}">
   <meta property="og:image:height" content="{{ site.og_image.height }}">
