@@ -7,14 +7,12 @@ build.py их не трогает и не пересобирает.
   generator/sources/icons/plumeria.svg — знак, из него все иконки;
   th.neva.beauty/assets/img/logo-neva-beauty.svg — круглая печать (копия
       Материалы/logo-варианты/E-плюмерия-печать-светлая-круг.svg), из неё логотип
-      организации для разметки.
+      организации для разметки и карточка превью ссылок.
 
 Зачем два разных рендерера: иконкам нужна честная альфа, поэтому лепестки рисуются
 напрямую в Pillow. Печать — готовый SVG с градиентами, их Pillow не умеет, поэтому
-она рендерится системным qlmanage (macOS).
-
-Карточку превью og-cover.jpg этот скрипт не трогает: она нарисована раньше и живёт
-своей жизнью.
+она и карточка превью рендерятся системным qlmanage (macOS): только браузерный
+движок даёт настоящие Cormorant и Manrope из assets/fonts.
 
 Требования: pip install pillow, macOS.
 Запуск: .venv/bin/python generator/make_brand_assets.py
@@ -25,7 +23,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import yaml
 from PIL import Image, ImageDraw
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT.parent / "th.neva.beauty"
@@ -42,6 +42,8 @@ CURVE_STEPS = 96           # на столько отрезков разбива
 MARK_RATIO_BARE = 0.92
 MARK_RATIO_PLATE = 0.58
 
+OG_WIDTH, OG_HEIGHT = 1200, 630   # пропорция, которую мессенджеры показывают целиком
+OG_QUALITY = 92
 LOGO_SIZE = 512                   # логотип организации для Google и Яндекса
 TOUCH_SIZE = 180                  # apple-touch-icon
 APP_SIZES = (192, 512)            # иконки манифеста
@@ -229,11 +231,28 @@ def logo_html():
             f'<img src="{SEAL_SVG.relative_to(OUT).as_posix()}" alt="">')
 
 
-def build_logo():
-    """Логотип организации для разметки schema.org."""
+def card_html(site, categories):
+    """Разметка карточки превью из шаблона og-card.html.j2 и данных сайта."""
+    env = Environment(loader=FileSystemLoader(ROOT / "templates"),
+                      autoescape=select_autoescape(["html", "j2"]))
+    return env.get_template("og-card.html.j2").render(
+        width=OG_WIDTH, height=OG_HEIGHT,
+        brand=site["brand"], loc=site["brand_location"],
+        services=[cat["title"] for cat in categories],
+        logo_src=SEAL_SVG.relative_to(OUT).as_posix(),
+    )
+
+
+def build_social(site, categories):
+    """Логотип организации для разметки и карточка превью ссылок."""
     logo = OUT / "assets" / "img" / "logo-neva-beauty.png"
     render_page(logo_html(), LOGO_SIZE, LOGO_SIZE).save(logo)
     report(logo)
+
+    card = OUT / "assets" / "img" / "og-cover.jpg"
+    render_page(card_html(site, categories), OG_WIDTH, OG_HEIGHT).save(
+        card, quality=OG_QUALITY, optimize=True)
+    report(card)
 
 
 # ---------- вспомогательное ----------
@@ -248,8 +267,10 @@ def report(path):
 
 
 def main():
+    site = yaml.safe_load((ROOT / "data/site.yml").read_text(encoding="utf-8"))
+    content = yaml.safe_load((ROOT / "data/content.yml").read_text(encoding="utf-8"))
     build_icons()
-    build_logo()
+    build_social(site, content["categories"])
 
 
 if __name__ == "__main__":
