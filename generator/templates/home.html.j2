@@ -9,6 +9,16 @@
     {%- if it.name == name and not ns.found %}{{ it.price }}{%- set ns.found = true -%}{% endif -%}
   {%- endfor -%}{%- endfor -%}
 {%- endmacro %}
+{# Подтверждение прав в Search Console и Вебмастере. Только на главной:
+   обе панели читают корень сайта, на остальных страницах тег бесполезен.
+   Значения — в site.yml, там же причина, почему способ мета-тег, а не DNS. #}
+{% block extra_head %}
+{%- if site.verification.google %}
+  <meta name="google-site-verification" content="{{ site.verification.google }}">
+{%- endif %}
+{%- if site.verification.yandex %}
+  <meta name="yandex-verification" content="{{ site.verification.yandex }}">
+{%- endif %}{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="container hero__inner">

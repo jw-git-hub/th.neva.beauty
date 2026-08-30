@@ -40,6 +40,9 @@
   <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/cormorant-600.woff2" crossorigin>
   <link rel="stylesheet" href="{{ asset('/assets/css/bundle.min.css') }}">
   {% block extra_css %}{% endblock %}
+  {#- Пустой блок не должен добавлять ни байта: page_digest считает байты,
+     лишний перевод строки сдвинул бы lastmod у всех страниц разом. #}
+  {%- block extra_head %}{% endblock %}
 </head>
 <body>
   {% include 'partials/aurora.html.j2' %}

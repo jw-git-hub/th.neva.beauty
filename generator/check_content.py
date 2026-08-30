@@ -12,6 +12,7 @@ from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlsplit
 
+import yaml
 from bs4 import BeautifulSoup
 from PIL import Image
 from fontTools.ttLib import TTFont
@@ -20,6 +21,9 @@ ROOT = Path(__file__).resolve().parent
 SITE = ROOT.parent / "th.neva.beauty"
 BASE_URL = "https://th.neva.beauty"
 OG_SIZE = ("1200", "630")  # формат карточки в WhatsApp, Telegram и Facebook
+SITE_YML = ROOT / "data" / "site.yml"
+# Мета-теги подтверждения прав: ключ в site.yml → имя тега в разметке.
+VERIFICATION_TAGS = {"google": "google-site-verification", "yandex": "yandex-verification"}
 
 # Следы старого бренда. Instagram-аккаунт avocado.beauty.samui — исключение:
 # переименование отложено решением заказчика, ссылка на него легальна.
@@ -381,6 +385,27 @@ def check_meta(path, soup, titles, descriptions):
     descriptions[desc].append(rel(path))
 
 
+def check_verification(files):
+    """Мета-теги подтверждения прав стоят на главной и только на ней.
+
+    Панель вебмастера снимает подтверждение, если тег пропал, — а пропасть он может
+    молча при любой правке шаблонов. На внутренних страницах тег бесполезен и
+    выдаёт токен лишний раз, поэтому лишние вхождения тоже считаем ошибкой.
+    """
+    tokens = yaml.safe_load(SITE_YML.read_text(encoding="utf-8")).get("verification") or {}
+    for key, tag in VERIFICATION_TAGS.items():
+        token = (tokens.get(key) or "").strip()
+        for path in files:
+            el = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser").select_one(
+                f'meta[name="{tag}"]')
+            found = el.get("content", "").strip() if el else ""
+            on_home = path.name == "index.html" and path.parent == SITE
+            if on_home and token and found != token:
+                report(rel(path), f"мета-тег {tag}: ожидался {token!r}, найдено {found!r}")
+            elif not on_home and found:
+                report(rel(path), f"мета-тег {tag} вне главной страницы")
+
+
 def check_title_prefixes(titles):
     """Два title с одинаковым началом — заявка на каннибализацию.
 
@@ -431,6 +456,7 @@ def main():
         check_open_graph(path, soup)
         check_faq(path, soup)
     check_css_variables()
+    check_verification(files)
     check_duplicates("title", titles)
     check_title_prefixes(titles)
     check_duplicates("meta description", descriptions)
