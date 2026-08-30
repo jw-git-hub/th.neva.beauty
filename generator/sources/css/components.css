@@ -24,7 +24,11 @@
 .site-header__logo:hover .brand-mark__name{color:var(--rose)}
 
 /* brand lockup: название + строка локации */
-.brand-mark{display:inline-flex;flex-direction:column;gap:.34em;line-height:1}
+.brand-mark{display:inline-flex;align-items:center;gap:.6em;line-height:1}
+/* Знак ужимается первым: на узких экранах место уступает название, а не цветок,
+   поэтому flex-basis auto с правом сжаться, а текст — flex:none. */
+.brand-mark__flower{flex:0 1 auto;width:2.9em;height:auto;display:block}
+.brand-mark__text{flex:none;display:inline-flex;flex-direction:column;gap:.34em}
 .brand-mark__name{font-family:var(--font-head);font-size:var(--fs-600);font-weight:600;
   letter-spacing:.05em;color:var(--ink);transition:color var(--t-fast) var(--ease)}
 .brand-mark__loc{display:inline-flex;align-items:center;gap:.55em;align-self:flex-start;

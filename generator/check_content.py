@@ -286,6 +286,22 @@ def check_images(path, soup):
             report(rel(path), f"изображение без width/height: {src}")
 
 
+def check_brand_assets(path, soup):
+    """Фавиконы, иконка iOS и манифест лежат на диске.
+
+    check_images смотрит только <img>, поэтому битая ссылка на иконку проходила молча —
+    именно так буква-заглушка в favicon.svg дожила до задачи 95. Ошибка тихая по своей
+    природе: вкладка просто показывает пустой лист, и на странице ничего не ломается.
+    """
+    for link in soup.select('link[rel~="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]'):
+        href = link.get("href", "")
+        if not href.startswith("/"):
+            report(rel(path), f"ссылка на брендовый ассет не от корня: {href!r}")
+            continue
+        if not (SITE / href.lstrip("/")).exists():
+            report(rel(path), f"нет файла брендового ассета: {href}")
+
+
 def check_links(path, soup):
     for a in soup.select("a[href]"):
         href = a["href"]
@@ -447,6 +463,7 @@ def main():
         check_brand_in_title(path, soup)
         check_og_title(path, soup)
         check_images(path, soup)
+        check_brand_assets(path, soup)
         check_srcset(path, soup)
         check_font_coverage(path, soup)
         check_preloaded_image(path, soup)

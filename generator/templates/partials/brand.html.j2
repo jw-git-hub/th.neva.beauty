@@ -1,8 +1,15 @@
-{# Марка набрана двумя строками, но название бизнеса везде пишется через тире.
+{# Фирменный замок: знак-плюмерия + название и город. Единственный источник знака для
+   шапки, подвала и мобильного меню — все три включают этот макрос.
+   Знак помечен aria-hidden: доступное имя ссылки-логотипа даёт её видимый текст,
+   знак не должен в него попадать.
+   Марка набрана двумя строками, но название бизнеса везде пишется через тире.
    Скрытое тире не меняет вид, зато копируется и читается вслух как
    «Neva Beauty — Koh Samui» — той же формой, что стоит в разметке и в текстах. #}
 {% macro brand_mark(brand, loc) -%}
-<span class="brand-mark__name">{{ brand }}</span>
-<span class="visually-hidden"> — </span>
-<span class="brand-mark__loc">{{ loc }}</span>
+{{ icon('plumeria', 'brand-mark__flower') }}
+<span class="brand-mark__text">
+  <span class="brand-mark__name">{{ brand }}</span>
+  <span class="visually-hidden"> — </span>
+  <span class="brand-mark__loc">{{ loc }}</span>
+</span>
 {%- endmacro %}

@@ -32,7 +32,13 @@
   <meta name="twitter:image" content="{{ og_image }}">
   <meta name="twitter:image:alt" content="{{ og_image_alt }}">
   {% if page.schema_json %}<script type="application/ld+json">{{ page.schema_json }}</script>{% endif %}
+  {# .ico для старых браузеров и краулеров фавиконов, они не умеют SVG;
+     .svg для современных браузеров, apple-touch-icon для «на главный экран» в iOS. #}
+  <link rel="icon" href="{{ base_path }}/favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" href="{{ base_path }}/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{{ base_path }}/apple-touch-icon.png">
+  <link rel="manifest" href="{{ base_path }}/site.webmanifest">
+  <meta name="theme-color" content="{{ theme_color }}">
   {# imagesrcset повторяет набор ширин самой картинки: без него предзагрузка
      тянет самый большой файл, а вёрстка потом просит другой — два запроса вместо одного. #}
   {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" imagesrcset="{{ srcset(page.hero_stem, page.hero_slot) }}" imagesizes="{{ img_sizes(page.hero_slot) }}" fetchpriority="high">{% endif %}
