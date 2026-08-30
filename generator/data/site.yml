@@ -26,7 +26,7 @@ verification:
   # Токен ресурса с префиксом URL, способ «HTML-тег». Токен доменного ресурса
   # (google-site-verification=OOD-Swoa1YW_JqvbsBwZuT87PpfK6dyFmofOnIH-bWU из задачи 66)
   # сюда не подходит: у каждого типа ресурса он свой.
-  google: ""
+  google: "n2Gup2kYzjw0pk2ZhTbgltdatmneJes7GSwy8JrXDCo"
   # Яндекс выдаёт один код на все три способа: мета-тег, файл yandex_<код>.html
   # и запись DNS. Значение взято из задачи 67, где оно показано как DNS-запись.
   yandex: "073be936857d814d"
