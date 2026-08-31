@@ -25,10 +25,9 @@ SITE_YML = ROOT / "data" / "site.yml"
 # Мета-теги подтверждения прав: ключ в site.yml → имя тега в разметке.
 VERIFICATION_TAGS = {"google": "google-site-verification", "yandex": "yandex-verification"}
 
-# Следы старого бренда. Instagram-аккаунт avocado.beauty.samui — исключение:
-# переименование отложено решением заказчика, ссылка на него легальна.
+# Следы старого бренда. Исключений больше нет: последним был Instagram-аккаунт
+# avocado.beauty.samui, переименованный в th.neva.beauty (задача 64).
 FORBIDDEN = ["Avocado", "avocado", "doctor-cosmetolog.pro", "Дананг", "Da Nang"]
-ALLOWED_BRAND_TRACE = "avocado.beauty.samui"
 
 # Аппараты и методики — поисковые сущности: их ищут точным написанием, и «РФ лифтинг»
 # без дефиса или кириллическая «М22» для поиска и ИИ уже другие слова.
@@ -96,9 +95,8 @@ def rel(path):
 
 
 def check_forbidden(path, text):
-    cleaned = text.replace(ALLOWED_BRAND_TRACE, "")
     for needle in FORBIDDEN:
-        if needle in cleaned:
+        if needle in text:
             report(rel(path), f"след старого бренда или города: {needle!r}")
 
 

@@ -34,8 +34,8 @@ contacts:
   whatsapp_number: "79990289115"
   whatsapp_url: "https://wa.me/79990289115"
   telegram_url: "https://t.me/shyrakras"
-  # Аккаунт со старым брендом — переименование отложено решением заказчика.
-  instagram_url: "https://www.instagram.com/avocado.beauty.samui/"
+  # Имя аккаунта совпадает с доменом — так же, как у соседнего vn.neva.beauty.
+  instagram_url: "https://www.instagram.com/th.neva.beauty/"
 
 # Превью ссылки в мессенджерах и соцсетях. Размер один на все страницы: карточки
 # WhatsApp, Telegram и Facebook рассчитаны на 1200×630, размер объявляем в разметке,
@@ -64,7 +64,7 @@ business:
   image: "/assets/img/og-cover.jpg"  # Google ждёт для бизнеса кадр от 1200px по ширине
   logo: "/assets/img/logo-neva-beauty.png"  # круглая печать, 512 px (make_brand_assets.py)
   same_as:
-    - "https://www.instagram.com/avocado.beauty.samui/"
+    - "https://www.instagram.com/th.neva.beauty/"
   address:
     locality: "Koh Samui"
     region: "Surat Thani"
