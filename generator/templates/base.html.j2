@@ -3,6 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# Ссылки на то, без чего страница не рисуется, — первыми в head, до разметки
+     Schema.org. Её JSON на странице услуги весит до 27 КБ, и пока он не разобран,
+     сканер предзагрузки о стилях не знает: на мобильном канале HTML приезжает
+     несколькими порциями, и запрос CSS уходил на круг-другой позже. #}
+  <link rel="stylesheet" href="{{ asset('/assets/css/bundle.min.css') }}">
+  {% block extra_css %}{% endblock %}
+  {# imagesrcset повторяет набор ширин самой картинки: без него предзагрузка
+     тянет самый большой файл, а вёрстка потом просит другой — два запроса вместо одного. #}
+  {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" imagesrcset="{{ srcset(page.hero_stem, page.hero_slot) }}" imagesizes="{{ img_sizes(page.hero_slot) }}" fetchpriority="high">{% endif %}
+  {# Manrope собран одним вариативным файлом, поэтому один preload закрывает все
+     веса. Отдельными файлами веса 500/600/700 находились только после разбора CSS
+     — на 1,3 с, и жирный текст первого экрана до тех пор стоял системным шрифтом. #}
+  <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/manrope-var.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/cormorant-600.woff2" crossorigin>
   <script>document.documentElement.classList.add('js')</script>
   {# Сорвавшийся запрос картинки (обрыв связи, таймаут узкого канала — так не
      догрузился hero во встроенном браузере Instagram) браузер сам не повторяет:
@@ -80,13 +94,6 @@
   <link rel="apple-touch-icon" href="{{ base_path }}/apple-touch-icon.png">
   <link rel="manifest" href="{{ base_path }}/site.webmanifest">
   <meta name="theme-color" content="{{ theme_color }}">
-  {# imagesrcset повторяет набор ширин самой картинки: без него предзагрузка
-     тянет самый большой файл, а вёрстка потом просит другой — два запроса вместо одного. #}
-  {% if page.hero_image %}<link rel="preload" as="image" href="{{ base_path }}{{ page.hero_image }}" imagesrcset="{{ srcset(page.hero_stem, page.hero_slot) }}" imagesizes="{{ img_sizes(page.hero_slot) }}" fetchpriority="high">{% endif %}
-  <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/manrope-400.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="{{ base_path }}/assets/fonts/cormorant-600.woff2" crossorigin>
-  <link rel="stylesheet" href="{{ asset('/assets/css/bundle.min.css') }}">
-  {% block extra_css %}{% endblock %}
   {#- Пустой блок не должен добавлять ни байта: page_digest считает байты,
      лишний перевод строки сдвинул бы lastmod у всех страниц разом. #}
   {%- block extra_head %}{% endblock %}
