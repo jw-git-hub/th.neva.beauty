@@ -5,7 +5,7 @@
   },
   "/apparatnaya-kosmetologiya/": {
     "date": "2026-08-31",
-    "hash": "9ad89f365c1f763e06ec455f95178034d22ddfb3"
+    "hash": "952e7995f1b866841f5d059b174007b3b87b3514"
   },
   "/biozavivka-volos/": {
     "date": "2026-08-31",
@@ -29,7 +29,7 @@
   },
   "/epilyaciya/": {
     "date": "2026-08-31",
-    "hash": "93a0a6226862603e26431926422ad72efbe2ac3a"
+    "hash": "86028f6423b22aca009249c093157a06cc3e39a1"
   },
   "/fotoomolozhenie-m22/": {
     "date": "2026-08-31",
@@ -45,11 +45,11 @@
   },
   "/korrekciya-figury/": {
     "date": "2026-08-31",
-    "hash": "2b095073b2889ee513196abae396e405cb956dc6"
+    "hash": "d23d1ce650c346c7d289866368bf7a169960e8ac"
   },
   "/kosmetologiya/": {
     "date": "2026-08-31",
-    "hash": "b52e51777cb97cf212a16c7c3ab15fd30e0f8149"
+    "hash": "cbe96af66e50389a2e4cf4a478b27e33a0fca28e"
   },
   "/lazernaya-epilyaciya/": {
     "date": "2026-08-31",
@@ -85,6 +85,6 @@
   },
   "/volosy/": {
     "date": "2026-08-31",
-    "hash": "840c3d14f4721c520876b9b213a7e03559455588"
+    "hash": "33fafa79922f6111d95ed546adc6502d5af1b394"
   }
 }

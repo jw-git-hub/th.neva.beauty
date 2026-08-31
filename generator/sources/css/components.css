@@ -212,6 +212,11 @@ body.no-scroll{overflow:hidden}
 .breadcrumbs a:hover{color:var(--rose)}
 .breadcrumbs__sep{color:var(--line)}
 .breadcrumbs [aria-current="page"]{color:var(--ink)}
+/* Первая секция раздела: сверху отступ такой же, как у хлебных крошек на
+   странице услуги (.svc-hero .breadcrumbs), чтобы крошки везде стояли на
+   одной высоте. Нижний отступ секции остаётся общий. */
+.cat-hero{padding-top:var(--sp-5)}
+@media(min-width:768px){.cat-hero{padding-top:var(--sp-8)}}
 
 /* ===== FAQ (used by home/category) ===== */
 .faq{display:grid;gap:var(--sp-3);max-width:760px;margin-inline:auto}
