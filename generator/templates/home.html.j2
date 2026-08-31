@@ -80,6 +80,34 @@
   {{ cta_inline(site, 'Не нашли свою процедуру? Спросите — подскажем цену и время.', wide=true) }}
 </section>
 
+{#- Сводка цен по направлениям. «Сколько стоит» — самый частый запрос к салону,
+    а на главной цены стояли только шестью карточками «Частое»: диапазона
+    по направлению не было ни одного. Границы считаются из тех же прайсов,
+    что уходят в AggregateOffer услуг, поэтому выдумать цену таблица не может. #}
+<section class="section container" id="ceny">
+  <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>{{ home.price_title }}</h2><p>{{ home.price_lead | safe }}</p></div>
+  <div class="compare" data-reveal>
+    <table class="compare__table">
+      <caption class="visually-hidden">Цены по направлениям — {{ site.brand_full }}</caption>
+      <thead>
+        {#- Цена второй колонкой, а не последней: перечисление услуг длинное и,
+            стоя перед ценой, зажимает её в две строки. #}
+        <tr><th scope="col">Направление</th><th scope="col">Цены</th><th scope="col">Что входит</th></tr>
+      </thead>
+      <tbody>
+        {% for row in price_rows %}
+        <tr>
+          <th scope="row"><a href="{{ base_path }}{{ row.url }}">{{ row.label }}</a></th>
+          <td class="compare__price">{{ row.span or '—' }}</td>
+          <td>{{ row.services }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ cta_inline(site, 'Нашли свою процедуру? Напишите — назовём точную цену и время.', wide=true) }}
+</section>
+
 <section class="section container" id="faq">
   <div class="section-head" data-reveal>
     <p class="eyebrow">Вопросы и ответы</p>

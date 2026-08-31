@@ -296,12 +296,15 @@ def booking_channel_node(contacts, telephone, languages):
 
 
 def service_node(name, description, provider_ref, area_name, aggregate_offer=None,
-                 offer_catalog=None, page_url=None, image=None, channel=None):
+                 offer_catalog=None, page_url=None, image=None, channel=None,
+                 category=None):
     """Service — профильная услуга страницы. provider ссылается на узел бизнеса,
     areaServed — город. Если передан aggregate_offer {low, high, count, currency},
     добавляется AggregateOffer с диапазоном цен (числа считаются из прайса).
     offer_catalog — тот же прайс попозиционно, цена каждой услуги без догадок.
-    image — кадр первого экрана, channel — канал записи (`booking_channel_node`)."""
+    image — кадр первого экрана, channel — канал записи (`booking_channel_node`),
+    category — направление салона, к которому услуга относится: из графа это
+    иначе не следует, направление жило только в хлебных крошках страницы."""
     node = {
         "@type": "Service",
         **({"@id": page_url + SERVICE_ID, "url": page_url,
@@ -311,6 +314,8 @@ def service_node(name, description, provider_ref, area_name, aggregate_offer=Non
         "provider": provider_ref,
         "areaServed": {"@type": "City", "name": area_name},
     }
+    if category:
+        node["category"] = category
     if image:
         node["image"] = image
     if channel:

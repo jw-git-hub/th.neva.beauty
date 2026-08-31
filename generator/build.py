@@ -50,6 +50,10 @@ def env():
     e.tests["match"] = lambda s, pat: re.match(pat, s) is not None
     e.globals["icon"] = icon
     e.globals["theme_color"] = THEME_COLOR
+    # Заглушки даты изменения: настоящую дату подставляет write_page уже в готовый
+    # HTML — иначе подстановка даты сама делала бы страницу изменённой (см. ниже).
+    e.globals["lastmod_placeholder"] = LASTMOD_PLACEHOLDER
+    e.globals["lastmod_human_placeholder"] = LASTMOD_HUMAN_PLACEHOLDER
     return e
 
 def write(path: Path, html: str):
@@ -200,27 +204,30 @@ def render_page_prices(entry, index):
         entry[field] = render_prices(entry[field], index)
 
 
-def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
-    """Финализирует HTML-ответы FAQ: подставляет URL мессенджеров вместо плейсхолдеров
-    {whatsapp}/{telegram}/{instagram} (единый источник — site.yml), цены из прайса
-    вместо {price:...} и префиксует внутренние ссылки href="/..." на base_path —
-    чтобы они работали и на превью по подпути."""
+def render_rich_text(text, contacts, base_path="", prices_index=None):
+    """Финализирует HTML-текст страницы: подставляет URL мессенджеров вместо
+    плейсхолдеров {whatsapp}/{telegram}/{instagram} (единый источник — site.yml),
+    цены из прайса вместо {price:...} и префиксует внутренние ссылки href="/..."
+    на base_path — чтобы они работали и на превью по подпути."""
     tokens = {
         "{whatsapp}": contacts["whatsapp_url"],
         "{telegram}": contacts["telegram_url"],
         "{instagram}": contacts["instagram_url"],
     }
-    result = []
-    for item in faq:
-        answer = item["a"]
-        for token, url in tokens.items():
-            answer = answer.replace(token, url)
-        if prices_index:
-            answer = render_prices(answer, prices_index)
-        if base_path:
-            answer = answer.replace('href="/', f'href="{base_path}/')
-        result.append({"q": item["q"], "a": answer})
-    return result
+    for token, url in tokens.items():
+        text = text.replace(token, url)
+    if prices_index:
+        text = render_prices(text, prices_index)
+    if base_path:
+        text = text.replace('href="/', f'href="{base_path}/')
+    return text
+
+
+def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
+    """Ответы FAQ, готовые к выводу: те же подстановки, что и в остальном тексте."""
+    return [{"q": item["q"],
+             "a": render_rich_text(item["a"], contacts, base_path, prices_index)}
+            for item in faq]
 
 
 # Число цены: первая цифра и дальше цифры с разделителями разрядов (обычный
@@ -404,12 +411,70 @@ def price_span(sections_list, currency_sign):
     return f"{span}{NBSP}{currency_sign}"
 
 
+def category_price_rows(cat, services, prices, site):
+    """Строки сводной таблицы раздела: услуга, диапазон цен, длительность.
+
+    Раздел перечисляет услуги карточками, и на вопрос «сколько стоит эпиляция
+    на Самуи» отвечать ему было нечем — цена стояла только подписью «от … ฿».
+    Таблица собирается из прайса и полей услуг, ничего не добавляя от себя."""
+    sign = site["business"]["currency_sign"]
+    rows = []
+    for slug in cat["services"]:
+        svc = services[slug]
+        rows.append({
+            "slug": slug,
+            "label": svc["title"],
+            "span": price_span([prices.get(slug, [])], sign),
+            "duration": svc.get("duration"),
+        })
+    return rows
+
+
+def home_price_rows(content, prices, site):
+    """Строки сводной таблицы главной: направление, состав, диапазон цен."""
+    sign = site["business"]["currency_sign"]
+    rows = []
+    for cat in content["categories"]:
+        slugs = cat["services"]
+        rows.append({
+            "url": cat["url"] if cat["is_page"] else f"/{slugs[0]}/",
+            "label": cat["title"],
+            "services": ", ".join(content["services"][slug]["title"] for slug in slugs),
+            "span": price_span([prices.get(slug, []) for slug in slugs], sign),
+        })
+    return rows
+
+
+# Ссылка в HTML-ответе FAQ → markdown-ссылка для llms.txt. Относительный адрес
+# разворачивается в абсолютный: файл читают в отрыве от сайта, и «/volosy/»
+# из него никуда не ведёт.
+_LINK_RE = re.compile(r'<a [^>]*href="([^"]+)"[^>]*>(.*?)</a>', re.S)
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def uncapitalize(text):
+    """Строчная только первая буква: строка встраивается в перечисление после
+    двоеточия. Сплошной lower() испортил бы написание сущностей внутри строки —
+    «Hydra Facial» и «Tokio Inkarami» обязаны выглядеть одинаково везде."""
+    return text[:1].lower() + text[1:]
+
+
+def markdown_links(html, base_url):
+    """HTML-ответ FAQ как markdown: ссылки сохраняются, остальные теги убираются."""
+    def link(match):
+        href, text = match.group(1), match.group(2)
+        return f"[{text}]({base_url + href if href.startswith('/') else href})"
+    return _TAG_RE.sub("", _LINK_RE.sub(link, html)).strip()
+
+
 def build_llms(site, content, prices):
     """llms.txt — выжимка сайта для ИИ-ассистентов (llmstxt.org).
 
-    Кроме карты ссылок файл несёт короткий блок фактов и цены: ассистент,
-    который прочитал только его, должен уметь ответить, где салон, на каком
-    языке говорят и сколько стоит направление. Разделы без своей страницы
+    Кроме карты ссылок файл несёт факты, цены, длительность процедур и вопросы
+    с ответами: ассистент, прочитавший только его, должен уметь ответить, где
+    салон, на каком языке говорят, сколько стоит и сколько длится процедура.
+    Отдельно перечислено то, чего на сайте нет: без явной строки «адрес
+    не публикуется» ассистент дописывает адрес сам. Разделы без своей страницы
     (одна услуга) в карту не выводятся — их адрес это адрес самой услуги,
     и второй раз тот же URL под другой подписью только путает."""
     base = site["base_url"]
@@ -423,10 +488,17 @@ def build_llms(site, content, prices):
         "",
         "## Коротко",
         f"- Локация: {site['location']}, провинция {b['address']['region']}",
-        f"- Как попасть: {site['hours'].lower()}",
+        f"- Как попасть: {uncapitalize(site['hours'])}",
         "- Языки обслуживания: русский, английский",
         f"- Валюта прайса: тайский бат ({sign})",
         f"- Телефон и WhatsApp: {b['telephone']}",
+        f"- Правило переноса: {uncapitalize(site['booking_rule'])}",
+        "",
+        "## Чего на сайте нет",
+        "- Точный адрес не публикуется: его сообщают при записи в мессенджере.",
+        "- Часы работы не заявлены: салон принимает по предварительной записи.",
+        "- Отзывов и рейтингов на сайте нет, и салон их не собирает.",
+        "- Neva Beauty — Koh Samui это салон красоты, а не медицинская клиника.",
         "",
         "## Страницы",
         f"- [{content['home']['seo_title']}]({base}/)",
@@ -440,10 +512,14 @@ def build_llms(site, content, prices):
     lines += ["", "## Услуги"]
     for slug, svc in content["services"].items():
         span = price_span([prices.get(slug, [])], sign)
-        note = f" — цены {span}" if span else ""
+        facts = [f"цены {span}" if span else None,
+                 f"длительность: {uncapitalize(svc['duration'])}" if svc.get("duration") else None]
+        note = " — " + ", ".join(fact for fact in facts if fact) if any(facts) else ""
         lines.append(f"- [{svc['title']}]({base}/{slug}/){note}")
+    lines += ["", "## Частые вопросы"]
+    for item in content["home"]["faq"]:
+        lines += [f"### {item['q']}", markdown_links(item["a"], base), ""]
     lines += [
-        "",
         "## Контакты",
         f"- WhatsApp: {c['whatsapp_url']}",
         f"- Telegram: {c['telegram_url']}",
@@ -466,6 +542,18 @@ _ASSET_VERSION_RE = re.compile(r"\?v=[0-9a-f]+")
 # так же, как с отпечатками ассетов: страница рендерится с постоянной заглушкой,
 # отпечаток считается по ней, и только потом на её место встаёт настоящая дата.
 LASTMOD_PLACEHOLDER = "0000-00-00"
+# Ту же дату страница показывает человеку: dateModified в разметке отвечает поиску,
+# но ИИ цитирует то, что читает в тексте, а YMYL-страница без видимой даты выглядит
+# недатированной. Заглушка отдельная — вид у даты в тексте русский, не ISO.
+LASTMOD_HUMAN_PLACEHOLDER = "00 месяца 0000 года"
+MONTHS_RU = ("января", "февраля", "марта", "апреля", "мая", "июня",
+             "июля", "августа", "сентября", "октября", "ноября", "декабря")
+
+
+def format_date_ru(iso_date):
+    """«2026-08-31» → «31 августа 2026 года»."""
+    year, month, day = (int(part) for part in iso_date.split("-"))
+    return f"{day} {MONTHS_RU[month - 1]} {year} года"
 
 
 def page_digest(html):
@@ -498,7 +586,8 @@ def write_page(path: Path, url: str, html: str, journal: dict, history: dict, to
     digest = page_digest(html)
     date_str = page_date(url, digest, history, today)
     journal[url] = {"hash": digest, "date": date_str}
-    write(path, html.replace(LASTMOD_PLACEHOLDER, date_str))
+    write(path, html.replace(LASTMOD_HUMAN_PLACEHOLDER, format_date_ru(date_str))
+                    .replace(LASTMOD_PLACEHOLDER, date_str))
 
 
 def build_manifest(site, base_path):
@@ -601,9 +690,12 @@ def main():
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
             "hero_stem": "hero", "hero_slot": "home_hero",
             "og_image_alt": site["og_image"]["default_alt"]}
+    home["price_lead"] = render_rich_text(
+        home["price_lead"], site["contacts"], base_path, prices_index)
     write_page(OUT/"index.html", "/", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"],
-        prices=prices), journal, history, today)
+        prices=prices, price_rows=home_price_rows(content, prices, site)),
+        journal, history, today)
     # услуги
     tpl = e.get_template("service.html.j2")
     provider_ref = {"@id": base_url + "/" + schema.BUSINESS_ID}
@@ -617,6 +709,10 @@ def main():
         sections = prices.get(slug, [])
         cat = category_by_slug[slug]
         render_page_prices(svc, prices_index)
+        # Лид блока цен — тот же рич-текст, что и ответы FAQ: ссылки на смежные
+        # услуги, суммы плейсхолдерами, префикс base_path для превью по подпути.
+        svc["price_lead"] = render_rich_text(
+            svc["price_lead"], site["contacts"], base_path, prices_index)
         url = base_url + f"/{slug}/"
         hero = base_url + f"/assets/img/{svc['hero_image']}.webp"
         crumbs = [{"name": "Главная", "url": base_url + "/"}]
@@ -633,7 +729,8 @@ def main():
                 svc["title"], svc["intro"], provider_ref, area_name,
                 price_aggregate(sections, currency),
                 service_offer_catalog(svc["title"], sections, currency, url),
-                page_url=url, image=hero, channel=booking_channel),
+                page_url=url, image=hero, channel=booking_channel,
+                category=cat["title"]),
         ]
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
@@ -655,6 +752,8 @@ def main():
         if not cat["is_page"]:
             continue
         render_page_prices(cat, prices_index)
+        cat["price_lead"] = render_rich_text(
+            cat["price_lead"], site["contacts"], base_path, prices_index)
         url = base_url + cat["url"]
         nodes = [
             schema.webpage_node(url, base_url, cat["seo_title"], cat["seo_desc"],
@@ -682,7 +781,9 @@ def main():
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
         write_page(OUT/cat["slug"]/"index.html", cat["url"], cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"],
-            categories=content["categories"]), journal, history, today)
+            categories=content["categories"],
+            price_rows=category_price_rows(cat, content["services"], prices, site)),
+            journal, history, today)
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
             "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "

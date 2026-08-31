@@ -32,6 +32,32 @@
   </div>
 </section>
 
+{#- Сводка цен раздела. Карточки выше показывают только «от … ฿», и на вопрос
+    «сколько стоит эпиляция на Самуи» раздел отвечал одной цифрой на услугу.
+    Таблица даёт диапазон и длительность рядом — формат, который ИИ цитирует
+    охотнее прозы. Диапазоны считаются из того же каталога, что уходит
+    в AggregateOffer услуги, поэтому разойтись с прайсом не могут. #}
+<section class="section container" id="ceny">
+  <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>{{ cat.price_title }}</h2><p>{{ cat.price_lead | safe }}</p></div>
+  <div class="compare" data-reveal>
+    <table class="compare__table">
+      <caption class="visually-hidden">Цены и длительность услуг раздела «{{ cat.title }}» — {{ site.brand_full }}</caption>
+      <thead>
+        <tr><th scope="col">Услуга</th><th scope="col">Цены</th><th scope="col">Сколько длится</th></tr>
+      </thead>
+      <tbody>
+        {% for row in price_rows %}
+        <tr>
+          <th scope="row"><a href="{{ base_path }}/{{ row.slug }}/">{{ row.label }}</a></th>
+          <td class="compare__price">{{ row.span or '—' }}</td>
+          <td>{{ row.duration or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
 {% if cat.compare %}
 <section class="section container" id="sravnenie">
   <div class="section-head" data-reveal><p class="eyebrow">Сравнение</p><h2>{{ cat.compare.title }}</h2></div>

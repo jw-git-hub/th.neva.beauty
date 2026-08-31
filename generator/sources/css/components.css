@@ -342,3 +342,8 @@ body.no-scroll{overflow:hidden}
 .compare__table td{font-size:var(--fs-300);color:var(--muted)}
 .compare__table tr>*{border-bottom:1px dashed var(--line)}
 .compare__table tbody tr:last-child>*{border-bottom:none}
+/* Диапазон цен в сводной таблице — той же подачей, что и в прайсе услуги
+   (.pricelist__price): без nowrap соседняя колонка с перечислением услуг
+   зажимает цену, и «300–20 000 ฿» ломается на две строки. */
+.compare__price{font-weight:600;color:var(--rose-deep);font-variant-numeric:tabular-nums;
+  white-space:nowrap}

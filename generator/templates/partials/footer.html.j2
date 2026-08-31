@@ -20,7 +20,13 @@
     </div>
   </div>
   <div class="site-footer__bottom container">
-    <span>© {{ site.brand_full }}</span>
+    {#- Дата проверки материала рядом с копирайтом, а не отдельной строкой: та же
+        дата, что уходит в dateModified и в sitemap. Косметология — YMYL-тема,
+        и поиск, и ИИ спрашивают у такой страницы, когда её последний раз
+        проверяли; разметка отвечает роботу, а цитирует ИИ то, что читает в тексте.
+        Служебные страницы (noindex) собираются мимо write_page, и заглушку там
+        менять некому — поэтому даты у них нет. #}
+    <span>© {{ site.brand_full }}{% if not page.noindex %}. Страница обновлена <time datetime="{{ lastmod_placeholder }}">{{ lastmod_human_placeholder }}</time>{% endif %}</span>
     <a href="{{ base_path }}/privacy/">Политика конфиденциальности</a>
   </div>
 </footer>

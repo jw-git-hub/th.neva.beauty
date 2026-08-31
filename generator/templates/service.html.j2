@@ -42,14 +42,21 @@
 
 <section class="section pricelist-section">
   <div class="container">
-    <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>Цены на услугу «{{ svc.title }}»</h2><p>{{ site.business.currency_note }}</p></div>
+    {#- Заголовок блока вопросом, а под ним ответ первым же абзацем: «сколько
+        стоит» — самый частый запрос аудитории, а блок начинался таблицей, и
+        процитировать из него короткий ответ было нечего. Тот же вопрос стоял
+        ещё и в FAQ: ответ перенесён сюда целиком, из FAQ вопрос убран — две
+        одинаковые формулировки с двумя разными ответами не нужны ни клиенту,
+        ни роботу. Суммы в ответе — плейсхолдерами из прайса. #}
+    <div class="section-head" data-reveal><p class="eyebrow">Стоимость</p><h2>{{ svc.price_title }}</h2><p>{{ svc.price_lead | safe }}</p></div>
     {#- Полоска фактов: строка появляется только там, где салон назвал число.
         Порядок строк один на всех страницах, пустые молча выпадают. #}
     {%- set facts = [
-          ('clock',  'Сколько длится',    svc.duration),
-          ('check',  'Что входит в цену', svc.included),
-          ('sun',    'Солнце и море',     svc.sun),
-          ('repeat', 'Интервал в курсе',  svc.course),
+          ('clock',    'Сколько длится',        svc.duration),
+          ('check',    'Что входит в цену',     svc.included),
+          ('sun',      'Солнце и море',         svc.sun),
+          ('repeat',   'Интервал в курсе',      svc.course),
+          ('sparkles', 'Когда виден результат', svc.effect),
         ] | selectattr('2') | list %}
     {%- if facts %}
     <dl class="svc-facts" data-reveal>

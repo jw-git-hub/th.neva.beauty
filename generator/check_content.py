@@ -61,6 +61,10 @@ DOUBLED_WORD_RE = re.compile(r"\b(\w+)[  ]+\1\b", re.IGNORECASE)
 TITLE_MIN, TITLE_MAX = 45, 65
 TITLE_PREFIX = 20  # по такому началу заголовка поиск схлопывает похожие страницы
 BRAND_SUFFIX = " — Neva Beauty"  # единая связка названия салона с заголовком
+# Заглушки даты изменения из build.py: в собранной странице их быть не должно.
+LASTMOD_PLACEHOLDERS = ("0000-00-00", "00 месяца 0000 года")
+# Ответ под вопросом-заголовком блока цен короче этого — не ответ, а подпись.
+LEAD_MIN_CHARS = 60
 DESC_MIN, DESC_MAX = 120, 170
 
 # Знаки, которых нет ни в Manrope, ни в Cormorant, — их рисует системный шрифт.
@@ -450,6 +454,47 @@ def check_page_dates():
             report(rel(path), f"dateModified {marked} ≠ lastmod в sitemap {date!r}")
 
 
+def check_visible_date(path, soup):
+    """У индексируемой страницы дата обновления видна человеку, а не только роботу.
+
+    dateModified в JSON-LD отвечает поиску, но ИИ цитирует то, что читает
+    в тексте. Косметология — YMYL-тема: страница без видимой даты выглядит
+    недатированной. Дата совпадает с dateModified, это сверяет check_page_dates."""
+    if soup.select_one('meta[name="robots"][content*="noindex"]'):
+        return
+    stamp = soup.select_one(".site-footer__bottom time")
+    if not stamp or not stamp.get("datetime"):
+        report(rel(path), "нет видимой даты обновления страницы в подвале")
+
+
+def check_price_answer(path, soup):
+    """Блок цен отвечает вопросом-заголовком и абзацем-ответом над таблицей.
+
+    «Сколько стоит» — самый частый запрос аудитории. Блок, который начинается
+    сразу таблицей, отвечает на него только строками прайса: короткого ответа,
+    который ИИ мог бы процитировать целиком, из него не вынуть."""
+    block = soup.select_one("#ceny, .pricelist-section")
+    if not block:
+        return  # страница без цен — служебная
+    heading = block.select_one("h2")
+    if not heading or not heading.get_text(strip=True).endswith("?"):
+        report(rel(path), f"заголовок блока цен не вопрос: "
+                          f"{heading.get_text(strip=True) if heading else None!r}")
+    lead = block.select(".section-head p")
+    if len(lead) < 2 or len(lead[1].get_text(strip=True)) < LEAD_MIN_CHARS:
+        report(rel(path), "под заголовком блока цен нет абзаца-ответа")
+
+
+def check_placeholder_leak(path, text):
+    """Заглушка даты не должна доехать до страницы.
+
+    Настоящую дату подставляет write_page уже в готовый HTML. Страница, собранная
+    мимо него (служебная, новая), унесла бы в прод «0000-00-00» видимым текстом."""
+    for placeholder in LASTMOD_PLACEHOLDERS:
+        if placeholder in text:
+            report(rel(path), f"незаменённая заглушка даты {placeholder!r}")
+
+
 def check_title_prefixes(titles):
     """Два title с одинаковым началом — заявка на каннибализацию.
 
@@ -484,6 +529,7 @@ def main():
         check_forbidden(path, text)
         check_entity_spelling(path, text)
         check_placeholders(path, text)
+        check_placeholder_leak(path, text)
         check_doubled_words(path, soup)
         check_headings(path, soup)
         check_heading_order(path, soup)
@@ -500,6 +546,8 @@ def main():
         check_meta(path, soup, titles, descriptions)
         check_open_graph(path, soup)
         check_faq(path, soup)
+        check_visible_date(path, soup)
+        check_price_answer(path, soup)
     check_css_variables()
     check_verification(files)
     check_page_dates()
