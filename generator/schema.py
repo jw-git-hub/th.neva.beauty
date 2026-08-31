@@ -73,6 +73,12 @@ def business_nodes(site):
     }
     if b.get("same_as"):
         organization["sameAs"] = b["same_as"]
+    # knowsAbout — темы, в которых организация компетентна. Для поиска и ИИ это
+    # ответ на вопрос «чем занимается этот бизнес», не требующий обхода всех
+    # страниц. Список берётся из названий услуг сайта, поэтому выдумать тему,
+    # которой в салоне нет, нельзя.
+    if b.get("knows_about"):
+        organization["knowsAbout"] = b["knows_about"]
 
     business = {
         "@type": b.get("type", "BeautySalon"),
@@ -121,11 +127,15 @@ def business_nodes(site):
 
 
 def webpage_node(url, site_base, name, description, breadcrumb=False,
-                 main_entity_id=None, image=None, language="ru"):
+                 main_entity_id=None, image=None, language="ru", date_modified=None):
     """WebPage — сама страница как узел графа, к которому крепится всё остальное.
 
     Без неё Service, FAQPage и BreadcrumbList висят в графе без адреса: видно,
-    что услуга принадлежит бизнесу, но не видно, на какой странице её искать."""
+    что услуга принадлежит бизнесу, но не видно, на какой странице её искать.
+
+    dateModified — та же дата, что уходит в sitemap. Косметология это YMYL-тема:
+    поиск и ИИ спрашивают у такой страницы, когда её последний раз проверяли,
+    и страница без даты для них молчит."""
     node = {
         "@type": "WebPage",
         "@id": url + WEBPAGE_ID,
@@ -136,6 +146,8 @@ def webpage_node(url, site_base, name, description, breadcrumb=False,
         "about": {"@id": site_base + "/" + BUSINESS_ID},
         "inLanguage": language,
     }
+    if date_modified:
+        node["dateModified"] = date_modified
     if image:
         node["primaryImageOfPage"] = image
     if breadcrumb:
@@ -167,25 +179,39 @@ def breadcrumb_node(items, page_url=None):
     }
 
 
-def item_list_node(name, items, page_url=None):
-    """ItemList услуг категории из [{name, url}, ...] — связывает раздел с услугами.
+def _list_item(position, item):
+    """Звено списка: подпись, адрес и — если звено ведёт на услугу — ссылка на её узел.
 
-    Название звена и адрес в двух полях — как в `breadcrumb_node`: голый URL
-    заставляет робота идти на страницу, чтобы узнать, что это за услуга."""
+    Название и адрес в двух полях — как в `breadcrumb_node`: голый URL заставляет
+    робота идти на страницу, чтобы узнать, что это за услуга. Ключ `service`
+    добавляет `@id` того самого узла Service, который описан на целевой странице:
+    без него список раздела и услуга в графе остаются двумя разными сущностями
+    с одинаковым адресом."""
+    node = {
+        "@type": "ListItem",
+        "position": position,
+        "name": item["name"],
+        "item": item["url"],
+        "url": item["url"],
+    }
+    if item.get("service"):
+        node["item"] = {
+            "@type": "Service",
+            "@id": item["url"] + SERVICE_ID,
+            "name": item["name"],
+            "url": item["url"],
+        }
+    return node
+
+
+def item_list_node(name, items, page_url=None):
+    """ItemList из [{name, url, service?}, ...] — связывает страницу-список с целями."""
     return {
         "@type": "ItemList",
         **({"@id": page_url + ITEMLIST_ID} if page_url else {}),
         "name": name,
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": i + 1,
-                "name": item["name"],
-                "item": item["url"],
-                "url": item["url"],
-            }
-            for i, item in enumerate(items)
-        ],
+        "numberOfItems": len(items),
+        "itemListElement": [_list_item(i + 1, item) for i, item in enumerate(items)],
     }
 
 
@@ -250,12 +276,32 @@ def offer_catalog_node(service_name, catalog, currency, url):
     }
 
 
+def booking_channel_node(contacts, telephone, languages):
+    """ServiceChannel — как записаться на услугу: мессенджер и телефон записи.
+
+    Страница отвечает на это блоком записи, разметка до сих пор молчала: из графа
+    было видно, что услуга есть и сколько стоит, но не по какому адресу на неё
+    записываются."""
+    return {
+        "@type": "ServiceChannel",
+        "name": "Запись в мессенджере",
+        "serviceUrl": contacts["whatsapp_url"],
+        "availableLanguage": languages,
+        "servicePhone": {
+            "@type": "ContactPoint",
+            "contactType": "reservations",
+            "telephone": telephone,
+        },
+    }
+
+
 def service_node(name, description, provider_ref, area_name, aggregate_offer=None,
-                 offer_catalog=None, page_url=None):
+                 offer_catalog=None, page_url=None, image=None, channel=None):
     """Service — профильная услуга страницы. provider ссылается на узел бизнеса,
     areaServed — город. Если передан aggregate_offer {low, high, count, currency},
     добавляется AggregateOffer с диапазоном цен (числа считаются из прайса).
-    offer_catalog — тот же прайс попозиционно, цена каждой услуги без догадок."""
+    offer_catalog — тот же прайс попозиционно, цена каждой услуги без догадок.
+    image — кадр первого экрана, channel — канал записи (`booking_channel_node`)."""
     node = {
         "@type": "Service",
         **({"@id": page_url + SERVICE_ID, "url": page_url,
@@ -265,6 +311,10 @@ def service_node(name, description, provider_ref, area_name, aggregate_offer=Non
         "provider": provider_ref,
         "areaServed": {"@type": "City", "name": area_name},
     }
+    if image:
+        node["image"] = image
+    if channel:
+        node["availableChannel"] = channel
     if aggregate_offer:
         node["offers"] = {
             "@type": "AggregateOffer",

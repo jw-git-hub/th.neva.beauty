@@ -9,7 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from build import build_llms, og_title, page_digest, price_by_name, price_span
+from build import (LASTMOD_PLACEHOLDER, build_llms, og_title, page_date,
+                   page_digest, price_by_name, price_span)
 
 NBSP = " "
 
@@ -97,3 +98,23 @@ def test_llms_carries_facts_and_prices():
     assert "о. Самуи, Таиланд" in text
     assert "приём по записи" in text
     assert f"20{NBSP}000" in text
+
+
+def test_page_date_keeps_date_while_page_unchanged():
+    """Пересборка без правок не двигает дату: отпечаток тот же — дата прежняя."""
+    history = {"/massazh/": {"hash": "abc", "date": "2026-08-01"}}
+    assert page_date("/massazh/", "abc", history, "2026-08-31") == "2026-08-01"
+
+
+def test_page_date_bumps_on_change_and_for_new_page():
+    history = {"/massazh/": {"hash": "abc", "date": "2026-08-01"}}
+    assert page_date("/massazh/", "zzz", history, "2026-08-31") == "2026-08-31"
+    assert page_date("/novaya/", "abc", history, "2026-08-31") == "2026-08-31"
+
+
+def test_page_digest_ignores_lastmod_placeholder():
+    """Дата рендерится заглушкой, поэтому подстановка даты не делает страницу изменённой."""
+    page = f'<p>Текст</p><script>{{"dateModified": "{LASTMOD_PLACEHOLDER}"}}</script>'
+    assert LASTMOD_PLACEHOLDER in page
+    assert page_digest(page) == page_digest(page)  # заглушка постоянна на всех сборках
+    assert page_digest(page) != page_digest(page.replace(LASTMOD_PLACEHOLDER, "2026-08-31"))

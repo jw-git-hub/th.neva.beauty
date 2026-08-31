@@ -58,7 +58,7 @@ PLACEHOLDER_RE = re.compile(r"\{(?:whatsapp|telegram|instagram|price:[^}]*)\}")
 # Слово, повторённое подряд через пробел (обычный или неразрывный).
 DOUBLED_WORD_RE = re.compile(r"\b(\w+)[  ]+\1\b", re.IGNORECASE)
 
-TITLE_MAX = 65
+TITLE_MIN, TITLE_MAX = 45, 65
 TITLE_PREFIX = 20  # по такому началу заголовка поиск схлопывает похожие страницы
 BRAND_SUFFIX = " — Neva Beauty"  # единая связка названия салона с заголовком
 DESC_MIN, DESC_MAX = 120, 170
@@ -392,6 +392,11 @@ def check_meta(path, soup, titles, descriptions):
     noindex = soup.select_one('meta[name="robots"][content*="noindex"]') is not None
     if noindex:
         return
+    # Нижняя граница только для индексируемых страниц: в выдаче под заголовок
+    # отведено около 60 знаков, и короткий title отдаёт это место впустую —
+    # страница отвечает ровно на один запрос там, где могла бы на два.
+    if title and len(title) < TITLE_MIN:
+        report(rel(path), f"title длиной {len(title)}, минимум {TITLE_MIN}")
     if not desc:
         report(rel(path), "нет meta description")
     elif not DESC_MIN <= len(desc) <= DESC_MAX:
@@ -418,6 +423,31 @@ def check_verification(files):
                 report(rel(path), f"мета-тег {tag}: ожидался {token!r}, найдено {found!r}")
             elif not on_home and found:
                 report(rel(path), f"мета-тег {tag} вне главной страницы")
+
+
+def check_page_dates():
+    """dateModified в разметке совпадает с lastmod той же страницы в sitemap.
+
+    Дата живёт в двух местах: в sitemap её читает краулер до захода на страницу,
+    в JSON-LD — поиск и ИИ уже на странице. Разойтись они могут молча (заглушка
+    не заменилась, страница выпала из журнала), а расхождение дат поиск читает
+    как повод не доверять ни одной из них."""
+    sitemap = (SITE / "sitemap.xml").read_text(encoding="utf-8")
+    lastmod = dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", sitemap))
+    if not lastmod:
+        problems.append("sitemap.xml: не разобрана ни одна запись")
+    for url, date in lastmod.items():
+        path = SITE / (url[len(BASE_URL):].strip("/") or ".") / "index.html"
+        if not path.exists():
+            problems.append(f"sitemap.xml: нет файла страницы {url}")
+            continue
+        soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
+        marked = [node.get("dateModified")
+                  for script in soup.select('script[type="application/ld+json"]')
+                  for node in json.loads(script.string or "{}").get("@graph", [])
+                  if node.get("@type") == "WebPage"]
+        if marked != [date]:
+            report(rel(path), f"dateModified {marked} ≠ lastmod в sitemap {date!r}")
 
 
 def check_title_prefixes(titles):
@@ -472,6 +502,7 @@ def main():
         check_faq(path, soup)
     check_css_variables()
     check_verification(files)
+    check_page_dates()
     check_duplicates("title", titles)
     check_title_prefixes(titles)
     check_duplicates("meta description", descriptions)

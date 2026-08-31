@@ -461,15 +461,15 @@ LASTMOD_PATH = ROOT / "data" / "lastmod.json"
 # Отпечатки ассетов (?v=1a2b3c4d) из отпечатка страницы вырезаем: правка CSS
 # меняет ссылку на бандл на всех 23 страницах, но текст страницы не трогает.
 _ASSET_VERSION_RE = re.compile(r"\?v=[0-9a-f]+")
+# Дата изменения стоит в самой странице (dateModified в JSON-LD), и это замкнутый
+# круг: подставить дату — значит изменить страницу, а значит и её дату. Разрываем
+# так же, как с отпечатками ассетов: страница рендерится с постоянной заглушкой,
+# отпечаток считается по ней, и только потом на её место встаёт настоящая дата.
+LASTMOD_PLACEHOLDER = "0000-00-00"
 
 
 def page_digest(html):
     return hashlib.sha1(_ASSET_VERSION_RE.sub("", html).encode("utf-8")).hexdigest()
-
-
-def page_file(url):
-    """Файл собранной страницы по её адресу: «/» → index.html, «/slug/» → slug/index.html."""
-    return OUT / url.strip("/") / "index.html" if url.strip("/") else OUT / "index.html"
 
 
 def lastmod_history():
@@ -478,16 +478,27 @@ def lastmod_history():
     return {}
 
 
-def lastmod_dates(urls, today):
-    """Даты изменения страниц и обновлённый журнал отпечатков."""
-    history = lastmod_history()
-    journal = {}
-    for url in urls:
-        digest = page_digest(page_file(url).read_text(encoding="utf-8"))
-        known = history.get(url)
-        date_str = known["date"] if known and known["hash"] == digest else today
-        journal[url] = {"hash": digest, "date": date_str}
-    return journal
+def page_date(url, digest, history, today):
+    """Дата изменения страницы: прежняя, если отпечаток совпал, иначе сегодняшняя."""
+    known = history.get(url)
+    return known["date"] if known and known["hash"] == digest else today
+
+
+def save_lastmod(journal):
+    LASTMOD_PATH.write_text(
+        json.dumps(journal, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+
+
+def write_page(path: Path, url: str, html: str, journal: dict, history: dict, today: str):
+    """Записывает индексируемую страницу и проставляет ей дату изменения.
+
+    Отпечаток снимается с разметки, где на месте даты стоит заглушка, поэтому
+    подстановка даты сама по себе страницу «изменённой» не делает."""
+    digest = page_digest(html)
+    date_str = page_date(url, digest, history, today)
+    journal[url] = {"hash": digest, "date": date_str}
+    write(path, html.replace(LASTMOD_PLACEHOLDER, date_str))
 
 
 def build_manifest(site, base_path):
@@ -510,11 +521,8 @@ def build_manifest(site, base_path):
     return json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
 
 
-def build_sitemap(urls, base_url, today):
-    journal = lastmod_dates(urls, today)
-    LASTMOD_PATH.write_text(
-        json.dumps(journal, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8")
+def build_sitemap(urls, base_url, journal):
+    """sitemap.xml по журналу, заполненному при записи страниц."""
     rows = "\n".join(
         f'  <url><loc>{base_url}{url}</loc>'
         f'<lastmod>{journal[url]["date"]}</lastmod></url>' for url in urls)
@@ -552,7 +560,14 @@ def main():
     enrich_categories(content)
     fill_related(content)
     site["nav"] = build_nav(content["categories"], content["services"])
+    # Темы, в которых компетентен салон, — ровно названия его услуг: список
+    # уходит в Organization.knowsAbout и собирается здесь, чтобы не разойтись
+    # с составом сайта после добавления или снятия услуги.
+    site["business"]["knows_about"] = [svc["title"] for svc in content["services"].values()]
     base_schema = schema.render(site)  # общий граф бизнеса — на всех страницах
+    # Журнал дат изменения: history — прошлая сборка, journal — текущая.
+    today = date.today().isoformat()
+    history, journal = lastmod_history(), {}
     # «от N ฿» на карточках услуг — считаем один раз на все страницы,
     # карточка одной услуги встречается и в разделе, и в «Смотрите также».
     currency_sign = site["business"]["currency_sign"]
@@ -563,9 +578,19 @@ def main():
     base_url = site["base_url"]
     home = content["home"]
     home_url = base_url + "/"
+    # Список направлений: главная показывает пять разделов карточками, а в графе
+    # этого не было — из разметки не следовало, что у салона вообще есть разделы.
+    home_sections = schema.item_list_node(
+        f"Направления салона {site['brand_full']}",
+        [{"name": cat["title"], "url": base_url + cat["url"]}
+         for cat in content["categories"]],
+        home_url)
     home_nodes = [schema.webpage_node(home_url, base_url, home["seo_title"],
                                       home["seo_desc"],
-                                      image=base_url + "/assets/img/hero.webp")]
+                                      image=base_url + "/assets/img/hero.webp",
+                                      main_entity_id=home_url + schema.ITEMLIST_ID,
+                                      date_modified=LASTMOD_PLACEHOLDER),
+                  home_sections]
     home_faq = home.get("faq", [])
     if home_faq:
         home["faq"] = render_faq_contacts(home_faq, site["contacts"], base_path, prices_index)
@@ -576,13 +601,17 @@ def main():
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
             "hero_stem": "hero", "hero_slot": "home_hero",
             "og_image_alt": site["og_image"]["default_alt"]}
-    write(OUT/"index.html", e.get_template("home.html.j2").render(
-        site=site, page=page, home=content["home"], categories=content["categories"], prices=prices))
+    write_page(OUT/"index.html", "/", e.get_template("home.html.j2").render(
+        site=site, page=page, home=content["home"], categories=content["categories"],
+        prices=prices), journal, history, today)
     # услуги
     tpl = e.get_template("service.html.j2")
     provider_ref = {"@id": base_url + "/" + schema.BUSINESS_ID}
     area_name = site["business"]["address"]["locality"]
     currency = site["business"].get("currency")
+    # Канал записи один на все услуги: записываются в мессенджер, номер тот же.
+    booking_channel = schema.booking_channel_node(
+        site["contacts"], site["business"]["telephone"], site["business"]["language"])
     category_by_slug = {slug: cat for cat in content["categories"] for slug in cat["services"]}
     for slug, svc in content["services"].items():
         sections = prices.get(slug, [])
@@ -597,13 +626,14 @@ def main():
         nodes = [
             schema.webpage_node(url, base_url, svc["seo_title"], svc["seo_desc"],
                                 breadcrumb=True, image=hero,
-                                main_entity_id=url + schema.SERVICE_ID),
+                                main_entity_id=url + schema.SERVICE_ID,
+                                date_modified=LASTMOD_PLACEHOLDER),
             schema.breadcrumb_node(crumbs, url),
             schema.service_node(
                 svc["title"], svc["intro"], provider_ref, area_name,
                 price_aggregate(sections, currency),
                 service_offer_catalog(svc["title"], sections, currency, url),
-                page_url=url),
+                page_url=url, image=hero, channel=booking_channel),
         ]
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
@@ -615,9 +645,10 @@ def main():
                 "hero_stem": svc["hero_image"], "hero_slot": "service_hero",
                 "og_image": og_image_path(slug),
                 "og_image_alt": svc.get("image_alt") or f"{svc['title']} — {site['brand_full']}"}
-        write(OUT/slug/"index.html", tpl.render(
+        write_page(OUT/slug/"index.html", f"/{slug}/", tpl.render(
             site=site, page=page, svc=svc, slug=slug, category=cat,
-            sections=price_view(sections), services=content["services"]))
+            sections=price_view(sections), services=content["services"]),
+            journal, history, today)
     # категории (только группы с несколькими услугами)
     cat_tpl = e.get_template("category.html.j2")
     for cat in content["categories"]:
@@ -629,13 +660,15 @@ def main():
             schema.webpage_node(url, base_url, cat["seo_title"], cat["seo_desc"],
                                 breadcrumb=True,
                                 image=base_url + f"/assets/img/{cat['image']}.webp",
-                                main_entity_id=url + schema.ITEMLIST_ID),
+                                main_entity_id=url + schema.ITEMLIST_ID,
+                                date_modified=LASTMOD_PLACEHOLDER),
             schema.breadcrumb_node([
                 {"name": "Главная", "url": base_url + "/"},
                 {"name": cat["title"], "url": url},
             ], url),
             schema.item_list_node(cat["title"], [
-                {"name": content["services"][slug]["title"], "url": f"{base_url}/{slug}/"}
+                {"name": content["services"][slug]["title"],
+                 "url": f"{base_url}/{slug}/", "service": True}
                 for slug in cat["services"]
             ], url),
         ]
@@ -647,9 +680,9 @@ def main():
                 "schema_json": schema.render(site, nodes),
                 "og_image": og_image_path(cat["slug"]),
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
-        write(OUT/cat["slug"]/"index.html", cat_tpl.render(
+        write_page(OUT/cat["slug"]/"index.html", cat["url"], cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"],
-            categories=content["categories"]))
+            categories=content["categories"]), journal, history, today)
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
             "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "
@@ -666,7 +699,8 @@ def main():
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
     # /privacy/ и /404.html — noindex, в sitemap не включаем
     urls = ["/"] + [f"/{slug}/" for slug in content["services"]] + cat_urls
-    write(OUT/"sitemap.xml", build_sitemap(urls, base_url, date.today().isoformat()))
+    save_lastmod(journal)
+    write(OUT/"sitemap.xml", build_sitemap(urls, base_url, journal))
     # site.webmanifest — имя и иконка при добавлении на главный экран
     write(OUT/"site.webmanifest", build_manifest(site, base_path))
     # llms.txt — выжимка сайта для ИИ-ассистентов
