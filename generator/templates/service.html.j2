@@ -1,6 +1,5 @@
 {% extends "base.html.j2" %}
 {% from "partials/faq.html.j2" import faq_list %}
-{% from "partials/contact_strip.html.j2" import contact_strip %}
 {% from "partials/booking.html.j2" import booking, cta_inline %}
 {% from "partials/picture.html.j2" import responsive_img %}
 {% block content %}
@@ -29,8 +28,6 @@
     </div>
   </div>
 </section>
-
-{{ contact_strip(site) }}
 
 {% if svc.benefits %}
 <section class="section container">
