@@ -2,9 +2,15 @@
    и подберём удобное время» клиент читает по третьему разу и перестаёт видеть,
    поэтому и заголовок, и подводка приходят от страницы: h2 «Запишитесь
    на консультацию» стоял на всех 23 страницах и не работал ни на клиента,
-   ни на робота. Кнопки разного веса: WhatsApp —
-   действие, остальное — запасные каналы, иначе три равные кнопки подряд
-   заставляют выбирать вместо того, чтобы написать.
+   ни на робота.
+   Три канала кнопками — как на vn.neva.beauty. Раньше здесь была одна кнопка
+   WhatsApp и строка «Или так: …» со ссылками: считалось, что три равные кнопки
+   заставляют выбирать вместо того, чтобы написать. Оформление двух сайтов
+   бренда держим одинаковым, поэтому вернулись к трём кнопкам; вес всё равно
+   разный — WhatsApp залит, остальные обведены.
+   Ссылку «по телефону» убрали вместе со строкой: `business.telephone` — это тот
+   же номер, что и WhatsApp (см. site.yml), отдельного канала она не давала.
+   Сам номер остался в микроразметке (schema.py) и на странице политики.
    Правило переноса стоит здесь, а не только в FAQ главной: клиент из поиска
    попадает сразу на услугу и записывается с неё, главную он не открывает. #}
 {% macro booking(site, title, lead, subject=None) %}
@@ -13,13 +19,10 @@
   <div class="container booking">
     <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
     <div class="booking__actions">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Написать в WhatsApp</a>
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} WhatsApp</a>
+      <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }} Telegram</a>
+      <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">{{ icon('instagram') }} Instagram</a>
     </div>
-    <p class="booking__alt">Или так:
-      <a href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">Telegram</a>,
-      <a href="tel:{{ site.business.telephone }}">по телефону</a>,
-      <a href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">Instagram</a>
-    </p>
     <p class="booking__rule">{{ site.booking_rule }}</p>
     <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
   </div>

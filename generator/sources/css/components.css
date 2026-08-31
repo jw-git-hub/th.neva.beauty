@@ -277,20 +277,19 @@ body.no-scroll{overflow:hidden}
 .faq__a{color:var(--muted);margin-top:var(--sp-3);max-width:64ch}
 /* Ссылка внутри абзаца — единственное место на сайте, где нужно подчёркивание:
    в сплошном тексте ссылку не видно ни по цвету, ни по положению. */
-.faq__a a,.booking__alt a{color:var(--rose-deep);text-decoration:underline;
+.faq__a a{color:var(--rose-deep);text-decoration:underline;
   text-decoration-thickness:1px;text-underline-offset:2px}
-.faq__a a:hover,.booking__alt a:hover{color:var(--rose)}
+.faq__a a:hover{color:var(--rose)}
 
 /* ===== BOOKING ===== */
-/* Один основной канал и запасные строкой ниже: три равные кнопки подряд
-   превращают призыв в выбор, а выбор клиент откладывает. */
+/* Три канала кнопками — как на vn.neva.beauty, вплоть до отступа --sp-6
+   под ними. Вес всё равно разный: WhatsApp залит, Telegram и Instagram обведены.
+   Раньше здесь была одна кнопка и строка «Или так: …» со ссылками. */
 .booking{text-align:center}
-.booking__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center;margin-bottom:var(--sp-4)}
-.booking__alt,.booking__rule{color:var(--muted);font-size:var(--fs-300)}
-.booking__alt{margin-bottom:var(--sp-6)}
+.booking__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center;margin-bottom:var(--sp-6)}
 /* Правило переноса и локация — сноска под призывом, поэтому стоят вплотную
-   друг к другу и отделены от запасных каналов, а не размазаны равным шагом. */
-.booking__rule{margin-bottom:var(--sp-2)}
+   друг к другу, а не размазаны равным шагом. */
+.booking__rule{color:var(--muted);font-size:var(--fs-300);margin-bottom:var(--sp-2)}
 .booking__loc{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .booking__loc .icon{width:18px;height:18px;color:var(--rose)}
 
