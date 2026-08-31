@@ -39,25 +39,27 @@
 .brand-mark__loc::before{content:"";width:1.6rem;height:1px;flex:none;
   background:linear-gradient(90deg,var(--rose-soft),transparent)}
 
-/* Перелив лепестков — знак в шапке и в мобильном меню слегка «дышит» тоном.
+/* Перелив лепестков — знак в шапке и в мобильном меню «дышит» тоном.
    Анимируется только fill: это paint без layout и композитинга, на элементе ~46 px,
    поэтому кадр стоит доли процента; JS нет, в бандле около 0,5 КБ.
    Периоды — простые числа, поэтому общий цикл пяти лепестков выходит в часы и
    рисунок глазом не поймать. Отрицательные задержки стартуют лепестки в середине
    фазы: ни при загрузке, ни при открытии меню знак не «щёлкает» цветом.
-   Вилка у каждого лепестка — восьмая шага в сторону --rose от собственного тона,
-   за палитру самой плюмерии перелив не выходит. Два ряда ходят по непересекающимся
-   вилкам: лепестки непрозрачны и заходят друг на друга, совпади они в цвете —
-   швы пропадут и цветок слипнётся в пятно. Сердцевина статична, она держит центр.
+   Размах — около 10% по каналу. Ряды ходят по непересекающимся вилкам, и нижний
+   край светлого ряда (#D2A296) заведомо выше верхнего края тёмного (#CE9B91):
+   лепестки плюмерии непрозрачны и заходят друг на друга, сойдись ряды в цвете —
+   швы пропадут и цветок слипнётся в пятно. Поэтому вилки односторонние, каждый
+   ряд уходит от своего тона только вглубь, к --rose; за палитру знака перелив
+   не выходит. Сердцевина статична, она держит центр.
    Подвал намеренно не тронут: анимацию включает только правило ниже, а данные в
    :nth-of-type() — просто неиспользуемые переменные для любого другого знака. */
-@keyframes petal-shimmer-a{0%,100%{fill:#CE9B91}38%{fill:#C6948B}}
-@keyframes petal-shimmer-b{0%,100%{fill:#E2B9AE}57%{fill:#D8AEA4}}
-.brand-mark__flower path:nth-of-type(1){--petal-ramp:petal-shimmer-a;--petal-dur:17s;--petal-delay:-3s}
-.brand-mark__flower path:nth-of-type(2){--petal-ramp:petal-shimmer-b;--petal-dur:19s;--petal-delay:-11s}
-.brand-mark__flower path:nth-of-type(3){--petal-ramp:petal-shimmer-a;--petal-dur:23s;--petal-delay:-7s}
-.brand-mark__flower path:nth-of-type(4){--petal-ramp:petal-shimmer-b;--petal-dur:13s;--petal-delay:-5s}
-.brand-mark__flower path:nth-of-type(5){--petal-ramp:petal-shimmer-a;--petal-dur:29s;--petal-delay:-13s}
+@keyframes petal-shimmer-a{0%,100%{fill:#CE9B91}38%{fill:#B8877D}}
+@keyframes petal-shimmer-b{0%,100%{fill:#E2B9AE}57%{fill:#D2A296}}
+.brand-mark__flower path:nth-of-type(1){--petal-ramp:petal-shimmer-a;--petal-dur:11s;--petal-delay:-2s}
+.brand-mark__flower path:nth-of-type(2){--petal-ramp:petal-shimmer-b;--petal-dur:13s;--petal-delay:-9s}
+.brand-mark__flower path:nth-of-type(3){--petal-ramp:petal-shimmer-a;--petal-dur:17s;--petal-delay:-5s}
+.brand-mark__flower path:nth-of-type(4){--petal-ramp:petal-shimmer-b;--petal-dur:7s;--petal-delay:-3s}
+.brand-mark__flower path:nth-of-type(5){--petal-ramp:petal-shimmer-a;--petal-dur:19s;--petal-delay:-13s}
 /* В дровере анимация висит на .is-open: пока меню закрыто, ничего не тикает
    (а до 1024 px дровера в вёрстке и вовсе нет — он display:none). */
 .site-header__logo .brand-mark__flower path,
