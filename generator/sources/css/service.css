@@ -1,10 +1,7 @@
 /* ===== SERVICE HERO ===== */
 /* Общий с .hero каркас первого экрана — в components.css, здесь размеры. */
-/* Крошки ведут герой: отступ от шапки сверху, снизу гэп даёт padding самого героя.
-   До 768 px отступы поджаты — каждый лишний rem выталкивает «Записаться»
-   за нижнюю кромку первого экрана. */
-.svc-hero .breadcrumbs{padding-top:var(--sp-5);margin-bottom:0}
-@media(min-width:768px){.svc-hero .breadcrumbs{padding-top:var(--sp-8)}}
+/* Крошки ведут герой: отступ сверху даёт .breadcrumbs--lead, снизу — padding самого героя. */
+.svc-hero .breadcrumbs{margin-bottom:0}
 .svc-hero__inner{display:grid;gap:var(--sp-8);align-items:center;padding-block:var(--sp-8)}
 @media(min-width:768px){.svc-hero__inner{grid-template-columns:1.1fr .9fr;gap:var(--sp-10);padding-block:var(--sp-14)}}
 @media(min-width:1024px){.svc-hero__inner{gap:var(--sp-12);padding-block:var(--sp-16)}}
@@ -88,7 +85,7 @@
 @media(min-width:560px){.related-grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:900px){.related-grid{grid-template-columns:repeat(3,1fr)}}
 /* тело карточки — в components.css вместе с .cat-card */
-.related-card__body h3{font-size:var(--fs-500)}
+.related-card__body :is(h2,h3){font-size:var(--fs-500)}
 /* «от N ฿» на карточке: раньше цену раздела нельзя было узнать, не открыв
    каждую услугу по очереди. */
 .related-card__price{color:var(--rose-deep);font-weight:700;font-variant-numeric:tabular-nums}

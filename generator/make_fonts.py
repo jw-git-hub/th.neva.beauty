@@ -36,6 +36,21 @@ FACES = [
     ("Cormorant", "Cormorant[wght].ttf", (600,)),
 ]
 
+# Подложка на время загрузки. font-display:swap рисует текст системным шрифтом сразу,
+# и без выравнивания метрик эти первые секунды выглядят чужой страницей: Georgia шире
+# Cormorant на 14%, строки занимают другое число строк и прыгают при подмене.
+# size-adjust — отношение средней ширины символа, замеренное на русском тексте сайта;
+# ascent/descent — метрики фирменного шрифта, поделённые на size-adjust, потому что
+# браузер масштабирует и переопределённые метрики тоже.
+# Если ни один local() не нашёлся, правило просто не применяется и в силу вступает
+# следующий шрифт списка — поведение не хуже прежнего.
+FALLBACKS = [
+    ("Cormorant Fallback", ("Georgia", "Noto Serif", "Times New Roman"),
+     "size-adjust:88.5%;ascent-override:104.4%;descent-override:32.4%;line-gap-override:0%"),
+    ("Manrope Fallback", ("Arial", "Roboto", "Helvetica Neue"),
+     "size-adjust:102.7%;ascent-override:103.8%;descent-override:29.2%;line-gap-override:0%"),
+]
+
 BASIC_LATIN = "".join(chr(c) for c in range(0x20, 0x7F))
 RUSSIAN = ("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
            "абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
@@ -78,12 +93,19 @@ def css_rule(family, weight, filename):
             f"src:url('../fonts/{filename}') format('woff2')}}")
 
 
+def fallback_rule(family, locals_, metrics):
+    sources = ",".join(f"local('{name}')" for name in locals_)
+    return f"@font-face{{font-family:'{family}';src:{sources};{metrics}}}"
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     rules = ["/* Самохостинг шрифтов — сгенерировано make_fonts.py. Не редактировать вручную. */"]
     for family, master, weights in FACES:
         for weight in weights:
             rules.append(css_rule(family, weight, build_face(family, master, weight)))
+    rules.append("/* Подложка на время загрузки: системный шрифт с метриками фирменного. */")
+    rules.extend(fallback_rule(*fallback) for fallback in FALLBACKS)
     CSS_PATH.write_text("\n".join(rules) + "\n", encoding="utf-8")
     print(f"→ {CSS_PATH.name}")
     return 0

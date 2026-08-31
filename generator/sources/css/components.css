@@ -10,6 +10,7 @@
 .btn--ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn--sm{padding:.5rem 1.1rem;min-height:40px;font-size:var(--fs-200)}
 .btn--ghost:hover{background:var(--surface)}
+.btn .icon{width:18px;height:18px;flex:none}
 
 /* ---- header ---- */
 .site-header{position:sticky;top:0;z-index:var(--z-header);
@@ -25,13 +26,13 @@
 .site-header__logo:hover .brand-mark__name{color:var(--rose)}
 
 /* brand lockup: название + строка локации */
-.brand-mark{display:inline-flex;align-items:center;gap:.6em;line-height:1}
+.brand-mark{display:inline-flex;align-items:center;gap:.8rem;line-height:1}
 /* Знак ужимается первым: на узких экранах место уступает название, а не цветок,
    поэтому flex-basis auto с правом сжаться, а текст — flex:none. */
 .brand-mark__flower{flex:0 1 auto;width:2.9em;height:auto;display:block}
 .brand-mark__text{flex:none;display:inline-flex;flex-direction:column;gap:.34em}
 .brand-mark__name{font-family:var(--font-head);font-size:var(--fs-600);font-weight:600;
-  letter-spacing:.05em;color:var(--ink);transition:color var(--t-fast) var(--ease)}
+  letter-spacing:.05em;white-space:nowrap;color:var(--ink);transition:color var(--t-fast) var(--ease)}
 .brand-mark__loc{display:inline-flex;align-items:center;gap:.55em;align-self:flex-start;
   font-family:var(--font-body);font-size:.6875rem;font-weight:600;letter-spacing:.34em;
   text-transform:uppercase;color:var(--rose-deep);padding-right:.34em}
@@ -212,11 +213,10 @@ body.no-scroll{overflow:hidden}
 .breadcrumbs a:hover{color:var(--rose)}
 .breadcrumbs__sep{color:var(--line)}
 .breadcrumbs [aria-current="page"]{color:var(--ink)}
-/* Первая секция раздела: сверху отступ такой же, как у хлебных крошек на
-   странице услуги (.svc-hero .breadcrumbs), чтобы крошки везде стояли на
-   одной высоте. Нижний отступ секции остаётся общий. */
-.cat-hero{padding-top:var(--sp-5)}
-@media(min-width:768px){.cat-hero{padding-top:var(--sp-8)}}
+/* Крошки открывают страницу: единственный источник отступа от шапки — одинакового
+   на странице услуги и на странице категории. Секция под ними обнуляет свой верхний
+   padding через .section--lead, чтобы отступ не задавался в двух местах. */
+.breadcrumbs--lead{padding-top:var(--sp-8)}
 
 /* ===== FAQ (used by home/category) ===== */
 .faq{display:grid;gap:var(--sp-3);max-width:760px;margin-inline:auto}
@@ -242,7 +242,6 @@ body.no-scroll{overflow:hidden}
    превращают призыв в выбор, а выбор клиент откладывает. */
 .booking{text-align:center}
 .booking__actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center;margin-bottom:var(--sp-4)}
-.booking__actions .icon{width:18px;height:18px}
 .booking__alt,.booking__rule{color:var(--muted);font-size:var(--fs-300)}
 .booking__alt{margin-bottom:var(--sp-6)}
 /* Правило переноса и локация — сноска под призывом, поэтому стоят вплотную
@@ -267,7 +266,6 @@ body.no-scroll{overflow:hidden}
    пикселей центрированная пара снова висит в пустоте. */
 @media(min-width:1024px){.cta-inline--wide{justify-content:space-between;text-align:left}}
 .cta-inline__text{color:var(--ink);font-weight:500}
-.cta-inline .icon{width:18px;height:18px}
 
 /* Кнопка под заголовком страницы раздела */
 .section-head__action{margin-top:var(--sp-6)}
