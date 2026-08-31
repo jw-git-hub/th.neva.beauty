@@ -1,15 +1,15 @@
 {
   "/": {
     "date": "2026-08-31",
-    "hash": "a4192b650a9864e727ead89f016efe3f7746ec66"
+    "hash": "71f3560880647cde73b5d48b879d07d75875879d"
   },
   "/apparatnaya-kosmetologiya/": {
     "date": "2026-08-31",
-    "hash": "a92092e1812931195084a22904b034162850e88d"
+    "hash": "3dc6117576179148e1d95c767e74df75515d654a"
   },
   "/biozavivka-volos/": {
     "date": "2026-08-31",
-    "hash": "ff05eb5c27d96aea7e577fc35fafc305e935416c"
+    "hash": "8eed0154422661f69cd6c3dd994c459078ce092a"
   },
   "/botulinoterapiya/": {
     "date": "2026-08-31",
@@ -17,19 +17,19 @@
   },
   "/davines-naturaltech-tailoring/": {
     "date": "2026-08-31",
-    "hash": "c0938af7a55e7eb60270371f832b849be1a53221"
+    "hash": "a4760fb643f49a8c971580c50645cbdc3207f235"
   },
   "/elektroepilyaciya/": {
     "date": "2026-08-31",
-    "hash": "ec28552d685a55661bf49abb602b27a12262b285"
+    "hash": "ea10b092531b9f7fcdcee72d8f8ec513fa850f5c"
   },
   "/endosfera-terapiya/": {
     "date": "2026-08-31",
-    "hash": "fd084c848e43bd81484af79f411f7fef587967c5"
+    "hash": "a87c82f4b544e4ab4af4b0ac327f7236cbc7479f"
   },
   "/epilyaciya/": {
     "date": "2026-08-31",
-    "hash": "5a81f273a2c329d53ac0cf1f2e9074362909f493"
+    "hash": "313144aca3f0f1dcab600d36b99c05d5478d6fab"
   },
   "/fotoomolozhenie-m22/": {
     "date": "2026-08-31",
@@ -41,11 +41,11 @@
   },
   "/keratinovoe-vypryamlenie-volos/": {
     "date": "2026-08-31",
-    "hash": "ed7d0e5b1f832357fef82a5df11dfed457b4ca91"
+    "hash": "11f09a159d4be3cea9960b08dcfe56b0fe94d1d1"
   },
   "/korrekciya-figury/": {
     "date": "2026-08-31",
-    "hash": "75b07b28d8a4b1f1e3081ea79a45ce9593a0613c"
+    "hash": "da9711c975cbb4657da9f2bc2b8bc7379fdf3c0e"
   },
   "/kosmetologiya/": {
     "date": "2026-08-31",
@@ -53,7 +53,7 @@
   },
   "/lazernaya-epilyaciya/": {
     "date": "2026-08-31",
-    "hash": "bb282e491d5f30cc98b85eb47ae989dd9be74fc3"
+    "hash": "e4714503e3a0e0d2ac5456b668db35655103d77f"
   },
   "/massazh/": {
     "date": "2026-08-31",
@@ -61,7 +61,7 @@
   },
   "/saharnaya-epilyaciya/": {
     "date": "2026-08-31",
-    "hash": "1a0ffa2593d7f5d5bb46224042034a6147e10ae1"
+    "hash": "909766b465af1f081d041da092c24636ab24c5f6"
   },
   "/smas-lifting/": {
     "date": "2026-08-31",
@@ -69,22 +69,22 @@
   },
   "/tokio-inkarami/": {
     "date": "2026-08-31",
-    "hash": "deaabd95c66dd2f96e61cdd93852a4cd9288f086"
+    "hash": "2bc35ccfbc07883e5cd9112488cfabf3fc37aede"
   },
   "/udalenie-tatuirovok-lazerom/": {
     "date": "2026-08-31",
-    "hash": "49dcad9d4e4d657fbf619bb9131a9b312fe276d4"
+    "hash": "c65d9424ffe878e2e1233668bacf6d8e013a5a0e"
   },
   "/uhod-za-volosami/": {
     "date": "2026-08-31",
-    "hash": "5e5a1a991779a9a82aeba17584c8498957523110"
+    "hash": "ce32d576a6724fc22b6204d349633253c531a77c"
   },
   "/uhodovaya-kosmetologiya/": {
     "date": "2026-08-31",
-    "hash": "7f9391f12f341be01f0b600930813cbbfd747415"
+    "hash": "c224406ddd3e859aca4a05de95c75bfa42e99742"
   },
   "/volosy/": {
     "date": "2026-08-31",
-    "hash": "c77429959b3e76a90ed96b5bf23ba32964676284"
+    "hash": "6c86fb813ce501c4ca51952753109b3bdcf3a3fb"
   }
 }
