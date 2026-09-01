@@ -72,9 +72,9 @@
       {# Сеты («Подмышки + глубокое бикини») живут отдельным разделом прайса, но
          вкладкой не показываются: за ней их не видно, а это самое выгодное
          предложение страницы. Карточками над списком — как на vn.neva.beauty. #}
-      {% set combo_sections = sections | selectattr('combo') | list %}
-      {% set tab_sections = sections | rejectattr('combo') | list %}
-      {% set tabbed = tab_sections|length > 1 %}
+      {%- set combo_sections = sections | selectattr('combo') | list %}
+      {%- set tab_sections = sections | rejectattr('combo') | list %}
+      {%- set tabbed = tab_sections|length > 1 %}
       {% if tabbed %}
       <div class="pricelist__tabs" role="tablist" aria-label="Разделы прайса — {{ svc.title }}">
         {% for sec in tab_sections %}
@@ -85,7 +85,7 @@
         {% endfor %}
       </div>
       {% endif %}
-      {% for sec in combo_sections %}
+      {%- for sec in combo_sections %}
       <ul class="pricelist__combos" aria-label="{{ sec.section }} — {{ svc.title }}">
         {% for it in sec['items'] %}
         <li class="combo">
@@ -95,7 +95,7 @@
         </li>
         {% endfor %}
       </ul>
-      {% endfor %}
+      {%- endfor %}
       {% for sec in tab_sections %}
       <div class="pricelist__panel{{ ' is-active' if loop.first }}" data-panel="{{ loop.index0 }}"
         {%- if tabbed %} id="panel-{{ slug }}-{{ loop.index0 }}" role="tabpanel"
