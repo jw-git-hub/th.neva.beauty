@@ -58,6 +58,18 @@
 .pricelist__tab.is-active .pricelist__tab-count{color:color-mix(in srgb,var(--white) 80%,transparent)}
 .pricelist__panel{display:none}
 .pricelist__panel.is-active{display:block}
+/* Сеты — карточками над списком, единым видом с vn.neva.beauty: строкой прайса
+   набор из четырёх зон читается как ещё одна зона, а карточка показывает, что
+   это отдельное предложение. Три колонки от 600px — как на соседнем сайте. */
+.pricelist__combos{display:grid;gap:var(--sp-3);grid-template-columns:1fr;
+  margin:0 0 var(--sp-6);list-style:none;padding:0}
+@media(min-width:600px){.pricelist__combos{grid-template-columns:repeat(3,1fr)}}
+.combo{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-4);text-align:center}
+.combo__name{font-weight:700;color:var(--rose-deep);font-size:var(--fs-300)}
+.combo__note{display:block;font-weight:400;font-size:var(--fs-200);color:var(--muted);margin-top:2px}
+.combo__desc{font-size:var(--fs-200);color:var(--muted);margin:var(--sp-1) 0}
+.combo__price{font-weight:700;font-variant-numeric:tabular-nums;margin-top:var(--sp-2)}
 /* border-collapse:separate, а не collapse: только в раздельной модели у таблицы
    работают border-radius и боковой padding, за счёт которого разделители строк
    не доходят до краёв карточки. */

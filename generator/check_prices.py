@@ -31,6 +31,12 @@ PRICE_NAME = ".pricelist__name"
 PRICE_DESC = ".pricelist__desc"
 PRICE_VALUE = ".pricelist__price"
 PRICE_TABLE = ".pricelist"
+# Сеты показываются карточками, а не строкой таблицы, но сверять их надо так же:
+# для парити-теста это те же «название → цена».
+COMBO_ITEM = "li.combo"
+COMBO_NAME = ".combo__name"
+COMBO_DESC = ".combo__desc"
+COMBO_VALUE = ".combo__price"
 CARD = "a.related-card"
 CARD_PRICE = ".related-card__price"
 ROBOT_MARKUP = "script, style"
@@ -101,17 +107,27 @@ def expected_rows():
     return rows
 
 
+def rendered_entry(node, name_sel, desc_sel, value_sel):
+    """Пара «название → цена» так, как её видит клиент.
+
+    Пояснение к позиции в сверку не идёт: это подпись оформления, а не часть
+    названия из прайса."""
+    name = node.select_one(name_sel)
+    desc = name.select_one(desc_sel)
+    if desc:
+        desc.extract()
+    return clean(name.get_text()), clean(node.select_one(value_sel).get_text())
+
+
 def rendered_rows():
-    """Факт — строки прайса из собранных страниц услуг."""
+    """Факт — позиции прайса из собранных страниц услуг: строки и карточки сетов."""
     rows = Counter()
     for slug in PRICES:
-        for row in page_soup(SITE / slug / "index.html").select(PRICE_ROW):
-            name = row.select_one(PRICE_NAME)
-            desc = name.select_one(PRICE_DESC)
-            if desc:
-                desc.extract()
-            rows[(slug, clean(name.get_text()),
-                  clean(row.select_one(PRICE_VALUE).get_text()))] += 1
+        soup = page_soup(SITE / slug / "index.html")
+        for row in soup.select(PRICE_ROW):
+            rows[(slug, *rendered_entry(row, PRICE_NAME, PRICE_DESC, PRICE_VALUE))] += 1
+        for card in soup.select(COMBO_ITEM):
+            rows[(slug, *rendered_entry(card, COMBO_NAME, COMBO_DESC, COMBO_VALUE))] += 1
     return rows
 
 

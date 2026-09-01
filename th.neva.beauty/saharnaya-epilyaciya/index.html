@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <link rel="stylesheet" href="/assets/css/bundle.min.css?v=ff25839b">
+  <link rel="stylesheet" href="/assets/css/bundle.min.css?v=7d5fe430">
   
   
   <link rel="preload" as="image" href="/assets/img/saharnaya-epilyaciya.webp" imagesrcset="/assets/img/saharnaya-epilyaciya-320.webp 320w, /assets/img/saharnaya-epilyaciya-480.webp 480w, /assets/img/saharnaya-epilyaciya-560.webp 560w, /assets/img/saharnaya-epilyaciya.webp 760w" imagesizes="(min-width:768px) 360px, (min-width:420px) 290px, calc((100vw - 48px) * 0.78)" fetchpriority="high">
@@ -906,23 +906,28 @@
     <div class="pricelist" data-pricelist>
       
       
-      <div class="pricelist__tabs" role="tablist" aria-label="Разделы прайса — Сахарная эпиляция">
-        
-        <button class="pricelist__tab is-active" type="button" role="tab"
-          id="tab-saharnaya-epilyaciya-0" aria-controls="panel-saharnaya-epilyaciya-0"
-          tabindex="0"
-          aria-selected="true" data-tab="0">Цены<span class="pricelist__tab-count">16</span></button>
-        
-        <button class="pricelist__tab" type="button" role="tab"
-          id="tab-saharnaya-epilyaciya-1" aria-controls="panel-saharnaya-epilyaciya-1"
-          tabindex="-1"
-          aria-selected="false" data-tab="1">Комплексные предложения<span class="pricelist__tab-count">2</span></button>
-        
-      </div>
       
       
-      <div class="pricelist__panel is-active" data-panel="0" id="panel-saharnaya-epilyaciya-0" role="tabpanel"
-        aria-labelledby="tab-saharnaya-epilyaciya-0" tabindex="0">
+      
+      
+      <ul class="pricelist__combos" aria-label="Комплексные предложения — Сахарная эпиляция">
+        
+        <li class="combo">
+          <div class="combo__name">Глубокое бикини, ноги до колена, подмышечные впадины</div>
+          
+          <div class="combo__price">2100 ฿</div>
+        </li>
+        
+        <li class="combo">
+          <div class="combo__name">Глубокое бикини, руки, ноги, подмышечные впадины</div>
+          
+          <div class="combo__price">3000 ฿</div>
+        </li>
+        
+      </ul>
+      
+      
+      <div class="pricelist__panel is-active" data-panel="0">
         <table class="pricelist__table">
           <caption class="visually-hidden">Цены — Сахарная эпиляция, Neva Beauty — Koh Samui</caption>
           <thead class="visually-hidden">
@@ -1024,31 +1029,6 @@
               
               <th class="pricelist__name" scope="row">Щёки</th>
               <td class="pricelist__price">500 ฿</td>
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="pricelist__panel" data-panel="1" id="panel-saharnaya-epilyaciya-1" role="tabpanel"
-        aria-labelledby="tab-saharnaya-epilyaciya-1" tabindex="0">
-        <table class="pricelist__table">
-          <caption class="visually-hidden">Комплексные предложения — Сахарная эпиляция, Neva Beauty — Koh Samui</caption>
-          <thead class="visually-hidden">
-            <tr><th scope="col">Услуга</th><th scope="col">Цена</th></tr>
-          </thead>
-          <tbody>
-            
-            <tr class="pricelist__row">
-              
-              <th class="pricelist__name" scope="row">Глубокое бикини, ноги до колена, подмышечные впадины</th>
-              <td class="pricelist__price">2100 ฿</td>
-            </tr>
-            
-            <tr class="pricelist__row">
-              
-              <th class="pricelist__name" scope="row">Глубокое бикини, руки, ноги, подмышечные впадины</th>
-              <td class="pricelist__price">3000 ฿</td>
             </tr>
             
           </tbody>
@@ -1374,7 +1354,7 @@
 </footer>
   <script type="module" src="/assets/js/nav.js?v=e9d2e33b"></script>
   <script type="module" src="/assets/js/reveal.js?v=1060c862"></script>
-  <script type="module" src="/assets/js/price-tabs.js?v=bdead8bf"></script>
+  
   
 <!-- Yandex.Metrika counter --><script>
 (function (w, d) {

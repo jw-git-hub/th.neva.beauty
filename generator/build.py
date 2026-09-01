@@ -286,9 +286,15 @@ def price_name_parts(name):
 
 
 def price_view(sections):
-    """Разделы прайса в виде для показа — исходные данные не меняются."""
+    """Разделы прайса в виде для показа — исходные данные не меняются.
+
+    Флаг combo несут разделы из сетов — «Подмышки + глубокое бикини». Строкой
+    прайса такой набор не читается: клиенту важно, что это отдельное
+    предложение, а не ещё одна зона. Шаблон показывает их карточками, как на
+    vn.neva.beauty."""
     return [{
         "section": sec["section"],
+        "combo": bool(sec.get("combo")),
         "items": [dict(price_name_parts(item["name"]),
                        desc=item["desc"], price=format_price(item["price"]))
                   for item in sec["items"]],

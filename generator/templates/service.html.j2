@@ -69,10 +69,15 @@
     </dl>
     {%- endif %}
     <div class="pricelist" data-pricelist>
-      {% set tabbed = sections|length > 1 %}
+      {# Сеты («Подмышки + глубокое бикини») живут отдельным разделом прайса, но
+         вкладкой не показываются: за ней их не видно, а это самое выгодное
+         предложение страницы. Карточками над списком — как на vn.neva.beauty. #}
+      {% set combo_sections = sections | selectattr('combo') | list %}
+      {% set tab_sections = sections | rejectattr('combo') | list %}
+      {% set tabbed = tab_sections|length > 1 %}
       {% if tabbed %}
       <div class="pricelist__tabs" role="tablist" aria-label="Разделы прайса — {{ svc.title }}">
-        {% for sec in sections %}
+        {% for sec in tab_sections %}
         <button class="pricelist__tab{{ ' is-active' if loop.first }}" type="button" role="tab"
           id="tab-{{ slug }}-{{ loop.index0 }}" aria-controls="panel-{{ slug }}-{{ loop.index0 }}"
           tabindex="{{ '0' if loop.first else '-1' }}"
@@ -80,7 +85,18 @@
         {% endfor %}
       </div>
       {% endif %}
-      {% for sec in sections %}
+      {% for sec in combo_sections %}
+      <ul class="pricelist__combos" aria-label="{{ sec.section }} — {{ svc.title }}">
+        {% for it in sec['items'] %}
+        <li class="combo">
+          <div class="combo__name">{{ it.name }}{% if it.note %} <span class="combo__note">{{ it.note }}</span>{% endif %}</div>
+          {% if it.desc %}<div class="combo__desc">{{ it.desc }}</div>{% endif %}
+          <div class="combo__price">{{ it.price }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+      {% for sec in tab_sections %}
       <div class="pricelist__panel{{ ' is-active' if loop.first }}" data-panel="{{ loop.index0 }}"
         {%- if tabbed %} id="panel-{{ slug }}-{{ loop.index0 }}" role="tabpanel"
         aria-labelledby="tab-{{ slug }}-{{ loop.index0 }}" tabindex="0"{% endif %}>
@@ -138,4 +154,4 @@
 {% endblock %}
 {# Скрипт нужен только там, где вкладок больше одной: на 12 из 17 страниц с прайсом
    раздел единственный, и переключать нечего. #}
-{% block extra_js %}{% if sections|length > 1 %}<script type="module" src="{{ asset('/assets/js/price-tabs.js') }}"></script>{% endif %}{% endblock %}
+{% block extra_js %}{% if sections | rejectattr('combo') | list | length > 1 %}<script type="module" src="{{ asset('/assets/js/price-tabs.js') }}"></script>{% endif %}{% endblock %}
