@@ -3,12 +3,6 @@
 {% from "partials/contact_strip.html.j2" import contact_strip %}
 {% from "partials/booking.html.j2" import booking, cta_inline %}
 {% from "partials/picture.html.j2" import responsive_img %}
-{% macro price_of(prices, slug, name) -%}
-  {%- set ns = namespace(found=false) -%}
-  {%- for sec in prices.get(slug, []) -%}{%- for it in sec['items'] -%}
-    {%- if it.name == name and not ns.found %}{{ it.price }}{%- set ns.found = true -%}{% endif -%}
-  {%- endfor -%}{%- endfor -%}
-{%- endmacro %}
 {# Подтверждение прав в Search Console и Вебмастере. Только на главной:
    обе панели читают корень сайта, на остальных страницах тег бесполезен.
    Значения — в site.yml, там же причина, почему способ мета-тег, а не DNS. #}
@@ -73,7 +67,7 @@
         <span class="popular-card__cat">{{ p.label }}</span>
         <span class="popular-card__name">{{ p.name }}</span>
       </span>
-      <span class="popular-card__price">{{ price_of(prices, p.slug, p.name) | price }}</span>
+      <span class="popular-card__price">{{ item_price(p.slug, p.name) }}</span>
     </a>
     {% endfor %}
   </div>

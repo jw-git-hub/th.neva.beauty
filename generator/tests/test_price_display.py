@@ -87,7 +87,7 @@ def test_view_keeps_source_untouched():
 
 
 def test_price_from_takes_the_lowest_standalone_price():
-    assert price_from(SECTIONS, "฿") == f"от 2500{NBSP}฿"
+    assert price_from(SECTIONS, "฿") == f"от{NBSP}2500{NBSP}฿"
 
 
 def test_price_from_is_none_without_standalone_prices():

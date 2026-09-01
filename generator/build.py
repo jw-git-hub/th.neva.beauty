@@ -392,23 +392,85 @@ def price_from(sections, currency_sign):
               for section in price_catalog(sections) for item in section["items"]]
     if not bounds:
         return None
-    return f"от {format_price(str(min(low for low, _ in bounds)))}{NBSP}{currency_sign}"
+    return f"от{NBSP}{format_price(str(min(low for low, _ in bounds)))}{NBSP}{currency_sign}"
+
+
+def open_ended(offer):
+    """Цена вида «от 6000 ฿»: нижняя граница есть, верхней нет."""
+    return "price" not in offer and "max" not in offer
 
 
 def price_span(sections_list, currency_sign):
     """Диапазон цен по нескольким прайсам строкой «300–35 000 ฿», или None.
 
     Границы берутся из того же каталога, что уходит в AggregateOffer, поэтому
-    выжимка для ИИ не может назвать цену, которой нет в прайсе."""
-    bounds = [offer_bounds(item["offer"])
+    выжимка для ИИ не может назвать цену, которой нет в прайсе.
+
+    Если самая дорогая позиция сама задана как «от … ฿» — верхней границы у прайса
+    нет, и закрытый диапазон её выдумает. Такой прайс сворачивается в «от … ฿»:
+    у Tokio Inkarami все три длины стоят «от», и «3000–6000 ฿» обещало потолок,
+    которого салон не называл."""
+    offers = [item["offer"]
               for sections in sections_list
               for section in price_catalog(sections) for item in section["items"]]
-    if not bounds:
+    if not offers:
         return None
+    bounds = [offer_bounds(offer) for offer in offers]
+    top = max(high for _, high in bounds)
     low = format_price(str(min(low for low, _ in bounds)))
-    high = format_price(str(max(high for _, high in bounds)))
+    high = format_price(str(top))
+    if any(open_ended(offer) for offer, (_, hi) in zip(offers, bounds) if hi == top):
+        return f"от{NBSP}{low}{NBSP}{currency_sign}"
     span = low if low == high else f"{low}–{high}"
     return f"{span}{NBSP}{currency_sign}"
+
+
+def pricier_variant(sections, name):
+    """Есть ли в прайсе строка «то же название - уточнение» дороже, чем name.
+
+    Прайс волос устроен парами: «Женская — 2000 ฿» и «Женская - Длинные / густые
+    волосы — 2300 ฿». Назвать первую сумму точной значит соврать половине клиентов:
+    для них цена начинается от неё. Правило механическое, чтобы новая пара в прайсе
+    не потребовала помнить про него."""
+    base = None
+    for section in sections:
+        for item in section["items"]:
+            if item["name"] == name:
+                base = price_offer(item["price"])
+                break
+    if not base:
+        return False
+    ceiling = offer_bounds(base)[1]
+    prefix = name + " - "
+    return any(offer_bounds(offer)[0] > ceiling
+               for section in sections for item in section["items"]
+               if item["name"].startswith(prefix) and (offer := item_offer(item)))
+
+
+def item_price_label(prices, slug, name, currency_sign):
+    """Подпись цены позиции для карточки: «7000 ฿» или «от 7000 ฿»."""
+    sections = prices.get(slug, [])
+    for section in sections:
+        for item in section["items"]:
+            if item["name"] == name:
+                price = format_price(item["price"])
+                if not price.lower().startswith("от") and pricier_variant(sections, name):
+                    price = f"от {price}"
+                return price.replace(" ", NBSP)
+    raise KeyError(f"нет позиции прайса {name!r} у услуги {slug!r}")
+
+
+def price_with_note(svc, span):
+    """Диапазон услуги с оговоркой price_note, если он охватывает не весь прайс.
+
+    Диапазон складывается из позиций с самостоятельной ценой, а тариф за минуту
+    в него не входит: электроэпиляция выглядела как «300–700 ฿», хотя тело
+    считают поминутно и сеанс стоит кратно больше. Оговорка пишется в content.yml
+    руками — вывести её из прайса нельзя, длительность сеанса там не задана."""
+    note = svc.get("price_note")
+    if not span or not note:
+        return span
+    return f"{span}, {note}"
 
 
 def category_price_rows(cat, services, prices, site):
@@ -424,7 +486,7 @@ def category_price_rows(cat, services, prices, site):
         rows.append({
             "slug": slug,
             "label": svc["title"],
-            "span": price_span([prices.get(slug, [])], sign),
+            "span": price_with_note(svc, price_span([prices.get(slug, [])], sign)),
             "duration": svc.get("duration"),
         })
     return rows
@@ -511,7 +573,7 @@ def build_llms(site, content, prices):
         lines.append(f"- [{cat['title']}]({base}{cat['url']}){note}")
     lines += ["", "## Услуги"]
     for slug, svc in content["services"].items():
-        span = price_span([prices.get(slug, [])], sign)
+        span = price_with_note(svc, price_span([prices.get(slug, [])], sign))
         facts = [f"цены {span}" if span else None,
                  f"длительность: {uncapitalize(svc['duration'])}" if svc.get("duration") else None]
         note = " — " + ", ".join(fact for fact in facts if fact) if any(facts) else ""
@@ -663,6 +725,10 @@ def main():
     price_from_by_slug = {slug: price_from(sections, currency_sign)
                           for slug, sections in prices.items()}
     e.globals["price_from"] = price_from_by_slug.get
+    # Цена конкретной позиции для карточек «Частое» на главной — той же формой,
+    # что и в текстах: «от N ฿», если у позиции есть строка дороже.
+    e.globals["item_price"] = lambda slug, name: item_price_label(
+        prices, slug, name, currency_sign)
     # главная
     base_url = site["base_url"]
     home = content["home"]
