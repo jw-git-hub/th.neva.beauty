@@ -26,7 +26,7 @@
   background:var(--bg);border-bottom-color:var(--line);
   backdrop-filter:none;-webkit-backdrop-filter:none}
 .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);min-height:76px}
-@media(min-width:1024px){.site-header__inner{gap:var(--sp-6)}}
+@media(min-width:1160px){.site-header__inner{gap:var(--sp-6)}}
 .site-header__logo{color:var(--ink)}
 .brand-mark__name:hover{color:var(--rose)}
 
@@ -46,7 +46,7 @@
 
 /* ===== ПЕРЕКЛЮЧАТЕЛЬ САЛОНОВ ===== */
 /* Строка города в замке — единственное место в шапке, где переключателю хватило
-   места: втроём логотип, меню и кнопка записи требуют 1077 px из 1024 доступных
+   места: втроём логотип, меню и кнопка записи требуют 1127 px из 1160
    (см. .site-header__cta), и отдельный пункт шапку бы сломал. Галочка добавляет
    к строке 10 px и не выходит за ширину названия над ней. */
 .loc{position:relative}
@@ -130,7 +130,7 @@
 
 /* desktop nav */
 .nav{display:none}
-@media(min-width:1024px){.nav{display:flex;align-items:center;gap:var(--sp-2)}}
+@media(min-width:1160px){.nav{display:flex;align-items:center;gap:var(--sp-2)}}
 .nav__link{position:relative;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:inherit;font-size:var(--fs-300);
   font-weight:500;color:var(--ink);padding:.5rem .75rem;border-radius:var(--radius);background:none;border:none;cursor:pointer;
   transition:color var(--t-fast) var(--ease)}
@@ -154,8 +154,7 @@
   opacity:0;visibility:hidden;transform:translateY(8px);
   transition:opacity var(--t-fast) var(--ease),visibility var(--t-fast),transform var(--t-fast) var(--ease)}
 /* Крайний справа дропдаун раскрывается влево: панель шириной 248 px от левого
-   края своей группы уходила за окно на 43 px (на 1024 px — весь диапазон, где
-   меню уже есть, а кнопки записи ещё нет), и страница получала горизонтальную
+   края своей группы уходила за окно, и страница получала горизонтальную
    прокрутку. `visibility:hidden` от `scrollWidth` не спасает. Привязка к правому
    краю, а не сдвиг меню целиком: так панель не вылезет и если разделов станет
    больше. Последний ребёнок `.nav` — ссылка «Макияж» без дропдауна, поэтому
@@ -189,22 +188,21 @@
   .nav__menu .nav__sub{opacity:1;transform:none;transition:background var(--t-fast),color var(--t-fast)}
   .nav__sub::before{transition:none}
 }
-/* Кнопка записи в шапке — только на десктопе, как на vn.neva.beauty: до 1024 px
-   место занимают логотип и бургер.
-   Порог у кнопки свой, 1100, а не 1024, как у меню: втроём логотип, меню
-   и кнопка требуют 1077 px, и на 1024 (iPad в горизонтали) страница вылезала
-   за окно на 53 px — сжиматься нечему, у ссылок меню `white-space:nowrap`.
-   Прячем кнопку, а не меню: перелинковка важнее дубля кнопки, которая ниже
-   1024 px и так не показывается, а на странице их несколько. Без неё шапке
-   нужно 941 px — влезает с запасом. */
+/* Кнопка записи и горизонтальное меню включаются одним порогом, 1160 px.
+   Замок, меню и кнопка требуют 1127 px (203 + 691 + 136 плюс два просвета
+   по 24 и поля контейнера), сжиматься нечему — у ссылок меню `white-space:
+   nowrap`. Раньше пороги были разные, меню с 1024 и кнопка с 1100, и в щели
+   между ними шапка стояла без кнопки записи. Теперь одна точка переключения:
+   не помещается кнопка — уходим в бургер целиком, там кнопка есть в подвале
+   ящика. Порог с запасом в 33 px на случай другой метрики шрифта. */
 .site-header__cta{display:none}
-@media(min-width:1100px){.site-header__cta{display:inline-flex}}
+@media(min-width:1160px){.site-header__cta{display:inline-flex}}
 
 /* burger */
 .burger{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
   width:44px;height:44px;padding:10px;background:none;border:none;cursor:pointer}
 .burger span{display:block;height:2px;background:var(--ink);border-radius:2px;transition:all var(--t-fast) var(--ease)}
-@media(min-width:1024px){.burger{display:none}}
+@media(min-width:1160px){.burger{display:none}}
 
 /* overlay + drawer */
 .overlay{position:fixed;inset:0;background:rgba(58,44,42,.5);z-index:var(--z-overlay);
@@ -269,7 +267,7 @@
   transition-delay:calc(var(--i,0) * 45ms + 90ms)}
 
 body.no-scroll{overflow:hidden}
-@media(min-width:1024px){.drawer,.overlay{display:none}}
+@media(min-width:1160px){.drawer,.overlay{display:none}}
 @media(prefers-reduced-motion:reduce){
   .drawer__nav > *{opacity:1;transform:none;transition:none}
   .drawer__link::before,.drawer__sub::before{transition:none}
