@@ -81,7 +81,7 @@
         <button class="pricelist__tab{{ ' is-active' if loop.first }}" type="button" role="tab"
           id="tab-{{ slug }}-{{ loop.index0 }}" aria-controls="panel-{{ slug }}-{{ loop.index0 }}"
           tabindex="{{ '0' if loop.first else '-1' }}"
-          aria-selected="{{ 'true' if loop.first else 'false' }}" data-tab="{{ loop.index0 }}">{{ sec.section or 'Цены' }}<span class="pricelist__tab-count">{{ sec['items'] | length }}</span></button>
+          aria-selected="{{ 'true' if loop.first else 'false' }}" data-tab="{{ loop.index0 }}">{{ sec.section or 'Цены' }}</button>
         {% endfor %}
       </div>
       {% endif %}
