@@ -98,7 +98,17 @@ def rel(path):
     return str(path.relative_to(SITE))
 
 
+# Переключатель салонов в шапке и строки «Наши салоны» в подвале называют второй
+# город бренда по делу: сайты Самуи и Дананга ссылаются друг на друга. Разметка
+# этих двух блоков вырезается перед проверкой, чтобы FORBIDDEN продолжал ловить
+# «Дананг», случайно оставшийся в тексте от донорского репозитория.
+LOCATION_MARKUP = re.compile(
+    r'<div class="loc__menu">.*?</div>|<div class="site-footer__places">.*?</div>',
+    re.DOTALL)
+
+
 def check_forbidden(path, text):
+    text = LOCATION_MARKUP.sub("", text)
     for needle in FORBIDDEN:
         if needle in text:
             report(rel(path), f"след старого бренда или города: {needle!r}")
