@@ -12,18 +12,23 @@
    же номер, что и WhatsApp (см. site.yml), отдельного канала она не давала.
    Сам номер остался в микроразметке (schema.py) и на странице политики.
    Правило переноса стоит здесь, а не только в FAQ главной: клиент из поиска
-   попадает сразу на услугу и записывается с неё, главную он не открывает. #}
-{% macro booking(site, title, lead, subject=None) %}
+   попадает сразу на услугу и записывается с неё, главную он не открывает.
+   Подпись блока и это правило страница может переопределить: на витрине
+   покупают, а не записываются, и «отменить запись за сутки» там неверно. #}
+{% macro booking(site, title, lead, subject=None, eyebrow=None, rule=None) %}
 {%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
 <section class="section">
   <div class="container booking">
-    <div class="section-head" data-reveal><p class="eyebrow">Запись</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
+    <div class="section-head" data-reveal><p class="eyebrow">{{ eyebrow | default('Запись', true) }}</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
     <div class="booking__actions">
       <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} WhatsApp</a>
       <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }} Telegram</a>
       <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">{{ icon('instagram') }} Instagram</a>
     </div>
-    <p class="booking__rule">{{ site.booking_rule }}</p>
+    {#- Правило переноса — про запись на процедуру. Страница, где ничего
+        не записывают, отдаёт пустую строку и обходится без него. #}
+    {%- set booking_rule = rule if rule is not none else site.booking_rule %}
+    {% if booking_rule %}<p class="booking__rule">{{ booking_rule }}</p>{% endif %}
     <p class="booking__loc">{{ icon('map-pin') }} {{ site.location }}</p>
   </div>
 </section>

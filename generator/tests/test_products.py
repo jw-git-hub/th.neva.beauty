@@ -22,16 +22,16 @@ PRODUCTS = {
     "brands": [
         {"name": "Davines", "slug": "davines", "heading": "Davines", "lead": "Из Пармы.",
          "products": [
-             {"title": "OI Oil", "line": "OI", "kind": "Масло", "volume": "50 ml",
+             {"title": "OI Oil", "kind": "Масло", "volume": "50 ml",
               "price": "1200 ฿", "desc": "Масло для блеска.",
               "image": "davines-oi-oil-50", "image_alt": "Флакон"},
-             {"title": "OI Oil", "line": "OI", "kind": "Масло", "volume": "135 ml",
+             {"title": "OI Oil", "kind": "Масло", "volume": "135 ml",
               "price": "1900 ฿", "desc": "Тот же флакон побольше.",
               "image": "davines-oi-oil-135", "image_alt": "Флакон"},
          ]},
         {"name": "LEBEL", "slug": "lebel", "heading": "LEBEL", "lead": "Из Японии.",
          "products": [
-             {"title": "viege Shampoo", "line": "viege", "kind": "Шампунь",
+             {"title": "viege Shampoo", "kind": "Шампунь",
               "volume": "240 ml", "price": "1200 ฿", "desc": "Шампунь на травах.",
               "image": "lebel-viege-shampoo", "image_alt": "Флакон"},
          ]},

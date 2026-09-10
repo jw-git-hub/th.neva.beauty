@@ -43,9 +43,13 @@
     <div class="product-card card">
       <div class="product-card__media">{{ responsive_img(item.image, 'product_card', item.image_alt) }}</div>
       <div class="product-card__body">
-        <p class="product-card__line">{{ item.line }}</p>
-        <h3>{{ item.title }}</h3>
-        <p class="product-card__kind">{{ item.kind }}, {{ item.volume }}</p>
+        {#- Объём поднят в заголовок: «OI Oil» на полке два, и различал их только
+            объём — третьей строкой карточки, мельче и тише цены. Строка
+            с линейкой бренда снята: она повторяла начало названия во всех
+            двенадцати карточках («LOVE CURL» над «LOVE CURL Shampoo»)
+            и набиралась цветом с контрастом 2,3:1 при кегле 13 px. #}
+        <h3>{{ item.title }} <span class="product-card__vol">{{ item.volume }}</span></h3>
+        <p class="product-card__kind">{{ item.kind }}</p>
         <p class="product-card__desc">{{ item.desc }}</p>
         <p class="product-card__foot">
           <span class="product-card__price">{{ item.price | price }}</span>
@@ -91,5 +95,6 @@
 </section>
 {% endif %}
 
-{{ booking(site, page_data.booking_title, page_data.booking_lead) }}
+{{ booking(site, page_data.booking_title, page_data.booking_lead,
+           eyebrow=page_data.booking_eyebrow, rule=page_data.booking_rule) }}
 {% endblock %}

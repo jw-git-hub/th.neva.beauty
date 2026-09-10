@@ -25,6 +25,12 @@ page:
   booking_lead: >-
     Напишите, какое средство вам нужно или что происходит с волосами, —
     подберём, отложим и договоримся, как вам его передать.
+  # Общий блок внизу страницы подписан «Запись» и заканчивается правилом
+  # «перенести или отменить запись можно не позднее чем за сутки». Здесь ничего
+  # не записывают: подпись своя, а правило снято — правила отмены у покупки нет,
+  # а чужое сбивает с толку последней строкой перед подвалом.
+  booking_eyebrow: "Заказ"
+  booking_rule: ""
 
   # Шаги вместо корзины. Без них страница обрывается на цене: посетитель видит
   # товар, но не понимает, что дальше делать, а кнопки «Купить» здесь нет.
@@ -79,7 +85,6 @@ brands:
       В салоне на ней работают, дома ею поддерживают результат.
     products:
       - title: "LOVE CURL Shampoo"
-        line: "LOVE CURL"
         kind: "Шампунь"
         volume: "250 ml"
         price: "1300 ฿"
@@ -91,7 +96,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70110UCL-LOVE-CURL-SH-250ML-8004608300670-1.jpg"
 
       - title: "LOVE SMOOTHING Shampoo"
-        line: "LOVE SMOOTHING"
         kind: "Шампунь"
         volume: "250 ml"
         price: "1200 ฿"
@@ -103,7 +107,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70009UCL-LOVE-SMOOTH-SH-250ML-8004608300052-1.jpg"
 
       - title: "MINU Shampoo"
-        line: "MINU"
         kind: "Шампунь"
         volume: "250 ml"
         price: "1300 ฿"
@@ -115,7 +118,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70026UCL-MINU-SH-250ML-8004608300168-1.jpg"
 
       - title: "LOVE CURL Conditioner"
-        line: "LOVE CURL"
         kind: "Кондиционер"
         volume: "250 ml"
         price: "1500 ฿"
@@ -127,7 +129,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70115SLC-LOVE-CURL-COND-250ML-8004608302056-1.jpg"
 
       - title: "LOVE CURL Mask"
-        line: "LOVE CURL"
         kind: "Маска"
         volume: "250 ml"
         price: "1500 ฿"
@@ -139,7 +140,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70119SLC-LOVE-CURL-MASK-250ML-8004608302063-1.jpg"
 
       - title: "MINU Mask"
-        line: "MINU"
         kind: "Маска"
         volume: "250 ml"
         price: "1500 ฿"
@@ -151,7 +151,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70028SLC-MINU-MASK-250ML-8004608302025-1.jpg"
 
       - title: "SOLU Sea Salt Scrub"
-        line: "SOLU"
         kind: "Скраб для кожи головы"
         volume: "250 ml"
         price: "1200 ฿"
@@ -163,7 +162,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70015SLC-SOLU-SEA-SALT-SCRUB-250ML-8004608302070-1.jpg"
 
       - title: "OI Oil"
-        line: "OI"
         kind: "Масло"
         volume: "50 ml"
         price: "1200 ฿"
@@ -175,7 +173,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0507/2391/3898/files/Davines-76001-oi-oil-50ml-8004608247609-1.jpg"
 
       - title: "OI Oil"
-        line: "OI"
         kind: "Масло"
         volume: "135 ml"
         price: "1900 ฿"
@@ -187,7 +184,6 @@ brands:
         source: "https://cdn.shopify.com/s/files/1/0507/2391/3898/files/Davines-76000-oi-oil-135ml-8004608247593-1.jpg"
 
       - title: "OI Liquid Luster"
-        line: "OI"
         kind: "Уход-блеск"
         volume: "300 ml"
         price: "2100 ฿"
@@ -207,7 +203,6 @@ brands:
       для чувствительной кожи головы.
     products:
       - title: "IAU Essence Forti"
-        line: "IAU"
         kind: "Несмываемый уход"
         volume: "100 ml"
         price: "1100 ฿"
@@ -219,7 +214,6 @@ brands:
         source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_f.png"
 
       - title: "viege Shampoo"
-        line: "viege"
         kind: "Шампунь"
         volume: "240 ml"
         price: "1200 ฿"

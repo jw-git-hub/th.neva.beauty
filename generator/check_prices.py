@@ -47,9 +47,8 @@ ROBOT_MARKUP = "script, style"
 # Витрина товара: те же «название → цена», но карточками и из своего источника.
 PRODUCT_CARD = ".product-card"
 PRODUCT_NAME = ".product-card__body h3"
-PRODUCT_KIND = ".product-card__kind"
+PRODUCT_VOLUME = ".product-card__vol"  # объём внутри заголовка: «OI Oil 50 ml»
 PRODUCT_PRICE = ".product-card__price"
-KIND_VOLUME_SEP = ","  # «Масло, 50 ml» — тип и объём в одной подписи
 
 _, CONTENT, PRICES, PRODUCTS = load()
 
@@ -230,9 +229,12 @@ def rendered_products():
     if not path.exists():
         return rows
     for card in page_soup(path).select(PRODUCT_CARD):
-        kind = clean(card.select_one(PRODUCT_KIND).get_text())
-        rows[(clean(card.select_one(PRODUCT_NAME).get_text()),
-              clean(kind.rsplit(KIND_VOLUME_SEP, 1)[-1]),
+        # Объём — вложенный span заголовка, поэтому вынимается из дерева,
+        # а не отрезается от строки: у названий бывают свои цифры.
+        heading = card.select_one(PRODUCT_NAME)
+        volume = heading.select_one(PRODUCT_VOLUME).extract()
+        rows[(clean(heading.get_text()),
+              clean(volume.get_text()),
               clean(card.select_one(PRODUCT_PRICE).get_text()))] += 1
     return rows
 
