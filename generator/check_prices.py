@@ -2,16 +2,19 @@
 в собранном сайте. Падает (exit 1) при любом расхождении — защищает требование
 100% точности цен.
 
-Четыре уровня сверки:
+Пять уровней сверки:
   1. таблица прайса — построчно против прайса своей страницы;
   2. суммы в прозе — каждое число со знаком бата вне таблицы обязано быть
-     в прайсе хоть одной услуги;
+     в прайсе хоть одной услуги (на витрине — ещё и в products.yml);
   3. карточки «от … ฿» — обязаны равняться минимуму той услуги, куда ведут;
   4. противоречия между страницами — услуга со своей страницей, попавшая
-     строкой в чужой прайс, обязана стоить там столько же.
+     строкой в чужой прайс, обязана стоить там столько же;
+  5. витрина товара — карточка на /kosmetika/ против строки в products.yml.
 
 Уровень 1 ловит ошибку показа, уровни 2–4 — ошибку содержания: выдуманную сумму
 в тексте, устаревшую подпись на карточке и две разные цены одной услуги.
+Уровень 5 держит товар под той же гарантией, что и услуги: цена на витрине
+не может разойтись со своим источником.
 Запуск: cd generator && ../.venv/bin/python check_prices.py"""
 import re
 import sys
@@ -19,7 +22,8 @@ from collections import Counter
 from pathlib import Path
 from bs4 import BeautifulSoup
 
-from build import PROMO_PREFIX, format_price, load, price_from, price_name_parts
+from build import (PRODUCTS_URL, PROMO_PREFIX, format_price, load, price_from,
+                   price_name_parts)
 
 ROOT = Path(__file__).resolve().parent
 SITE = ROOT.parent / "th.neva.beauty"
@@ -40,8 +44,14 @@ COMBO_VALUE = ".combo__price"
 CARD = "a.related-card"
 CARD_PRICE = ".related-card__price"
 ROBOT_MARKUP = "script, style"
+# Витрина товара: те же «название → цена», но карточками и из своего источника.
+PRODUCT_CARD = "a.product-card"
+PRODUCT_NAME = ".product-card__body h3"
+PRODUCT_KIND = ".product-card__kind"
+PRODUCT_PRICE = ".product-card__price"
+KIND_VOLUME_SEP = ","  # «Масло, 50 ml» — тип и объём в одной подписи
 
-_, CONTENT, PRICES = load()
+_, CONTENT, PRICES, PRODUCTS = load()
 
 problems = []
 
@@ -93,6 +103,20 @@ def catalogue_numbers():
     """Все суммы прайсов — единственные числа, которые сайту можно называть ценой."""
     return {number for _, _, item in price_items()
             for number in price_numbers(item["price"])}
+
+
+def product_prices():
+    """Плоский список витрины: (название, объём, цена) из products.yml."""
+    return [(item["title"], item["volume"], item["price"])
+            for brand in PRODUCTS["brands"] for item in brand["products"]]
+
+
+def product_numbers():
+    """Суммы витрины. Отдельно от прайса услуг: цену товара можно называть
+    только на витрине, иначе опечатка в прайсе процедуры пройдёт молча,
+    случайно совпав с ценой шампуня."""
+    return {number for _, _, price in product_prices()
+            for number in price_numbers(price)}
 
 
 # ── Уровень 1: таблица прайса против prices.json ──────────────────────────────
@@ -179,12 +203,48 @@ def check_pages():
 
     Карточки читаются до прозы: prose_text() выбрасывает узлы из дерева."""
     allowed = catalogue_numbers()
+    # Витрина и выжимка для ИИ называют ещё и цены товара — им список шире.
+    with_products = allowed | product_numbers()
+    shop_page = Path(PRODUCTS_URL.strip("/")) / "index.html"
     for path in sorted(SITE.rglob("*.html")):
         page_name = path.relative_to(SITE)
         soup = page_soup(path)
         check_cards(page_name, soup)
-        check_prose(page_name, prose_text(soup), allowed)
-    check_prose(LLMS_TXT, (SITE / LLMS_TXT).read_text(encoding="utf-8"), allowed)
+        check_prose(page_name, prose_text(soup),
+                    with_products if page_name == shop_page else allowed)
+    check_prose(LLMS_TXT, (SITE / LLMS_TXT).read_text(encoding="utf-8"), with_products)
+
+
+# ── Уровень 5: витрина товара против products.yml ─────────────────────────────
+
+def expected_products():
+    """Эталон — позиции витрины из data/products.yml (источник истины)."""
+    return Counter((title, volume, clean(format_price(price)))
+                   for title, volume, price in product_prices())
+
+
+def rendered_products():
+    """Факт — карточки с собранной страницы витрины."""
+    path = SITE / PRODUCTS_URL.strip("/") / "index.html"
+    rows = Counter()
+    if not path.exists():
+        return rows
+    for card in page_soup(path).select(PRODUCT_CARD):
+        kind = clean(card.select_one(PRODUCT_KIND).get_text())
+        rows[(clean(card.select_one(PRODUCT_NAME).get_text()),
+              clean(kind.rsplit(KIND_VOLUME_SEP, 1)[-1]),
+              clean(card.select_one(PRODUCT_PRICE).get_text()))] += 1
+    return rows
+
+
+def check_products():
+    """Уровень 5. Возвращает пару «позиций в products.yml, позиций на витрине»."""
+    expected, rendered = expected_products(), rendered_products()
+    for label, missing in (("нет на витрине", expected - rendered),
+                           ("нет в products.yml", rendered - expected)):
+        for (title, volume, price), count in sorted(missing.items()):
+            problems.append(f"витрина: {label} — «{title}, {volume}» {price} ×{count}")
+    return sum(expected.values()), sum(rendered.values())
 
 
 # ── Уровень 4: противоречия между страницами ──────────────────────────────────
@@ -219,9 +279,11 @@ def main():
     expected_total, rendered_total = check_table_rows()
     check_pages()
     check_cross_page()
+    products_expected, products_rendered = check_products()
     for problem in problems:
         print("  ", problem)
     print(f"позиций в прайсах: {expected_total}, на страницах: {rendered_total}")
+    print(f"позиций на витрине: {products_expected}, в products.yml: {products_rendered}")
     print("PRICE PARITY OK" if not problems
           else f"PRICE PARITY FAILED: расхождений {len(problems)}")
     return 0 if not problems else 1

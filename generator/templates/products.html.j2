@@ -1,0 +1,81 @@
+{# Витрина товара. Корзины нет и не планируется: сделка идёт в мессенджере,
+   поэтому карточка не «кладёт в корзину», а целиком является ссылкой в WhatsApp
+   с уже подставленным названием — тем же приёмом, что кнопка записи на услугах.
+   Двенадцать отдельных кнопок внутри карточек превратили бы полку в лендинг. #}
+{% extends "base.html.j2" %}
+{% from "partials/faq.html.j2" import faq_list %}
+{% from "partials/booking.html.j2" import booking %}
+{% from "partials/picture.html.j2" import responsive_img %}
+{% block content %}
+<section class="section container section--lead">
+  <nav class="breadcrumbs breadcrumbs--lead" aria-label="Хлебные крошки">
+    <a href="{{ base_path }}/">Главная</a>
+    <span class="breadcrumbs__sep" aria-hidden="true">/</span>
+    <span aria-current="page">Косметика</span>
+  </nav>
+  <div class="section-head" data-reveal>
+    <p class="eyebrow">Витрина</p><h1>{{ page_data.h1 }}</h1><p>{{ page_data.intro }}</p>
+    <p class="section-head__action">
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу купить косметику для волос' | urlencode }}" target="_blank" rel="noopener">Написать в WhatsApp</a>
+    </p>
+  </div>
+</section>
+
+{% for brand in brands %}
+<section class="section container" id="{{ brand.slug }}">
+  <div class="section-head" data-reveal>
+    <p class="eyebrow">Бренд</p><h2>{{ brand.heading }}</h2><p>{{ brand.lead }}</p>
+  </div>
+  <div class="product-grid" data-reveal-children>
+    {% for item in brand.products %}
+    {%- set message = 'Здравствуйте! Интересует ' ~ brand.name ~ ' ' ~ item.title ~ ', ' ~ item.volume %}
+    <a class="product-card card" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">
+      <div class="product-card__media">{{ responsive_img(item.image, 'product_card', item.image_alt) }}</div>
+      <div class="product-card__body">
+        <p class="product-card__line">{{ item.line }}</p>
+        <h3>{{ item.title }}</h3>
+        <p class="product-card__kind">{{ item.kind }}, {{ item.volume }}</p>
+        <p class="product-card__desc">{{ item.desc }}</p>
+        <p class="product-card__foot">
+          <span class="product-card__price">{{ item.price | price }}</span>
+          <span class="product-card__more">Спросить о наличии {{ icon('arrow-right') }}</span>
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+{# Шаги вместо корзины: страница обязана объяснить, что происходит после клика. #}
+<section class="section benefits-section" id="kak-kupit">
+  <div class="container">
+    <div class="section-head" data-reveal><p class="eyebrow">Покупка</p><h2>{{ page_data.steps_title }}</h2></div>
+    <div class="benefits-grid" data-reveal-children>
+      {% for step in page_data.steps %}
+      <div class="benefit"><span class="benefit__icon">{{ icon(step.icon) }}</span><h3>{{ step.title }}</h3><p>{{ step.text }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if services %}
+<section class="section container">
+  <div class="section-head" data-reveal><p class="eyebrow">Процедуры</p><h2>{{ page_data.services_title }}</h2></div>
+  <nav class="cat-links" aria-label="Услуги для волос">
+    {% for svc in services %}
+    <a class="cat-links__item" href="{{ base_path }}/{{ svc.slug }}/">{{ svc.title }} {{ icon('arrow-right') }}</a>
+    {% endfor %}
+  </nav>
+</section>
+{% endif %}
+
+{% if page_data.faq %}
+<section class="section container" id="faq">
+  <div class="section-head" data-reveal><p class="eyebrow">Вопросы и ответы</p><h2>{{ page_data.faq_title }}</h2></div>
+  {{ faq_list(page_data.faq) }}
+</section>
+{% endif %}
+
+{{ booking(site, page_data.booking_title, page_data.booking_lead) }}
+{% endblock %}

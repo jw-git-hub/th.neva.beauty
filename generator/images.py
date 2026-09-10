@@ -39,6 +39,16 @@ SLOTS = {
                   f"(min-width:1024px) calc((100vw - {CONTAINER_PAD * 2 + GRID_GAP * 3}px) / 4), "
                   + _CARD_NARROW),
     },
+    # Карточка товара на витрине: сетка 1 → 2 → 3 → 4 колонки.
+    # Кадр вписывается в коробку целиком (object-fit:contain), а фон коробки
+    # совпадает с фоном самого кадра, поэтому пропорцию коробки можно менять
+    # по точкам останова — поля растут, шва не видно.
+    "product_card": {
+        "widths": (300, 400, 560, 760),
+        "sizes": ("(min-width:1200px) 270px, "
+                  f"(min-width:900px) calc((100vw - {CONTAINER_PAD * 2 + GRID_GAP * 2}px) / 3), "
+                  + _CARD_NARROW),
+    },
     # Карточка «Смотрите также»: сетка 1 → 2 → 3 колонки.
     "related_card": {
         "widths": (320, 480, 640, 760),
@@ -55,6 +65,7 @@ BOX = {
     "service_hero": (760, 950),
     "category_cover": (900, 675),
     "related_card": (760, 570),
+    "product_card": (760, 950),
 }
 
 RELATED_PREFIX = "card-"  # карточке нужен кроп 4:3, герой услуги — 4:5

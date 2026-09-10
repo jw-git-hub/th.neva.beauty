@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Jinja2-шаблоны-B41717?logo=jinja&logoColor=white" alt="Jinja2">
   <img src="https://img.shields.io/badge/SEO-JSON--LD%20/%20schema.org-FF9900" alt="JSON-LD">
-  <img src="https://img.shields.io/badge/Тесты-85%20unit%20%2B%202%20сквозные-0A9396" alt="85 unit-тестов и 2 сквозные проверки">
+  <img src="https://img.shields.io/badge/Тесты-136%20unit%20%2B%202%20сквозные-0A9396" alt="136 unit-тестов и 2 сквозные проверки">
   <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions">
   <img src="https://img.shields.io/badge/Хостинг-GitHub%20Pages-222?logo=github&logoColor=white" alt="GitHub Pages">
   <img src="https://img.shields.io/badge/Lighthouse-A11y%20100%20%C2%B7%20SEO%20100%20%C2%B7%20Perf%2093--99-0CCE6B?logo=lighthouse&logoColor=white" alt="Lighthouse: A11y 100, SEO 100, Performance 93-99">
@@ -77,12 +77,12 @@
 |---|---|
 | **Язык / сборка** | Python 3.12, собственный генератор `build.py` |
 | **Шаблоны** | Jinja2 (наследование, макросы, партиалы) |
-| **Данные** | YAML (`site.yml`, `content.yml`) + JSON (`prices.json`) |
+| **Данные** | YAML (`site.yml`, `content.yml`, `products.yml`) + JSON (`prices.json`) |
 | **SEO / данные для ИИ** | JSON-LD (schema.org) `@graph`, `sitemap.xml`, `llms.txt`, `robots.txt` |
-| **Стили** | Чистый CSS, девять слоёв по каскаду, минификация `rcssmin` в один бандл |
+| **Стили** | Чистый CSS, десять слоёв по каскаду, минификация `rcssmin` в один бандл |
 | **Шрифты** | Самохостинг Cormorant + Manrope: инстансы и сабсеты из вариативных мастеров (`fontTools`) |
 | **Графика** | SVG-иконки inline, адаптивный `WebP` (`Pillow`), декоративный CSS-фон с pointer-parallax |
-| **Тесты** | 85 unit-тестов (`pytest`) + `check_prices.py` и `check_content.py` по собранному сайту (BeautifulSoup4) |
+| **Тесты** | 136 unit-тестов (`pytest`) + `check_prices.py` и `check_content.py` по собранному сайту (BeautifulSoup4) |
 | **Аналитика** | Яндекс.Метрика |
 | **CI/CD** | GitHub Actions → GitHub Pages, кастомный домен через `CNAME` |
 
@@ -98,7 +98,8 @@ flowchart LR
     subgraph SRC["Источники истины"]
         A["site.yml<br/>бизнес · контакты"]
         B["content.yml<br/>тексты · FAQ · таксономия"]
-        C["prices.json<br/>эталон цен"]
+        C["prices.json<br/>эталон цен услуг"]
+        P["products.yml<br/>эталон витрины товара"]
     end
     subgraph GEN["generator/"]
         D["build.py<br/>оркестратор"]
@@ -108,6 +109,7 @@ flowchart LR
     A --> D
     B --> D
     C --> D
+    P --> D
     D --> E
     D --> F
     E --> G["Статический HTML<br/>th.neva.beauty/"]
@@ -157,7 +159,7 @@ flowchart LR
   которые кто-то скачает.
 
 - **⚡ Оптимизация скорости.** Девять CSS-слоёв склеиваются в один минифицированный
-  `bundle.min.css` (один render-blocking запрос вместо девяти), LCP-изображение
+  `bundle.min.css` (один render-blocking запрос вместо десяти), LCP-изображение
   прелоадится, шрифты нарезаны из вариативных мастеров: десять файлов и 220 КБ
   превратились в пять и 70 КБ. Вес страниц упал на 51–60% по своим файлам —
   главная 512 → 306 КБ, страница услуги 362 → 215 КБ. Замер боевого домена
@@ -178,7 +180,10 @@ flowchart LR
   не сбрасывал кастомный домен.
 
 - **🤖 `llms.txt` для ИИ-ассистентов.** Генератор публикует машиночитаемую карту сайта
-  по стандарту [llmstxt.org](https://llmstxt.org) — направления, услуги, цены и контакты.
+  по стандарту [llmstxt.org](https://llmstxt.org) — направления, услуги, товар, цены и контакты.
+- **🛍 Витрина без корзины.** Страница `/kosmetika/` показывает товар салона карточками
+  с разметкой `Product` + `Offer`; покупка идёт в мессенджере, а цена каждой позиции
+  сверяется с `products.yml` тем же парити-тестом, что и прайс услуг.
 
 ---
 
@@ -193,18 +198,20 @@ flowchart LR
 │  ├─ check_prices.py         #   парити-тест цен
 │  ├─ check_content.py        #   сквозные проверки качества страниц
 │  ├─ make_images.py          #   нарезка WebP-производных (запуск вручную)
+│  ├─ make_product_images.py  #   мастер-кадры товара из рендеров брендов (вручную)
 │  ├─ make_fonts.py           #   инстансы и сабсеты шрифтов (запуск вручную)
 │  ├─ data/
 │  │  ├─ site.yml             #   бизнес, контакты, конфиг
 │  │  ├─ content.yml          #   тексты, FAQ, таксономия
-│  │  ├─ prices.json          #   эталон цен (источник истины)
+│  │  ├─ prices.json          #   эталон цен услуг (источник истины)
+│  │  ├─ products.yml         #   эталон витрины товара (источник истины)
 │  │  └─ lastmod.json         #   журнал отпечатков страниц для sitemap
 │  ├─ sources/                #   исходники: css · icons · img · fonts
 │  ├─ templates/              #   Jinja2-шаблоны и партиалы
-│  └─ tests/                  #   85 unit-тестов (pytest)
+│  └─ tests/                  #   136 unit-тестов (pytest)
 │
 ├─ th.neva.beauty/            # Сгенерированный сайт (раздаётся GitHub Pages)
-│  ├─ index.html · <услуги>/ · <разделы>/
+│  ├─ index.html · <услуги>/ · <разделы>/ · kosmetika/
 │  ├─ assets/  css · js · fonts · img
 │  ├─ sitemap.xml · llms.txt · robots.txt · CNAME · 404.html
 │

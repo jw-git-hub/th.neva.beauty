@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Jinja2-templates-B41717?logo=jinja&logoColor=white" alt="Jinja2">
   <img src="https://img.shields.io/badge/SEO-JSON--LD%20/%20schema.org-FF9900" alt="JSON-LD">
-  <img src="https://img.shields.io/badge/Tests-85%20unit%20%2B%202%20end--to--end-0A9396" alt="85 unit tests and 2 end-to-end checks">
+  <img src="https://img.shields.io/badge/Tests-136%20unit%20%2B%202%20end--to--end-0A9396" alt="136 unit tests and 2 end-to-end checks">
   <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions">
   <img src="https://img.shields.io/badge/Hosting-GitHub%20Pages-222?logo=github&logoColor=white" alt="GitHub Pages">
   <img src="https://img.shields.io/badge/Lighthouse-A11y%20100%20%C2%B7%20SEO%20100%20%C2%B7%20Perf%2093--99-0CCE6B?logo=lighthouse&logoColor=white" alt="Lighthouse: A11y 100, SEO 100, Performance 93-99">
@@ -77,12 +77,12 @@ the deploy pipeline** — a wrong price or a broken link physically cannot reach
 |---|---|
 | **Language / build** | Python 3.12, custom generator `build.py` |
 | **Templating** | Jinja2 (inheritance, macros, partials) |
-| **Data** | YAML (`site.yml`, `content.yml`) + JSON (`prices.json`) |
+| **Data** | YAML (`site.yml`, `content.yml`, `products.yml`) + JSON (`prices.json`) |
 | **SEO / AI data** | JSON-LD (schema.org) `@graph`, `sitemap.xml`, `llms.txt`, `robots.txt` |
-| **Styling** | Plain CSS, nine cascade layers, minified into one bundle via `rcssmin` |
+| **Styling** | Plain CSS, ten cascade layers, minified into one bundle via `rcssmin` |
 | **Fonts** | Self-hosted Cormorant + Manrope: instanced and subset from variable masters (`fontTools`) |
 | **Graphics** | Inline SVG icons, responsive `WebP` (`Pillow`), decorative CSS backdrop with pointer parallax |
-| **Testing** | 85 unit tests (`pytest`) + `check_prices.py` and `check_content.py` over the built site (BeautifulSoup4) |
+| **Testing** | 136 unit tests (`pytest`) + `check_prices.py` and `check_content.py` over the built site (BeautifulSoup4) |
 | **Analytics** | Yandex.Metrica |
 | **CI/CD** | GitHub Actions → GitHub Pages, custom domain via `CNAME` |
 
@@ -99,7 +99,8 @@ flowchart LR
     subgraph SRC["Sources of truth"]
         A["site.yml<br/>business · contacts"]
         B["content.yml<br/>copy · FAQ · taxonomy"]
-        C["prices.json<br/>price reference"]
+        C["prices.json<br/>service price reference"]
+        P["products.yml<br/>product shelf reference"]
     end
     subgraph GEN["generator/"]
         D["build.py<br/>orchestrator"]
@@ -109,6 +110,7 @@ flowchart LR
     A --> D
     B --> D
     C --> D
+    P --> D
     D --> E
     D --> F
     E --> G["Static HTML<br/>th.neva.beauty/"]
@@ -159,7 +161,7 @@ flowchart LR
   pixels somebody will actually download get deployed.
 
 - **⚡ Performance.** Nine CSS layers are concatenated into one minified `bundle.min.css`
-  (one render-blocking request instead of nine), the LCP image is preloaded, and fonts are
+  (one render-blocking request instead of ten), the LCP image is preloaded, and fonts are
   instanced from variable masters: ten files and 220 KB became five and 70 KB. Page weight
   dropped 51–60% across own files — home 512 → 306 KB, service page 362 → 215 KB. Measured
   on the live domain (Lighthouse 13, mobile profile, median of three runs): Accessibility
@@ -178,6 +180,9 @@ flowchart LR
   while SEO URLs are always absolute. `CNAME` is emitted into the artifact so the deploy
   never resets the custom domain.
 
+- **🛍 A shelf without a cart.** `/kosmetika/` lists the products the salon sells as cards
+  with `Product` + `Offer` markup; the sale happens in a messenger, and every price is
+  checked against `products.yml` by the same parity test that guards service prices.
 - **🤖 `llms.txt` for AI assistants.** The generator publishes a machine-readable site map
   per the [llmstxt.org](https://llmstxt.org) standard — categories, services, prices, contacts.
 
@@ -194,18 +199,20 @@ flowchart LR
 │  ├─ check_prices.py         #   price-parity test
 │  ├─ check_content.py        #   end-to-end page quality checks
 │  ├─ make_images.py          #   WebP derivative slicing (run manually)
+│  ├─ make_product_images.py  #   product master frames from brand renders (manual)
 │  ├─ make_fonts.py           #   font instancing and subsetting (run manually)
 │  ├─ data/
 │  │  ├─ site.yml             #   business, contacts, config
 │  │  ├─ content.yml          #   copy, FAQ, taxonomy
-│  │  ├─ prices.json          #   price reference (source of truth)
+│  │  ├─ prices.json          #   service price reference (source of truth)
+│  │  ├─ products.yml         #   product shelf reference (source of truth)
 │  │  └─ lastmod.json         #   page digest journal for the sitemap
 │  ├─ sources/                #   build inputs: css · icons · img · fonts
 │  ├─ templates/              #   Jinja2 templates and partials
-│  └─ tests/                  #   85 unit tests (pytest)
+│  └─ tests/                  #   136 unit tests (pytest)
 │
 ├─ th.neva.beauty/            # Generated site (served by GitHub Pages)
-│  ├─ index.html · <services>/ · <categories>/
+│  ├─ index.html · <services>/ · <categories>/ · kosmetika/
 │  ├─ assets/  css · js · fonts · img
 │  ├─ sitemap.xml · llms.txt · robots.txt · CNAME · 404.html
 │

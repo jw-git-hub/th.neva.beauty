@@ -27,6 +27,12 @@ BREADCRUMB_ID = "#breadcrumb"
 SERVICE_ID = "#service"
 FAQ_ID = "#faq"
 ITEMLIST_ID = "#services"
+PRODUCTS_ID = "#products"
+# Товар продаётся только на месте: заказать его на сайте нельзя, корзины нет.
+# InStock обещал бы роботу интернет-магазин, которого не существует, —
+# InStoreOnly описывает ровно то, что есть.
+IN_STORE_ONLY = "https://schema.org/InStoreOnly"
+NEW_CONDITION = "https://schema.org/NewCondition"
 
 
 def _postal_address(addr):
@@ -212,6 +218,53 @@ def item_list_node(name, items, page_url=None):
         "name": name,
         "numberOfItems": len(items),
         "itemListElement": [_list_item(i + 1, item) for i, item in enumerate(items)],
+    }
+
+
+def product_node(item, currency, seller_ref, offer_url):
+    """Product с ценой — одна позиция витрины.
+
+    Название несёт бренд и объём: «OI Oil» есть в двух флаконах, и без объёма
+    это для робота один товар с двумя ценами. Продавец ссылается на узел
+    бизнеса — иначе из графа не следует, у кого этот товар покупают."""
+    return {
+        "@type": "Product",
+        "name": f"{item['brand']} {item['title']}, {item['volume']}",
+        "description": _plain(item["desc"]),
+        "brand": {"@type": "Brand", "name": item["brand"]},
+        "category": item["kind"],
+        "image": item["image_url"],
+        "offers": {
+            "@type": "Offer",
+            "price": item["price_value"],
+            "priceCurrency": currency,
+            "availability": IN_STORE_ONLY,
+            "itemCondition": NEW_CONDITION,
+            "url": offer_url,
+            "seller": seller_ref,
+        },
+    }
+
+
+def product_list_node(name, items, currency, seller_ref, page_url):
+    """ItemList из Product — витрина целиком одним списком.
+
+    Товар лежит на одной странице и своих адресов не имеет, поэтому Product
+    описывается прямо внутри звена списка, а не ссылкой на другую страницу."""
+    return {
+        "@type": "ItemList",
+        "@id": page_url + PRODUCTS_ID,
+        "name": name,
+        "numberOfItems": len(items),
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": position,
+                "item": product_node(item, currency, seller_ref,
+                                     f"{page_url}#{item['brand_slug']}"),
+            }
+            for position, item in enumerate(items, 1)
+        ],
     }
 
 

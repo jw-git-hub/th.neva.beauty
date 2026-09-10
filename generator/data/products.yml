@@ -1,0 +1,230 @@
+# Товар салона — витрина /kosmetika/.
+#
+# Источник истины по косметике: отсюда собирается страница, разметка Product
+# и сверка цен в check_prices.py. Корзины на сайте нет, отдельных страниц
+# у товара тоже: карточка ведёт в мессенджер, где и происходит сделка.
+#
+# Цены — данные заказчика, в той же форме, что в prices.json: число и знак бата.
+# Названия — официальные, как на сайтах брендов (us.davines.com, lebel.co.jp),
+# а не как на ценнике: по ним товар ищут и сверяют состав.
+# source — адрес, откуда взят исходный рендер; по нему make_product_images.py
+# пересобирает мастер-кадры, не заставляя искать картинку заново.
+
+page:
+  seo_title: "Косметика для волос на Самуи: Davines и LEBEL — Neva Beauty"
+  seo_desc: >-
+    Профессиональный уход для волос Davines и LEBEL в салоне Neva Beauty
+    на Самуи: шампуни, кондиционеры, маски, масла. Цены 1100–2100 ฿,
+    забрать можно в салоне.
+  h1: "Косметика для волос Davines и LEBEL на Самуи"
+  intro: >-
+    Профессиональный уход, которым мастера работают на процедурах, — эти же
+    средства можно забрать домой. Корзины на сайте нет: напишите в мессенджер,
+    отложим товар и отдадим в салоне.
+  booking_title: "Заберите уход в салоне"
+  booking_lead: >-
+    Напишите, какое средство вам нужно или что происходит с волосами, —
+    подберём и отложим.
+
+  # Шаги вместо корзины. Без них страница обрывается на цене: посетитель видит
+  # товар, но не понимает, что дальше делать, а кнопки «Купить» здесь нет.
+  steps_title: "Как купить косметику в салоне"
+  steps:
+    - icon: message-circle
+      title: "Напишите в мессенджер"
+      text: "Скажите, что нужно, или опишите волосы — подскажем, что подойдёт."
+    - icon: check
+      title: "Отложим за вами"
+      text: "Проверим, что средство на полке, и оставим его до вашего визита."
+    - icon: map-pin
+      title: "Заберёте в салоне"
+      text: "Адрес пришлём в переписке — на сайте он не публикуется."
+
+  # Переход в услуги: со страницы товара выхода в процедуры иначе нет,
+  # а средство и процедура продают друг друга.
+  services_title: "Что делают этими средствами в салоне"
+  services:
+    - uhod-za-volosami
+    - davines-naturaltech-tailoring
+    - keratinovoe-vypryamlenie-volos
+    - biozavivka-volos
+    - tokio-inkarami
+
+  faq_title: "Частые вопросы о косметике для волос"
+  faq:
+    - q: "Это оригинальная косметика?"
+      a: >-
+        Да. Это профессиональные линейки Davines и LEBEL — те же средства,
+        которыми мастера работают на процедурах в салоне.
+    - q: "Можно купить, не записываясь на процедуру?"
+      a: >-
+        Да. Напишите в {whatsapp}, что нужно, — договоримся, когда вам удобно
+        зайти и забрать.
+    - q: "Как понять, что подойдёт моим волосам?"
+      a: >-
+        Опишите в переписке, что с волосами происходит: пушатся, электризуются,
+        теряют цвет после моря. Или спросите мастера прямо на процедуре —
+        он видит волосы вживую.
+    - q: "Есть доставка?"
+      a: >-
+        Нет, доставки и корзины на сайте нет. Товар откладываем и отдаём
+        в салоне на Самуи.
+
+brands:
+  - name: "Davines"
+    slug: "davines"
+    heading: "Davines — итальянский уход из Пармы"
+    lead: >-
+      Семейная марка из Пармы, профессиональная линейка Essential Haircare.
+      В салоне на ней работают, дома ею поддерживают результат.
+    products:
+      - title: "LOVE CURL Shampoo"
+        line: "LOVE CURL"
+        kind: "Шампунь"
+        volume: "250 ml"
+        price: "1300 ฿"
+        desc: >-
+          Мягкий шампунь для волнистых и кудрявых волос с экстрактом мякоти
+          баобаба: очищает, не пересушивая, и возвращает локону упругость.
+        image: "davines-love-curl-shampoo"
+        image_alt: "Флакон шампуня Davines LOVE CURL Shampoo, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70110UCL-LOVE-CURL-SH-250ML-8004608300670-1.jpg"
+
+      - title: "LOVE SMOOTHING Shampoo"
+        line: "LOVE SMOOTHING"
+        kind: "Шампунь"
+        volume: "250 ml"
+        price: "1200 ฿"
+        desc: >-
+          Разглаживающий шампунь с экстрактом яблока для пушащихся волос:
+          дисциплинирует длину и облегчает укладку.
+        image: "davines-love-smoothing-shampoo"
+        image_alt: "Флакон шампуня Davines LOVE SMOOTHING Shampoo, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70009UCL-LOVE-SMOOTH-SH-250ML-8004608300052-1.jpg"
+
+      - title: "MINU Shampoo"
+        line: "MINU"
+        kind: "Шампунь"
+        volume: "250 ml"
+        price: "1300 ฿"
+        desc: >-
+          Шампунь для окрашенных волос с экстрактом зелёного кофе: моет бережно
+          и помогает цвету дольше оставаться ярким.
+        image: "davines-minu-shampoo"
+        image_alt: "Флакон шампуня Davines MINU Shampoo, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70026UCL-MINU-SH-250ML-8004608300168-1.jpg"
+
+      - title: "LOVE CURL Conditioner"
+        line: "LOVE CURL"
+        kind: "Кондиционер"
+        volume: "250 ml"
+        price: "1500 ฿"
+        desc: >-
+          Кондиционер для кудрей: полминуты на волосах — и они расчёсываются
+          без узлов, а локон держит форму.
+        image: "davines-love-curl-conditioner"
+        image_alt: "Банка кондиционера Davines LOVE CURL Conditioner, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70115SLC-LOVE-CURL-COND-250ML-8004608302056-1.jpg"
+
+      - title: "LOVE CURL Mask"
+        line: "LOVE CURL"
+        kind: "Маска"
+        volume: "250 ml"
+        price: "1500 ฿"
+        desc: >-
+          Питательная маска для волнистых и кудрявых волос на том же баобабе:
+          смягчает и делает рисунок локона отчётливее.
+        image: "davines-love-curl-mask"
+        image_alt: "Банка маски Davines LOVE CURL Mask, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70119SLC-LOVE-CURL-MASK-250ML-8004608302063-1.jpg"
+
+      - title: "MINU Mask"
+        line: "MINU"
+        kind: "Маска"
+        volume: "250 ml"
+        price: "1500 ฿"
+        desc: >-
+          Маска для окрашенных волос: питает длину и добавляет блеска,
+          поддерживая насыщенность цвета между окрашиваниями.
+        image: "davines-minu-mask"
+        image_alt: "Банка маски Davines MINU Mask, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70028SLC-MINU-MASK-250ML-8004608302025-1.jpg"
+
+      - title: "SOLU Sea Salt Scrub"
+        line: "SOLU"
+        kind: "Скраб для кожи головы"
+        volume: "250 ml"
+        price: "1200 ฿"
+        desc: >-
+          Скраб с морской солью для глубокого очищения кожи головы: снимает
+          налёт от стайлинга и жёсткой воды.
+        image: "davines-solu-sea-salt-scrub"
+        image_alt: "Банка скраба Davines SOLU Sea Salt Scrub, 250 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-70015SLC-SOLU-SEA-SALT-SCRUB-250ML-8004608302070-1.jpg"
+
+      - title: "OI Oil"
+        line: "OI"
+        kind: "Масло"
+        volume: "50 ml"
+        price: "1200 ฿"
+        desc: >-
+          Многофункциональное масло с маслом руку: блеск, мягкость и защита
+          от пушистости. Маленький флакон проходит в ручную кладь.
+        image: "davines-oi-oil-50"
+        image_alt: "Флакон масла Davines OI Oil, 50 ml"
+        source: "https://cdn.shopify.com/s/files/1/0507/2391/3898/files/Davines-76001-oi-oil-50ml-8004608247609-1.jpg"
+
+      - title: "OI Oil"
+        line: "OI"
+        kind: "Масло"
+        volume: "135 ml"
+        price: "1900 ฿"
+        desc: >-
+          То же масло в большом флаконе, на каждый день: на влажные волосы
+          перед укладкой или на сухие как финиш.
+        image: "davines-oi-oil-135"
+        image_alt: "Большой флакон масла Davines OI Oil, 135 ml"
+        source: "https://cdn.shopify.com/s/files/1/0507/2391/3898/files/Davines-76000-oi-oil-135ml-8004608247593-1.jpg"
+
+      - title: "OI Liquid Luster"
+        line: "OI"
+        kind: "Уход-блеск"
+        volume: "300 ml"
+        price: "2100 ฿"
+        desc: >-
+          Смываемый уход-флюид: минута на волосах — и появляется зеркальный
+          блеск и шелковистость, без утяжеления.
+        image: "davines-oi-liquid-luster"
+        image_alt: "Флакон ухода Davines OI Liquid Luster, 300 ml"
+        source: "https://cdn.shopify.com/s/files/1/0052/8085/8198/files/Davines-76078UCL-OI-LIQUID-LUSTER-300ml-8004608298533-1.jpg"
+
+  - name: "LEBEL"
+    slug: "lebel"
+    heading: "LEBEL — японский уход для тонких волос"
+    lead: >-
+      Японская профессиональная косметика: мягкие формулы на растительных
+      экстрактах — для чувствительной кожи головы и тонких волос.
+    products:
+      - title: "IAU Essence Forti"
+        line: "IAU"
+        kind: "Несмываемый уход"
+        volume: "100 ml"
+        price: "1100 ฿"
+        desc: >-
+          Несмываемая гель-эссенция для тонких и ослабленных волос: уплотняет
+          и добавляет блеска, не утяжеляя длину.
+        image: "lebel-iau-essence-forti"
+        image_alt: "Флакон эссенции LEBEL IAU Essence Forti, 100 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_f.png"
+
+      - title: "viege Shampoo"
+        line: "viege"
+        kind: "Шампунь"
+        volume: "240 ml"
+        price: "1200 ฿"
+        desc: >-
+          Шампунь на растительных экстрактах — люффа, перилла, солодка.
+          Деликатно моет чувствительную кожу головы, аромат грейпфрута и зелени.
+        image: "lebel-viege-shampoo"
+        image_alt: "Флакон шампуня LEBEL viege Shampoo, 240 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_viege_s.png"

@@ -1,0 +1,47 @@
+/* ===== ВИТРИНА ТОВАРА ===== */
+/* Слой страницы /kosmetika/. Ничего не переопределяет: карточка товара — свой
+   компонент рядом с .cat-card и .related-card, общее тело у них в .card. */
+
+:root{
+  /* Фон студии, на котором сняты флаконы. Тот же цвет запечён в сами кадры
+     (make_product_images.py), поэтому коробка под картинкой может быть любой
+     пропорции: поля вокруг вписанного кадра совпадают с его собственным фоном
+     и границы не видно. */
+  --product-bg:#F5F5F3;
+}
+
+/* Плотнее сетки услуг: у товара кадр вертикальный, а подпись короткая,
+   поэтому в ряд помещается четвёртая колонка. */
+.product-grid{display:grid;gap:var(--sp-6);grid-template-columns:1fr}
+@media(min-width:560px){.product-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.product-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1200px){.product-grid{grid-template-columns:repeat(4,1fr)}}
+
+.product-card{display:flex;flex-direction:column}
+/* На узком экране карточка одна в ряд, и кадр 4:5 занимал бы пол-экрана
+   на каждый флакон. Квадрат сокращает прокрутку витрины вдвое, а поля по бокам
+   заливает тот же цвет, что и фон кадра. */
+.product-card__media{background:var(--product-bg);aspect-ratio:1/1;overflow:hidden}
+@media(min-width:560px){.product-card__media{aspect-ratio:4/5}}
+.product-card__media img{width:100%;height:100%;object-fit:contain;
+  transition:transform var(--t-mid) var(--ease)}
+.product-card:hover .product-card__media img{transform:scale(1.04)}
+
+.product-card__body{flex:1;padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2)}
+/* Линейка бренда набирается как есть: «viege» пишется со строчной,
+   и капитель здесь исказила бы название. */
+.product-card__line{font-size:var(--fs-200);letter-spacing:.06em;color:var(--taupe)}
+.product-card__body h3{font-size:var(--fs-500)}
+.product-card__kind{font-size:var(--fs-200);color:var(--muted)}
+.product-card__desc{font-size:var(--fs-300);color:var(--muted)}
+
+/* Цена и приглашение написать прижаты к низу карточки: в ряду товары разной
+   длины описания, и без этого цены встают лесенкой и перестают сравниваться. */
+.product-card__foot{margin-top:auto;padding-top:var(--sp-3);
+  display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--sp-2)}
+.product-card__price{color:var(--rose-deep);font-weight:700;
+  font-size:var(--fs-500);font-variant-numeric:tabular-nums}
+.product-card__more{display:inline-flex;align-items:center;gap:6px;
+  color:var(--rose);font-weight:600;font-size:var(--fs-300)}
+.product-card__more .icon{width:16px;height:16px;transition:transform var(--t-mid) var(--ease)}
+.product-card:hover .product-card__more .icon{transform:translateX(4px)}

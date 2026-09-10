@@ -34,11 +34,16 @@ METHOD = 6     # самый медленный и самый плотный ре
 def load_stems():
     """Кадры сайта по слотам: (слот, имя файла без расширения)."""
     content = yaml.safe_load((ROOT / "data/content.yml").read_text(encoding="utf-8"))
+    products = yaml.safe_load((ROOT / "data/products.yml").read_text(encoding="utf-8"))
     stems = [("home_hero", "hero")]
     stems += [("category_cover", cat["image"]) for cat in content["categories"] if cat.get("image")]
     for svc in content["services"].values():
         stems.append(("service_hero", svc["hero_image"]))
         stems.append(("related_card", images.related_stem(svc["hero_image"])))
+    # Мастер-кадры товара готовит make_product_images.py — они уже 4:5,
+    # здесь остаётся только нарезать лестницу ширин.
+    stems += [("product_card", item["image"])
+              for brand in products["brands"] for item in brand["products"]]
     return stems
 
 

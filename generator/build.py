@@ -12,6 +12,17 @@ ICONS = SOURCES / "icons"
 
 RELATED_COUNT = 3  # сколько карточек «Смотрите также» показываем на странице услуги
 
+# Витрина товара. Адрес и подписи — здесь, а не в products.yml: страница одна,
+# и её место в меню это решение о структуре сайта, а не данные о товаре.
+PRODUCTS_URL = "/kosmetika/"
+PRODUCTS_NAV_LABEL = "Косметика"
+PRODUCTS_NAV_TITLE = "Косметика для волос"
+# Пункт встаёт сразу после «Волос»: товар на витрине — уход за волосами, рядом
+# со своим разделом он читается как продолжение. В конце списка он оказался бы
+# соседом «Косметологии», а «Косметика» и «Косметология» в одной строке меню
+# различаются одной буквой в середине слова.
+PRODUCTS_NAV_AFTER = "volosy"
+
 # Цвет фона бренда (токен --bg). Один и тот же для meta theme-color и для манифеста:
 # браузер красит им адресную строку и заставку, и оба должны совпадать с реальным
 # фоном страницы, иначе при запуске видна цветная вспышка.
@@ -21,7 +32,7 @@ THEME_COLOR = "#FBF4F0"
 # минифицированный файл → один render-blocking запрос вместо шести, общий кэш на
 # весь сайт. fonts первым (@font-face), затем токены/база, затем постраничные слои.
 CSS_BUNDLE_ORDER = ["fonts", "tokens", "base", "components",
-                    "aurora", "reveal", "home", "service", "legal"]
+                    "aurora", "reveal", "home", "service", "products", "legal"]
 
 def icon(name, cls="icon"):
     svg = (ICONS / f"{name}.svg").read_text(encoding="utf-8")
@@ -39,7 +50,8 @@ def load():
     site = yaml.safe_load((ROOT/"data/site.yml").read_text(encoding="utf-8"))
     content = yaml.safe_load((ROOT/"data/content.yml").read_text(encoding="utf-8"))
     prices = json.loads((ROOT/"data/prices.json").read_text(encoding="utf-8"))
-    return site, content, prices
+    products = yaml.safe_load((ROOT/"data/products.yml").read_text(encoding="utf-8"))
+    return site, content, prices, products
 
 def env():
     e = Environment(loader=FileSystemLoader(ROOT/"templates"),
@@ -535,7 +547,34 @@ def markdown_links(html, base_url):
     return _TAG_RE.sub("", _LINK_RE.sub(link, html)).strip()
 
 
-def build_llms(site, content, prices):
+def product_items(products, base_url):
+    """Плоский список товара: бренд рядом с позицией, цена числом, кадр адресом.
+
+    Витрина сгруппирована по брендам, а разметке, выжимке для ИИ и парити-тесту
+    цен нужен ровно плоский список — иначе вложенность разбирал бы каждый сам."""
+    items = []
+    for brand in products["brands"]:
+        for item in brand["products"]:
+            values = price_values(item["price"])
+            items.append({**item,
+                          "brand": brand["name"],
+                          "brand_slug": brand["slug"],
+                          "price_value": values[0] if values else None,
+                          "image_url": f"{base_url}/assets/img/{item['image']}.webp"})
+    return items
+
+
+def product_span(items, currency_sign):
+    """«1100–2100 ฿» — разброс цен витрины одной строкой."""
+    values = sorted(item["price_value"] for item in items if item["price_value"])
+    if not values:
+        return ""
+    if values[0] == values[-1]:
+        return format_price(f"{values[0]} {currency_sign}")
+    return format_price(f"{values[0]}–{values[-1]} {currency_sign}")
+
+
+def build_llms(site, content, prices, products=None):
     """llms.txt — выжимка сайта для ИИ-ассистентов (llmstxt.org).
 
     Кроме карты ссылок файл несёт факты, цены, длительность процедур и вопросы
@@ -584,6 +623,21 @@ def build_llms(site, content, prices):
                  f"длительность: {uncapitalize(svc['duration'])}" if svc.get("duration") else None]
         note = " — " + ", ".join(fact for fact in facts if fact) if any(facts) else ""
         lines.append(f"- [{svc['title']}]({base}/{slug}/){note}")
+    if products:
+        # Витрина отдельным разделом: ассистента спрашивают «где на Самуи купить
+        # Davines», и ответ на это — список позиций с ценами, а не ссылка на страницу.
+        items = product_items(products, base)
+        page = products["page"]
+        lines += ["", "## Косметика на продажу",
+                  f"- [{page['h1']}]({base}{PRODUCTS_URL}) — {len(items)} позиций, "
+                  f"цены {product_span(items, sign)}",
+                  "- Корзины и доставки нет: товар откладывают по переписке "
+                  "и отдают в салоне."]
+        for brand in products["brands"]:
+            lines += ["", f"### {brand['name']}"]
+            for item in brand["products"]:
+                lines.append(f"- {item['title']}, {item['volume']} — "
+                             f"{format_price(item['price'])} — {item['kind']}. {item['desc']}")
     lines += ["", "## Частые вопросы"]
     for item in content["home"]["faq"]:
         lines += [f"### {item['q']}", markdown_links(item["a"], base), ""]
@@ -696,10 +750,13 @@ def build_nav(categories, services):
         if cat["is_page"]:
             item["children"] = [{"label": services[svc_slug]["title"], "slug": svc_slug} for svc_slug in cat["services"]]
         nav.append(item)
+        if cat["slug"] == PRODUCTS_NAV_AFTER:
+            nav.append({"label": PRODUCTS_NAV_LABEL, "title": PRODUCTS_NAV_TITLE,
+                        "url": PRODUCTS_URL})
     return nav
 
 def main():
-    site, content, prices = load()
+    site, content, prices, products = load()
     e = env()
     # Префикс пути для ссылок на ассеты/страницы: пусто на боевом домене (сайт в корне),
     # "/th.neva.beauty" для превью на GitHub Pages по подпути проекта. SEO-URL (base_url) не трогает.
@@ -856,6 +913,37 @@ def main():
             categories=content["categories"],
             price_rows=category_price_rows(cat, content["services"], prices, site)),
             journal, history, today)
+    # витрина товара — единственная страница сайта, где предлагают не услугу, а вещь
+    shop = products["page"]
+    url = base_url + PRODUCTS_URL
+    items = product_items(products, base_url)
+    shop["faq"] = render_faq_contacts(shop["faq"], site["contacts"], base_path, prices_index)
+    nodes = [
+        schema.webpage_node(url, base_url, shop["seo_title"], shop["seo_desc"],
+                            breadcrumb=True, image=items[0]["image_url"],
+                            main_entity_id=url + schema.PRODUCTS_ID,
+                            date_modified=LASTMOD_PLACEHOLDER),
+        schema.breadcrumb_node([
+            {"name": "Главная", "url": base_url + "/"},
+            {"name": PRODUCTS_NAV_TITLE, "url": url},
+        ], url),
+        schema.product_list_node(shop["h1"], items, currency, provider_ref, url),
+        schema.faq_node(shop["faq"], url),
+    ]
+    shop_og = og_image_path("kosmetika")
+    page = {"url": PRODUCTS_URL, "seo_title": shop["seo_title"], "seo_desc": shop["seo_desc"],
+            "og_title": og_title(shop, site),
+            "schema_json": schema.render(site, nodes),
+            "og_image": shop_og,
+            # Подпись только к своей карточке: без неё в разметку уходит общая
+            # обложка, и описывать её должен её собственный alt из site.yml.
+            "og_image_alt": f"{shop['h1']} — {site['brand_full']}" if shop_og else None}
+    write_page(OUT/"kosmetika"/"index.html", PRODUCTS_URL,
+               e.get_template("products.html.j2").render(
+                   site=site, page=page, page_data=shop, brands=products["brands"],
+                   services=[{"slug": slug, "title": content["services"][slug]["title"]}
+                             for slug in shop["services"]]),
+               journal, history, today)
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
     page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
             "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "
@@ -871,13 +959,13 @@ def main():
     # sitemap (собирается после страниц: дата берётся из отпечатка готового HTML)
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
     # /privacy/ и /404.html — noindex, в sitemap не включаем
-    urls = ["/"] + [f"/{slug}/" for slug in content["services"]] + cat_urls
+    urls = ["/"] + [f"/{slug}/" for slug in content["services"]] + cat_urls + [PRODUCTS_URL]
     save_lastmod(journal)
     write(OUT/"sitemap.xml", build_sitemap(urls, base_url, journal))
     # site.webmanifest — имя и иконка при добавлении на главный экран
     write(OUT/"site.webmanifest", build_manifest(site, base_path))
     # llms.txt — выжимка сайта для ИИ-ассистентов
-    write(OUT/"llms.txt", build_llms(site, content, prices))
+    write(OUT/"llms.txt", build_llms(site, content, prices, products))
     # CNAME — боевой домен для GitHub Pages. Кладём в артефакт, иначе workflow-деплой
     # каждый раз сбрасывает кастомный домен в настройках Pages. Хост берём из base_url.
     write(OUT/"CNAME", urllib.parse.urlsplit(base_url).netloc + "\n")
