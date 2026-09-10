@@ -34,7 +34,12 @@
 .brand-mark{display:inline-flex;align-items:center;gap:.8rem;line-height:1}
 /* Знак ужимается первым: на узких экранах место уступает название, а не цветок,
    поэтому flex-basis auto с правом сжаться, а текст — flex:none. */
-.brand-mark__flower{flex:0 1 auto;width:2.9em;height:auto;display:block}
+/* Знак не сжимается. У текста логотипа и у кнопки записи flex:none, поэтому
+   раньше знак был единственным, кто мог отдать ширину, — и отдавал молча:
+   седьмой пункт меню ужал цветок с 46 до 10 px, и заметить это можно было
+   только рядом со старым скриншотом. Теперь нехватка ширины, если она снова
+   появится, проявится на меню, где её видно сразу. */
+.brand-mark__flower{flex:0 0 auto;width:2.9em;height:auto;display:block}
 .brand-mark__text{flex:none;display:inline-flex;flex-direction:column;gap:.34em}
 .brand-mark__name{font-family:var(--font-head);font-size:var(--fs-600);font-weight:600;
   letter-spacing:.05em;white-space:nowrap;color:var(--ink);transition:color var(--t-fast) var(--ease)}
@@ -131,10 +136,15 @@
 /* desktop nav */
 .nav{display:none}
 @media(min-width:1160px){.nav{display:flex;align-items:center;gap:var(--sp-2)}}
-.nav__link{position:relative;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:inherit;font-size:var(--fs-300);
-  font-weight:500;color:var(--ink);padding:.5rem .75rem;border-radius:var(--radius);background:none;border:none;cursor:pointer;
+/* Боковой отступ пункта — одной переменной: подчёркивание под текстом выставлено
+   по тем же значениям, и разъехаться они не должны. Отступ ужат с .75rem после
+   того, как пунктов стало семь: ряд шапки перестал помещаться в контейнер,
+   и нехватку молча забирал знак бренда (см. .brand-mark__flower). */
+.nav__link{--nav-pad:.5rem;
+  position:relative;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:inherit;font-size:var(--fs-300);
+  font-weight:500;color:var(--ink);padding:.5rem var(--nav-pad);border-radius:var(--radius);background:none;border:none;cursor:pointer;
   transition:color var(--t-fast) var(--ease)}
-.nav__link::after{content:"";position:absolute;left:.75rem;right:.75rem;bottom:.3rem;height:1.5px;border-radius:2px;
+.nav__link::after{content:"";position:absolute;left:var(--nav-pad);right:var(--nav-pad);bottom:.3rem;height:1.5px;border-radius:2px;
   background:var(--rose);transform:scaleX(0);transform-origin:left;transition:transform var(--t-mid) var(--ease)}
 .nav__link:hover{color:var(--rose)}
 .nav__link:hover::after,.nav__group.is-open .nav__link::after{transform:scaleX(1)}
