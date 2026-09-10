@@ -6,7 +6,7 @@
       <span class="site-footer__logo brand-mark">{{ brand_mark(site.brand, site.brand_location) }}</span>
       {{ loc_list(site, base_path) }}
     </div>
-    <nav class="site-footer__col" aria-label="Услуги">
+    <nav class="site-footer__col site-footer__col--wide" aria-label="Услуги">
       <h2 class="site-footer__title">Услуги</h2>
       {% for item in site.nav %}
         {% if item.children %}{% for c in item.children %}<a class="site-footer__link" href="{{ base_path }}/{{ c.slug }}/">{{ c.label }}</a>{% endfor %}

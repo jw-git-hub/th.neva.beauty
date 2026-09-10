@@ -293,9 +293,13 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 
 /* footer — собственный плотный «цоколь»: перекрывает аврору и отделяет подвал */
 .site-footer{background:var(--surface);border-top:1px solid var(--line);
-  box-shadow:0 -1px 24px rgba(74,59,56,.06);margin-top:var(--sp-24);padding-top:var(--sp-16)}
+  box-shadow:0 -1px 24px rgba(74,59,56,.06);padding-top:var(--sp-16);
+  /* Тот же шаг, что у .section: отступ до подвала складывается с нижним
+     отступом последней секции, и фиксированные 96 px на телефоне давали
+     перед подвалом полтора экрана пустоты. */
+  margin-top:clamp(var(--sp-16),8vw,var(--sp-24))}
 .site-footer__inner{display:grid;grid-template-columns:1fr;gap:var(--sp-8);padding-bottom:var(--sp-12)}
-@media(min-width:768px){.site-footer__inner{grid-template-columns:1.4fr 1fr 1fr}}
+@media(min-width:768px){.site-footer__inner{grid-template-columns:1.1fr 1.7fr .9fr}}
 .site-footer__logo{margin-bottom:var(--sp-3)}
 .site-footer__places{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-6)}
 .site-footer__place{display:flex;align-items:center;gap:.5rem;font-size:var(--fs-300);color:var(--ink);
@@ -310,6 +314,15 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 .site-footer__title{font-family:var(--font-body);font-size:var(--fs-200);letter-spacing:.12em;text-transform:uppercase;
   color:var(--muted);margin-bottom:var(--sp-3);font-weight:600}
 .site-footer__col{display:flex;flex-direction:column;gap:var(--sp-2)}
+/* Семнадцать услуг одной колонкой растягивали футер на семнадцать строк, пока
+   в соседних колонках стояло три. Список ложится в две колонки — но только если
+   каждой хватает 200 px, иначе длинные названия («Кератиновое выпрямление
+   и ботокс волос») переносятся на три строки и экономии нет. */
+@media(min-width:768px){
+  .site-footer__col--wide{display:block;columns:2 200px;column-gap:var(--sp-6)}
+  .site-footer__col--wide .site-footer__title{column-span:all}
+  .site-footer__col--wide .site-footer__link{display:block;margin-bottom:var(--sp-2)}
+}
 .site-footer__link{color:var(--ink);font-size:var(--fs-300)}
 .site-footer__link:hover{color:var(--rose)}
 .site-footer__bottom{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:space-between;
@@ -318,6 +331,10 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 
 /* shared section heading + card (used by home/service) */
 .section-head{text-align:center;max-width:640px;margin:0 auto var(--sp-12)}
+/* Отступ снизу отбивает заголовок от контента секции. Когда контента нет —
+   как на 404, где секция состоит из одной шапки, — отбивать нечего,
+   и 48 px просто складывались с паддингами соседних блоков. */
+.section-head:last-child{margin-bottom:0}
 /* Тот же clamp, что у заголовка услуги (service.css): 44 px на десктопе,
    36 px на телефоне. Фиксированные 44 px не влезали в 342 px контента
    и включали переносы по слогам в самой заметной строке страницы.

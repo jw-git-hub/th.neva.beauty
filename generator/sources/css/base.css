@@ -30,7 +30,10 @@ img[data-img-error]{color:transparent;
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--rose);outline-offset:2px;border-radius:4px}
 .container{max-width:var(--container);margin-inline:auto;padding-inline:var(--sp-6)}
-.section{padding-block:var(--sp-24)}
+/* Ритм секций: 96 px рассчитаны на десктоп, на телефоне столько же съедало
+   по 11% высоты экрана на каждый шов — восемь раз за страницу витрины.
+   Нижняя ступень 64 px, верхняя прежняя, между ними — по ширине окна. */
+.section{padding-block:clamp(var(--sp-16),8vw,var(--sp-24))}
 /* Секция открывает страницу крошками: отступ сверху задают сами крошки (.breadcrumbs--lead). */
 .section--lead{padding-top:0}
 .eyebrow{display:inline-flex;align-items:center;gap:var(--sp-3);
