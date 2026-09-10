@@ -631,8 +631,8 @@ def build_llms(site, content, prices, products=None):
         lines += ["", "## Косметика на продажу",
                   f"- [{page['h1']}]({base}{PRODUCTS_URL}) — {len(items)} позиций, "
                   f"цены {product_span(items, sign)}",
-                  "- Корзины и доставки нет: товар откладывают по переписке "
-                  "и отдают в салоне."]
+                  "- Корзины на сайте нет: заказ оформляют в мессенджере, товар "
+                  "отдают в салоне или отправляют доставкой по Таиланду."]
         for brand in products["brands"]:
             lines += ["", f"### {brand['name']}"]
             for item in brand["products"]:
@@ -927,7 +927,8 @@ def main():
             {"name": "Главная", "url": base_url + "/"},
             {"name": PRODUCTS_NAV_TITLE, "url": url},
         ], url),
-        schema.product_list_node(shop["h1"], items, currency, provider_ref, url),
+        schema.product_list_node(shop["h1"], items, currency, provider_ref, url,
+                                 region=site["business"]["address"]["country"]),
         schema.faq_node(shop["faq"], url),
     ]
     shop_og = og_image_path("kosmetika")

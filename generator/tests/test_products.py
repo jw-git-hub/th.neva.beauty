@@ -68,13 +68,22 @@ def test_product_name_carries_volume():
     assert len(set(names)) == len(names)
 
 
-def test_offer_says_store_only():
-    """Корзины нет: InStock обещал бы роботу интернет-магазин, которого не существует."""
+def test_offer_is_available_and_priced():
     item = product_items(PRODUCTS, BASE)[0]
     offer = schema.product_node(item, "THB", {"@id": "#business"}, BASE)["offers"]
-    assert offer["availability"] == schema.IN_STORE_ONLY
+    assert offer["availability"] == schema.IN_STOCK
     assert offer["price"] == 1200
     assert offer["priceCurrency"] == "THB"
+
+
+def test_offer_is_limited_to_the_delivery_country():
+    """Товар отдают в салоне или отправляют по Таиланду: за границей страны
+    предложение не действует, и разметка не должна обещать обратного."""
+    item = product_items(PRODUCTS, BASE)[0]
+    without = schema.product_node(item, "THB", {"@id": "#business"}, BASE)["offers"]
+    within = schema.product_node(item, "THB", {"@id": "#business"}, BASE, "TH")["offers"]
+    assert "eligibleRegion" not in without
+    assert within["eligibleRegion"] == {"@type": "Country", "name": "TH"}
 
 
 def test_product_list_holds_every_position_in_order():

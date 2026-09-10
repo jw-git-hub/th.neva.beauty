@@ -28,10 +28,11 @@ SERVICE_ID = "#service"
 FAQ_ID = "#faq"
 ITEMLIST_ID = "#services"
 PRODUCTS_ID = "#products"
-# Товар продаётся только на месте: заказать его на сайте нельзя, корзины нет.
-# InStock обещал бы роботу интернет-магазин, которого не существует, —
-# InStoreOnly описывает ровно то, что есть.
-IN_STORE_ONLY = "https://schema.org/InStoreOnly"
+# Товар можно забрать в салоне или получить доставкой по Таиланду, поэтому
+# InStoreOnly («только на месте») его не описывает. Само оформление идёт
+# в мессенджере, а не корзиной, — на доступность товара это не влияет,
+# и eligibleRegion честно ограничивает предложение страной доставки.
+IN_STOCK = "https://schema.org/InStock"
 NEW_CONDITION = "https://schema.org/NewCondition"
 
 
@@ -221,12 +222,25 @@ def item_list_node(name, items, page_url=None):
     }
 
 
-def product_node(item, currency, seller_ref, offer_url):
+def product_node(item, currency, seller_ref, offer_url, region=None):
     """Product с ценой — одна позиция витрины.
 
     Название несёт бренд и объём: «OI Oil» есть в двух флаконах, и без объёма
     это для робота один товар с двумя ценами. Продавец ссылается на узел
-    бизнеса — иначе из графа не следует, у кого этот товар покупают."""
+    бизнеса — иначе из графа не следует, у кого этот товар покупают.
+    region — страна, в пределах которой предложение действует: товар отдают
+    в салоне или отправляют доставкой, и за её границей его не купить."""
+    offer = {
+        "@type": "Offer",
+        "price": item["price_value"],
+        "priceCurrency": currency,
+        "availability": IN_STOCK,
+        "itemCondition": NEW_CONDITION,
+        "url": offer_url,
+        "seller": seller_ref,
+    }
+    if region:
+        offer["eligibleRegion"] = {"@type": "Country", "name": region}
     return {
         "@type": "Product",
         "name": f"{item['brand']} {item['title']}, {item['volume']}",
@@ -234,19 +248,11 @@ def product_node(item, currency, seller_ref, offer_url):
         "brand": {"@type": "Brand", "name": item["brand"]},
         "category": item["kind"],
         "image": item["image_url"],
-        "offers": {
-            "@type": "Offer",
-            "price": item["price_value"],
-            "priceCurrency": currency,
-            "availability": IN_STORE_ONLY,
-            "itemCondition": NEW_CONDITION,
-            "url": offer_url,
-            "seller": seller_ref,
-        },
+        "offers": offer,
     }
 
 
-def product_list_node(name, items, currency, seller_ref, page_url):
+def product_list_node(name, items, currency, seller_ref, page_url, region=None):
     """ItemList из Product — витрина целиком одним списком.
 
     Товар лежит на одной странице и своих адресов не имеет, поэтому Product
@@ -261,7 +267,7 @@ def product_list_node(name, items, currency, seller_ref, page_url):
                 "@type": "ListItem",
                 "position": position,
                 "item": product_node(item, currency, seller_ref,
-                                     f"{page_url}#{item['brand_slug']}"),
+                                     f"{page_url}#{item['brand_slug']}", region),
             }
             for position, item in enumerate(items, 1)
         ],
