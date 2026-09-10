@@ -318,7 +318,12 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 
 /* shared section heading + card (used by home/service) */
 .section-head{text-align:center;max-width:640px;margin:0 auto var(--sp-12)}
-.section-head h1,.section-head h2{font-size:var(--fs-800)}
+/* Тот же clamp, что у заголовка услуги (service.css): 44 px на десктопе,
+   36 px на телефоне. Фиксированные 44 px не влезали в 342 px контента
+   и включали переносы по слогам в самой заметной строке страницы.
+   balance убирает вдов — «Частые вопросы о косметике для / волос». */
+.section-head h1,.section-head h2{font-size:clamp(2.25rem,5.5vw,var(--fs-800));
+  text-wrap:balance}
 .section-head p{color:var(--muted);margin-top:var(--sp-3)}
 
 /* ===== BREADCRUMBS ===== */
@@ -326,7 +331,9 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
   font-size:var(--fs-200);color:var(--muted);margin-bottom:var(--sp-6)}
 .breadcrumbs a{color:var(--muted)}
 .breadcrumbs a:hover{color:var(--rose)}
-.breadcrumbs__sep{color:var(--line)}
+/* --line на фоне страницы даёт контраст 1.2:1 — слэша между «Главная»
+   и текущей страницей просто не видно, и путь читается как два слова подряд. */
+.breadcrumbs__sep{color:var(--taupe)}
 .breadcrumbs [aria-current="page"]{color:var(--ink)}
 /* Крошки открывают страницу: единственный источник отступа от шапки — одинакового
    на странице услуги и на странице категории. Секция под ними обнуляет свой верхний
