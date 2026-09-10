@@ -36,6 +36,14 @@ a{color:inherit;text-decoration:none}
 .section{padding-block:clamp(var(--sp-16),8vw,var(--sp-24))}
 /* Секция открывает страницу крошками: отступ сверху задают сами крошки (.breadcrumbs--lead). */
 .section--lead{padding-top:0}
+/* Витрина: в lead-секции только шапка и строка брендов, сетки карточек нет.
+   Полный отступ снизу складывался с отступом следующей секции — от интро
+   до первого бренда выходило 204 px пустоты при 48 px внутри самого блока,
+   и пауза читалась не как разрыв между секциями, а как незагрузившийся кусок.
+   Разрыв держит padding-top соседней секции, своего низа здесь не нужно.
+   На странице раздела класс не нужен: там lead-секция заканчивается сеткой
+   карточек, и её собственный низ отбивает эти карточки от следующего блока. */
+.section--lead-bare{padding-bottom:0}
 .eyebrow{display:inline-flex;align-items:center;gap:var(--sp-3);
   font-family:var(--font-body);font-size:var(--fs-200);letter-spacing:.2em;
   text-transform:uppercase;color:var(--rose);font-weight:600}

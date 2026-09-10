@@ -11,11 +11,17 @@
 }
 
 /* Плотнее сетки услуг: у товара кадр вертикальный, а подпись короткая,
-   поэтому в ряд помещается четвёртая колонка. */
-.product-grid{display:grid;gap:var(--sp-6);grid-template-columns:1fr}
-@media(min-width:560px){.product-grid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:900px){.product-grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1200px){.product-grid{grid-template-columns:repeat(4,1fr)}}
+   поэтому в ряд помещается четвёртая колонка.
+   Не grid, а flex с переносом — по той же причине, что у шагов покупки ниже:
+   у LEBEL на полке две позиции, и в сетке на четыре колонки они занимали
+   левую половину ряда под центрованным заголовком, а правая оставалась пустой.
+   flex-basis повторяет ширину колонки прежней сетки (на 1200 px это те же
+   270 px), но неполный ряд встаёт по центру, а не прижимается влево. */
+.product-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-6)}
+.product-grid > *{flex:0 1 100%}
+@media(min-width:560px){.product-grid > *{flex-basis:calc((100% - var(--sp-6)) / 2)}}
+@media(min-width:900px){.product-grid > *{flex-basis:calc((100% - var(--sp-6) * 2) / 3)}}
+@media(min-width:1200px){.product-grid > *{flex-basis:calc((100% - var(--sp-6) * 3) / 4)}}
 
 /* Шаги покупки. Плитка внутри та же, что у преимуществ (.benefit), а сетка своя:
    .benefits-grid на главной рассчитана на четыре колонки, и три шага занимали
