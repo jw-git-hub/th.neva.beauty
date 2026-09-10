@@ -27,14 +27,16 @@
 .steps-grid > *{flex:1 1 240px;max-width:340px}
 
 .product-card{display:flex;flex-direction:column}
+/* Карточка не ссылка — кликается только «Спросить о наличии». Значит и подъём
+   под курсором ей не положен: он обещал бы клик по всей плитке. Базовый вид
+   остаётся от .card, снимается только реакция на наведение. */
+.product-card:hover{transform:none;box-shadow:none;border-color:var(--line)}
 /* На узком экране карточка одна в ряд, и кадр 4:5 занимал бы пол-экрана
    на каждый флакон. Квадрат сокращает прокрутку витрины вдвое, а поля по бокам
    заливает тот же цвет, что и фон кадра. */
 .product-card__media{background:var(--product-bg);aspect-ratio:1/1;overflow:hidden}
 @media(min-width:560px){.product-card__media{aspect-ratio:4/5}}
-.product-card__media img{width:100%;height:100%;object-fit:contain;
-  transition:transform var(--t-mid) var(--ease)}
-.product-card:hover .product-card__media img{transform:scale(1.04)}
+.product-card__media img{width:100%;height:100%;object-fit:contain}
 
 .product-card__body{flex:1;padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2)}
 /* Линейка бренда набирается как есть: «viege» пишется со строчной,
@@ -50,7 +52,15 @@
   display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--sp-2)}
 .product-card__price{color:var(--rose-deep);font-weight:700;
   font-size:var(--fs-500);font-variant-numeric:tabular-nums}
-.product-card__more{display:inline-flex;align-items:center;gap:6px;
-  color:var(--rose);font-weight:600;font-size:var(--fs-300)}
+/* Единственная кликабельная часть карточки. */
+.product-card__more{position:relative;display:inline-flex;align-items:center;gap:6px;
+  color:var(--rose);font-weight:600;font-size:var(--fs-300);
+  transition:color var(--t-fast) var(--ease)}
+/* Область нажатия выше самой строки: пальцем в одну строку текста попасть трудно.
+   Раздвинуть строку отступами нельзя — цена и ссылка выровнены по базовой линии,
+   и отступ уводит их на разные высоты (проверено: строка выросла с 29 до 76 px).
+   Псевдоэлемент добирает высоту до 45 px, не участвуя в раскладке. */
+.product-card__more::after{content:"";position:absolute;inset:-.75rem 0}
 .product-card__more .icon{width:16px;height:16px;transition:transform var(--t-mid) var(--ease)}
-.product-card:hover .product-card__more .icon{transform:translateX(4px)}
+.product-card__more:hover{color:var(--rose-deep)}
+.product-card__more:hover .icon{transform:translateX(4px)}

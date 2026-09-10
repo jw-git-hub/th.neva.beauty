@@ -1,8 +1,11 @@
 {# Витрина товара. Корзины нет: заказ оформляют в мессенджере, а получают товар
-   в салоне или доставкой по Таиланду. Поэтому карточка не «кладёт в корзину»,
-   а целиком является ссылкой в WhatsApp с уже подставленным названием — тем же
-   приёмом, что кнопка записи на услугах. Двенадцать отдельных кнопок внутри
-   карточек превратили бы полку в лендинг. #}
+   в салоне или доставкой по Таиланду.
+
+   Кликается только «Спросить о наличии», а не карточка целиком. Карточка-ссылка
+   уводила со страницы по клику куда угодно — по фотографии, по названию, по цене,
+   — хотя ведёт она во внешний мессенджер, и такого перехода в этом месте никто
+   не ждёт. Ссылка одна, с адресом видимым в статусной строке, и уносит в WhatsApp
+   с уже подставленным названием товара. #}
 {% extends "base.html.j2" %}
 {% from "partials/faq.html.j2" import faq_list %}
 {% from "partials/booking.html.j2" import booking %}
@@ -29,8 +32,8 @@
   </div>
   <div class="product-grid" data-reveal-children>
     {% for item in brand.products %}
-    {%- set message = 'Здравствуйте! Интересует ' ~ brand.name ~ ' ' ~ item.title ~ ', ' ~ item.volume %}
-    <a class="product-card card" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">
+    {%- set product = brand.name ~ ' ' ~ item.title ~ ', ' ~ item.volume %}
+    <div class="product-card card">
       <div class="product-card__media">{{ responsive_img(item.image, 'product_card', item.image_alt) }}</div>
       <div class="product-card__body">
         <p class="product-card__line">{{ item.line }}</p>
@@ -39,10 +42,13 @@
         <p class="product-card__desc">{{ item.desc }}</p>
         <p class="product-card__foot">
           <span class="product-card__price">{{ item.price | price }}</span>
-          <span class="product-card__more">Спросить о наличии {{ icon('arrow-right') }}</span>
+          {#- Подпись у всех двенадцати ссылок одна, и списком ссылок страницы
+              она читается как двенадцать одинаковых пунктов. aria-label
+              называет товар — экранный диктор произносит, о чём спрашивают. #}
+          <a class="product-card__more" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Интересует ' ~ product) | urlencode }}" target="_blank" rel="noopener" aria-label="Спросить о наличии: {{ product }}">Спросить о наличии {{ icon('arrow-right') }}</a>
         </p>
       </div>
-    </a>
+    </div>
     {% endfor %}
   </div>
 </section>

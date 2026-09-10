@@ -45,7 +45,7 @@ CARD = "a.related-card"
 CARD_PRICE = ".related-card__price"
 ROBOT_MARKUP = "script, style"
 # Витрина товара: те же «название → цена», но карточками и из своего источника.
-PRODUCT_CARD = "a.product-card"
+PRODUCT_CARD = ".product-card"
 PRODUCT_NAME = ".product-card__body h3"
 PRODUCT_KIND = ".product-card__kind"
 PRODUCT_PRICE = ".product-card__price"
