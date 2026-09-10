@@ -28,6 +28,11 @@ IMG_DIR = ROOT.parent / "th.neva.beauty" / "assets" / "img"
 # кадре сайта (волосы крупным планом) PSNR 37.4 дБ, разницы с q82 не видно
 # при попиксельном сравнении, а файл легче на 17%.
 QUALITY = 78
+# Кадры товара — флаконы на ровном фоне студии, а не волосы крупным планом, под
+# которые подбирался общий порог. Здесь q62 неотличим от q78 при трёхкратном
+# увеличении (сверено на этикетке SOLU — самый мелкий текст витрины, PSNR 40,2 дБ),
+# а весит на 18% меньше: вся витрина в варианте 560 — 101,5 КБ вместо 122,6 КБ.
+QUALITY_BY_SLOT = {"product_card": 62}
 METHOD = 6     # самый медленный и самый плотный режим кодера WebP
 
 
@@ -69,8 +74,8 @@ def crop_to_ratio(image, ratio):
     return image.crop((0, top, width, top + new_height))
 
 
-def save_webp(image, path):
-    image.save(path, format="WEBP", quality=QUALITY, method=METHOD)
+def save_webp(image, path, quality=QUALITY):
+    image.save(path, format="WEBP", quality=quality, method=METHOD)
     print(f"→ {path.name} {image.width}×{image.height} {path.stat().st_size // 1024} КБ")
 
 
@@ -78,13 +83,14 @@ def build_variants(slot, stem):
     """Пишет самый большой файл лестницы и все уменьшенные копии."""
     widths = images.SLOTS[slot]["widths"]
     ratio = images.width(slot) / images.height(slot)
+    quality = QUALITY_BY_SLOT.get(slot, QUALITY)
     with Image.open(source_for(slot, stem)) as source:
         frame = crop_to_ratio(source.convert("RGB"), ratio)
         for target in widths:
             height = round(target / ratio)
             suffix = "" if target == widths[-1] else f"-{target}"
             save_webp(frame.resize((target, height), Image.LANCZOS),
-                      IMG_DIR / f"{stem}{suffix}.webp")
+                      IMG_DIR / f"{stem}{suffix}.webp", quality)
 
 
 def main():
