@@ -52,7 +52,7 @@
 <section class="section benefits-section" id="kak-kupit">
   <div class="container">
     <div class="section-head" data-reveal><p class="eyebrow">Покупка</p><h2>{{ page_data.steps_title }}</h2></div>
-    <div class="benefits-grid" data-reveal-children>
+    <div class="steps-grid" data-reveal-children>
       {% for step in page_data.steps %}
       <div class="benefit"><span class="benefit__icon">{{ icon(step.icon) }}</span><h3>{{ step.title }}</h3><p>{{ step.text }}</p></div>
       {% endfor %}

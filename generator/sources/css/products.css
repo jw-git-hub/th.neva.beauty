@@ -17,6 +17,15 @@
 @media(min-width:900px){.product-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1200px){.product-grid{grid-template-columns:repeat(4,1fr)}}
 
+/* Шаги покупки. Плитка внутри та же, что у преимуществ (.benefit), а сетка своя:
+   .benefits-grid на главной рассчитана на четыре колонки, и три шага занимали
+   три слота из четырёх — блок прижимался влево под центрованным заголовком.
+   Здесь колонки не заданы числом: сколько поместилось, столько и встало, а ряд
+   всегда по центру — и последний неполный тоже. Так блок не поедет вбок,
+   если шагов когда-нибудь станет четыре или два. */
+.steps-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-8)}
+.steps-grid > *{flex:1 1 240px;max-width:340px}
+
 .product-card{display:flex;flex-direction:column}
 /* На узком экране карточка одна в ряд, и кадр 4:5 занимал бы пол-экрана
    на каждый флакон. Квадрат сокращает прокрутку витрины вдвое, а поля по бокам
