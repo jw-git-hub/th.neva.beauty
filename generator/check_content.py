@@ -63,8 +63,6 @@ TITLE_PREFIX = 20  # по такому началу заголовка поис�
 BRAND_SUFFIX = " — Neva Beauty"  # единая связка названия салона с заголовком
 # Заглушки даты изменения из build.py: в собранной странице их быть не должно.
 LASTMOD_PLACEHOLDERS = ("0000-00-00", "00 месяца 0000 года")
-# Ответ под вопросом-заголовком блока цен короче этого — не ответ, а подпись.
-LEAD_MIN_CHARS = 60
 DESC_MIN, DESC_MAX = 120, 170
 
 # Знаки, которых нет ни в Manrope, ни в Cormorant, — их рисует системный шрифт.
@@ -477,12 +475,12 @@ def check_visible_date(path, soup):
         report(rel(path), "нет видимой даты обновления страницы в подвале")
 
 
-def check_price_answer(path, soup):
-    """Блок цен отвечает вопросом-заголовком и абзацем-ответом над таблицей.
+def check_price_question(path, soup):
+    """Заголовок блока цен — вопрос, которым аудитория ищет цену.
 
-    «Сколько стоит» — самый частый запрос аудитории. Блок, который начинается
-    сразу таблицей, отвечает на него только строками прайса: короткого ответа,
-    который ИИ мог бы процитировать целиком, из него не вынуть."""
+    «Сколько стоит» — самый частый запрос аудитории, и отвечает на него прайс
+    прямо под заголовком. Абзаца, который пересказывал прайс словами, над ним
+    нет: заказчик снял его как повтор тех же сумм (задача 122)."""
     block = soup.select_one("#ceny, .pricelist-section")
     if not block:
         return  # страница без цен — служебная
@@ -490,9 +488,6 @@ def check_price_answer(path, soup):
     if not heading or not heading.get_text(strip=True).endswith("?"):
         report(rel(path), f"заголовок блока цен не вопрос: "
                           f"{heading.get_text(strip=True) if heading else None!r}")
-    lead = block.select(".section-head p")
-    if len(lead) < 2 or len(lead[1].get_text(strip=True)) < LEAD_MIN_CHARS:
-        report(rel(path), "под заголовком блока цен нет абзаца-ответа")
 
 
 def check_placeholder_leak(path, text):
@@ -557,7 +552,7 @@ def main():
         check_open_graph(path, soup)
         check_faq(path, soup)
         check_visible_date(path, soup)
-        check_price_answer(path, soup)
+        check_price_question(path, soup)
     check_css_variables()
     check_verification(files)
     check_page_dates()

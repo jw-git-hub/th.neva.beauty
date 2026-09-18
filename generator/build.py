@@ -819,8 +819,6 @@ def main():
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
             "hero_stem": "hero", "hero_slot": "home_hero",
             "og_image_alt": site["og_image"]["default_alt"]}
-    home["price_lead"] = render_rich_text(
-        home["price_lead"], site["contacts"], base_path, prices_index)
     write_page(OUT/"index.html", "/", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"],
         prices=prices, price_rows=home_price_rows(content, prices, site)),
@@ -838,10 +836,6 @@ def main():
         sections = prices.get(slug, [])
         cat = category_by_slug[slug]
         render_page_prices(svc, prices_index)
-        # Лид блока цен — тот же рич-текст, что и ответы FAQ: ссылки на смежные
-        # услуги, суммы плейсхолдерами, префикс base_path для превью по подпути.
-        svc["price_lead"] = render_rich_text(
-            svc["price_lead"], site["contacts"], base_path, prices_index)
         url = base_url + f"/{slug}/"
         hero = base_url + f"/assets/img/{svc['hero_image']}.webp"
         crumbs = [{"name": "Главная", "url": base_url + "/"}]
@@ -881,8 +875,6 @@ def main():
         if not cat["is_page"]:
             continue
         render_page_prices(cat, prices_index)
-        cat["price_lead"] = render_rich_text(
-            cat["price_lead"], site["contacts"], base_path, prices_index)
         url = base_url + cat["url"]
         nodes = [
             schema.webpage_node(url, base_url, cat["seo_title"], cat["seo_desc"],
