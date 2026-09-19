@@ -510,21 +510,6 @@ def category_price_rows(cat, services, prices, site):
     return rows
 
 
-def home_price_rows(content, prices, site):
-    """Строки сводной таблицы главной: направление, состав, диапазон цен."""
-    sign = site["business"]["currency_sign"]
-    rows = []
-    for cat in content["categories"]:
-        slugs = cat["services"]
-        rows.append({
-            "url": cat["url"] if cat["is_page"] else f"/{slugs[0]}/",
-            "label": cat["title"],
-            "services": ", ".join(content["services"][slug]["title"] for slug in slugs),
-            "span": price_span([prices.get(slug, []) for slug in slugs], sign),
-        })
-    return rows
-
-
 # Ссылка в HTML-ответе FAQ → markdown-ссылка для llms.txt. Относительный адрес
 # разворачивается в абсолютный: файл читают в отрыве от сайта, и «/volosy/»
 # из него никуда не ведёт.
@@ -821,7 +806,7 @@ def main():
             "og_image_alt": site["og_image"]["default_alt"]}
     write_page(OUT/"index.html", "/", e.get_template("home.html.j2").render(
         site=site, page=page, home=content["home"], categories=content["categories"],
-        prices=prices, price_rows=home_price_rows(content, prices, site)),
+        prices=prices),
         journal, history, today)
     # услуги
     tpl = e.get_template("service.html.j2")
