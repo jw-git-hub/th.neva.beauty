@@ -1,7 +1,7 @@
 {
   "/": {
     "date": "2026-09-19",
-    "hash": "ea1d2938d161ddc1d38b6e9ad6e10ad4d0de459a"
+    "hash": "c8a4e7b6e0d359c4133688b750653878db15662c"
   },
   "/apparatnaya-kosmetologiya/": {
     "date": "2026-09-18",
@@ -81,14 +81,14 @@
   },
   "/uhod-za-volosami/": {
     "date": "2026-09-19",
-    "hash": "dc74335067bf8848ed8502e5acf5e222b622d40f"
+    "hash": "3bd3cdcfc254e30b990927f714a9cb2ac090fa47"
   },
   "/uhodovaya-kosmetologiya/": {
     "date": "2026-09-18",
     "hash": "e422abe1265c9a9443ad7e26dec745f93f5a5755"
   },
   "/volosy/": {
-    "date": "2026-09-18",
-    "hash": "52a2f8ada5d3ac9f907e7d9d916f839aa03c2a2f"
+    "date": "2026-09-19",
+    "hash": "dbeea17677a8c2a8642c762459e31ba7629ef5d2"
   }
 }
