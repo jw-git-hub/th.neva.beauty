@@ -484,7 +484,7 @@ def check_price_question(path, soup):
     «Сколько стоит» — самый частый запрос аудитории, и отвечает на него прайс
     прямо под заголовком. Абзаца, который пересказывал прайс словами, над ним
     нет: заказчик снял его как повтор тех же сумм (задача 122)."""
-    block = soup.select_one("#ceny, .pricelist-section")
+    block = soup.select_one(".pricelist-section")
     if not block:
         return  # страница без цен — служебная
     heading = block.select_one("h2")

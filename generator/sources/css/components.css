@@ -473,24 +473,32 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
   box-shadow:0 30px 66px rgba(74,59,56,.22), 0 0 0 1px rgba(255,255,255,.4) inset}
 
 /* ===== COMPARE ===== */
-/* Прокрутка у обёртки, а не у страницы: на узком экране таблица уезжает вбок
-   внутри себя и не тянет за собой горизонтальную прокрутку всего документа. */
-.compare{max-width:960px;margin-inline:auto;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.compare{max-width:960px;margin-inline:auto}
 /* border-collapse:separate — как у прайса: только так работают border-radius
    и боковой padding, за счёт которого разделители не доходят до краёв карточки. */
-.compare__table{width:100%;min-width:600px;background:var(--white);border:1px solid var(--line);
+.compare__table{width:100%;background:var(--white);border:1px solid var(--line);
   border-radius:var(--radius-lg);border-collapse:separate;border-spacing:0;padding:0 var(--sp-5)}
 .compare__table th,.compare__table td{text-align:left;vertical-align:top;padding:var(--sp-4) var(--sp-4) var(--sp-4) 0}
-.compare__table thead th{font-size:var(--fs-200);font-weight:600;text-transform:uppercase;
-  letter-spacing:.08em;color:var(--muted)}
+/* Подпись колонки на узком экране (::before) набрана как шапка таблицы. */
+.compare__table thead th,.compare__table td::before{font-size:var(--fs-200);font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .compare__table tbody th{font-weight:600;color:var(--ink)}
 .compare__table tbody th a{color:var(--rose-deep)}
 .compare__table tbody th a:hover{color:var(--rose)}
 .compare__table td{font-size:var(--fs-300);color:var(--muted)}
 .compare__table tr>*{border-bottom:1px dashed var(--line)}
 .compare__table tbody tr:last-child>*{border-bottom:none}
-/* Диапазон цен в сводной таблице — той же подачей, что и в прайсе услуги
-   (.pricelist__price): без nowrap соседняя колонка с перечислением услуг
-   зажимает цену, и «300–20 000 ฿» ломается на две строки. */
-.compare__price{font-weight:600;color:var(--rose-deep);font-variant-numeric:tabular-nums;
-  white-space:nowrap}
+/* Уже 768 px четыре колонки не помещались, и таблица уезжала вбок, пряча
+   последнюю колонку за край экрана. Здесь строка становится блоком той же
+   карточки: название метода сверху, под ним «подпись — значение» из data-label.
+   Шапка скрыта целиком — её слова уже стоят в подписях, и скринридер читает
+   их вместе со значением. */
+@media(max-width:767.98px){
+  .compare__table,.compare__table tbody,.compare__table tr,.compare__table th,.compare__table td{display:block}
+  .compare__table thead{display:none}
+  .compare__table tr>*{padding:0;border-bottom:none}
+  .compare__table tbody tr{padding:var(--sp-4) 0;border-bottom:1px dashed var(--line)}
+  .compare__table tbody tr:last-child{border-bottom:none}
+  .compare__table td{margin-top:var(--sp-3)}
+  .compare__table td::before{content:attr(data-label);display:block;margin-bottom:var(--sp-1)}
+}

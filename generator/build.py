@@ -491,25 +491,6 @@ def price_with_note(svc, span):
     return f"{span}, {note}"
 
 
-def category_price_rows(cat, services, prices, site):
-    """Строки сводной таблицы раздела: услуга, диапазон цен, длительность.
-
-    Раздел перечисляет услуги карточками, и на вопрос «сколько стоит эпиляция
-    на Самуи» отвечать ему было нечем — цена стояла только подписью «от … ฿».
-    Таблица собирается из прайса и полей услуг, ничего не добавляя от себя."""
-    sign = site["business"]["currency_sign"]
-    rows = []
-    for slug in cat["services"]:
-        svc = services[slug]
-        rows.append({
-            "slug": slug,
-            "label": svc["title"],
-            "span": price_with_note(svc, price_span([prices.get(slug, [])], sign)),
-            "duration": svc.get("duration"),
-        })
-    return rows
-
-
 # Ссылка в HTML-ответе FAQ → markdown-ссылка для llms.txt. Относительный адрес
 # разворачивается в абсолютный: файл читают в отрыве от сайта, и «/volosy/»
 # из него никуда не ведёт.
@@ -887,8 +868,7 @@ def main():
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
         write_page(OUT/cat["slug"]/"index.html", cat["url"], cat_tpl.render(
             site=site, page=page, cat=cat, services=content["services"],
-            categories=content["categories"],
-            price_rows=category_price_rows(cat, content["services"], prices, site)),
+            categories=content["categories"]),
             journal, history, today)
     # витрина товара — единственная страница сайта, где предлагают не услугу, а вещь
     shop = products["page"]

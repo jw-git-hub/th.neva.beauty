@@ -18,44 +18,46 @@
     <p>Запись идёт через мессенджеры. Открывая переписку, вы показываете нам ровно то, что показывает мессенджер по своим настройкам, и то, что решите написать сами: имя, желаемую процедуру, удобное время, иногда — вопрос о коже или фото. Объём здесь выбираете вы.</p>
     <p>Эта переписка живёт у мессенджера и в телефоне администратора салона. Мы не выгружаем её в таблицы, не переносим в базу и не заводим на клиента карточку.</p>
 
-    <div class="legal-table" tabindex="0" role="region" aria-label="Какие данные и где хранятся">
-      <table>
-        <thead>
-          <tr>
-            <th>Канал</th>
-            <th>Что мы видим</th>
-            <th>Где эти данные лежат</th>
-            <th>По чьим правилам</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>WhatsApp</td>
-            <td>Номер телефона, имя и фото профиля, текст переписки</td>
-            <td>Серверы WhatsApp и телефон администратора</td>
-            <td>WhatsApp (Meta)</td>
-          </tr>
-          <tr>
-            <td>Telegram</td>
-            <td>Имя и @username, номер телефона — если он открыт вашими настройками, текст переписки</td>
-            <td>Серверы Telegram и телефон администратора</td>
-            <td>Telegram</td>
-          </tr>
-          <tr>
-            <td>Instagram Direct</td>
-            <td>Аккаунт и текст переписки</td>
-            <td>Серверы Instagram и телефон администратора</td>
-            <td>Instagram (Meta)</td>
-          </tr>
-          <tr>
-            <td>Сайт</td>
-            <td>Обезличенная статистика визита — без имени и телефона</td>
-            <td>Серверы Яндекса</td>
-            <td>Яндекс.Метрика</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    {#- Роли ARIA дублируют родные намеренно: уже 768 px CSS складывает строки
+        в блоки, и Safari без явных ролей перестаёт считать это таблицей.
+        data-label — подпись колонки, которую на узком экране выводит ::before. #}
+    <table role="table">
+      <caption class="visually-hidden">Какие данные и где хранятся</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader">Канал</th>
+          <th role="columnheader">Что мы видим</th>
+          <th role="columnheader">Где эти данные лежат</th>
+          <th role="columnheader">По чьим правилам</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        <tr role="row">
+          <td role="rowheader">WhatsApp</td>
+          <td role="cell" data-label="Что мы видим">Номер телефона, имя и фото профиля, текст переписки</td>
+          <td role="cell" data-label="Где эти данные лежат">Серверы WhatsApp и телефон администратора</td>
+          <td role="cell" data-label="По чьим правилам">WhatsApp (Meta)</td>
+        </tr>
+        <tr role="row">
+          <td role="rowheader">Telegram</td>
+          <td role="cell" data-label="Что мы видим">Имя и @username, номер телефона — если он открыт вашими настройками, текст переписки</td>
+          <td role="cell" data-label="Где эти данные лежат">Серверы Telegram и телефон администратора</td>
+          <td role="cell" data-label="По чьим правилам">Telegram</td>
+        </tr>
+        <tr role="row">
+          <td role="rowheader">Instagram Direct</td>
+          <td role="cell" data-label="Что мы видим">Аккаунт и текст переписки</td>
+          <td role="cell" data-label="Где эти данные лежат">Серверы Instagram и телефон администратора</td>
+          <td role="cell" data-label="По чьим правилам">Instagram (Meta)</td>
+        </tr>
+        <tr role="row">
+          <td role="rowheader">Сайт</td>
+          <td role="cell" data-label="Что мы видим">Обезличенная статистика визита — без имени и телефона</td>
+          <td role="cell" data-label="Где эти данные лежат">Серверы Яндекса</td>
+          <td role="cell" data-label="По чьим правилам">Яндекс.Метрика</td>
+        </tr>
+      </tbody>
+    </table>
 
     <p>Удалить переписку у себя вы можете средствами самого мессенджера. Попросите — удалим и на своей стороне.</p>
 
