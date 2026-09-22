@@ -26,7 +26,7 @@
 
 **Neva Beauty — Koh Samui** is the website of a beauty salon on Koh Samui, Thailand.
 It serves Russian- and English-speaking clients: cosmetology and hardware procedures,
-hair removal, hair care, body contouring and permanent makeup.
+hair removal, hair care and body contouring.
 
 This is a **migration of a running business off the Tilda page builder onto a custom
 static site generator** — the entire price list carried over intact, the copy rewritten
@@ -35,7 +35,7 @@ and the output is clean static HTML served for free from GitHub Pages on a custo
 domain: no CMS, no database, no paid hosting, no builder subscription.
 
 Everything a visitor sees is assembled from single sources of truth, and
-**204 prices plus the quality of all 25 pages are guarded by automated checks inside
+**193 prices plus the quality of all 25 pages are guarded by automated checks inside
 the deploy pipeline** — a wrong price or a broken link physically cannot reach production.
 
 <table>
@@ -61,10 +61,6 @@ the deploy pipeline** — a wrong price or a broken link physically cannot reach
     <td align="center" width="33%">
       <img src="th.neva.beauty/assets/img/cat-korrekciya-figury-700.webp" width="100%"><br>
       <sub><b>Body contouring</b></sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="th.neva.beauty/assets/img/cat-makiyazh-700.webp" width="100%"><br>
-      <sub><b>Permanent makeup</b></sub>
     </td>
   </tr>
 </table>
@@ -130,7 +126,7 @@ flowchart LR
   A category holding a single service gets no page of its own and links straight to that
   service: the site has no empty wrapper pages.
 
-- **💰 Price-accuracy guarantee.** `prices.json` is the only source of prices — 204 items.
+- **💰 Price-accuracy guarantee.** `prices.json` is the only source of prices — 193 items.
   After the build, `check_prices.py` parses the generated HTML and compares against the
   reference not just the number, but the price-list section, the item caption and the
   promo label, failing on any mismatch. Prices are never duplicated in the copy either:
@@ -258,7 +254,7 @@ via `CNAME`.
 
 ## 🧭 Site content
 
-**6 categories · 17 services · 204 price-list items · 25 pages**, with the structure
+**5 categories · 16 services · 193 price-list items · 25 pages**, with the structure
 generated automatically from the taxonomy:
 
 | Category | Services |
@@ -268,7 +264,6 @@ generated automatically from the taxonomy:
 | **Hardware cosmetology** | RF microneedling · SMAS lifting · tattoo and PMU removal · M22 photorejuvenation |
 | **Cosmetology** | facial care · botulinum therapy |
 | **Body contouring** | endosphere therapy · professional massage |
-| **Permanent makeup** | permanent makeup |
 
 ---
 
