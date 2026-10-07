@@ -1,14 +1,11 @@
 // Появления секций и карточек при входе во вьюпорт (fade-up, одноразово).
-const SELECTOR = "[data-reveal], [data-reveal-children]";
-const CHILDREN_ATTR = "data-reveal-children";
-// Значение атрибута, с которым сетка раскрывается рядами, а не целиком.
-const ROWS_MODE = "rows";
+const BLOCK_SELECTOR = "[data-reveal]";
+const CARD_SELECTOR = "[data-reveal-children] > *";
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-// Блок считается вошедшим, когда во вьюпорте его пятнадцатая с небольшим часть.
-const THRESHOLD = 0.15;
-// Наблюдатель смотрит на вьюпорт, укороченный снизу на 10% (rootMargin ниже).
-const ROOT_SHARE = 0.9;
-// Шаг каскада: каждая следующая карточка стартует на столько позже предыдущей.
+// Блок (заголовок секции, таблица) считается вошедшим, когда его пятнадцатая
+// с небольшим часть показалась во вьюпорте, укороченном снизу на 10%.
+const BLOCK_OBSERVER_OPTIONS = { rootMargin: "0px 0px -10% 0px", threshold: 0.15 };
+// Шаг каскада: каждая следующая карточка ряда стартует на столько позже предыдущей.
 const STAGGER_MS = 70;
 
 function show(el, delayMs = 0) {
@@ -16,22 +13,21 @@ function show(el, delayMs = 0) {
   el.classList.add("is-visible");
 }
 
-function reveal(el) {
-  if (!el.hasAttribute(CHILDREN_ATTR)) return show(el);
-  [...el.children].forEach((child, index) => show(child, index * STAGGER_MS));
-}
-
 function revealBlocks(entries, observer) {
   for (const entry of entries) {
     if (!entry.isIntersecting) continue;
-    reveal(entry.target);
+    show(entry.target);
     observer.unobserve(entry.target);
   }
 }
 
+// Сетку наблюдаем не целиком, а по карточке. Порог блочного наблюдателя — доля
+// высоты блока, и чем сетка выше, тем позже она появлялась: в одну колонку
+// на телефоне первый ряд оставался прозрачным, пока в экран не въезжало
+// пол-экрана пустого места, а самым высоким сеткам порог был недостижим вовсе.
 // Карточки одного ряда стоят на одной высоте и входят во вьюпорт одним пакетом,
-// в порядке разметки. Каскад считается внутри ряда: первая карточка каждого ряда
-// стартует сразу, а не ждёт своей очереди за всеми рядами выше.
+// в порядке разметки, поэтому каскад считается внутри ряда: первая карточка
+// каждого ряда стартует сразу, а не ждёт своей очереди за всеми рядами выше.
 function revealRows(entries, observer) {
   const shownInRow = new Map();
   for (const entry of entries) {
@@ -44,35 +40,15 @@ function revealRows(entries, observer) {
   }
 }
 
-// Порог блочного наблюдателя задан долей самого блока, и чем блок выше, тем
-// позже он появляется. Витрина товара на 1440 px — 2000 px высотой: её первый ряд
-// оставался прозрачным, пока в экран не въезжало 380 px пустого места, а потом
-// сетка раскрывалась целиком — с рядами за нижним краем и каскадом до 630 мс
-// на карточку. На телефоне она выше 7000 px, и порог недостижим вовсе.
-// Такие сетки наблюдаем по карточке: ряд появляется, как только показался его
-// верхний край. Режим включается в разметке (data-reveal-children="rows") и сам —
-// для любой сетки, которой порог недостижим. Остальные работают как работали.
-function revealsByRows(el) {
-  if (!el.hasAttribute(CHILDREN_ATTR)) return false;
-  if (el.getAttribute(CHILDREN_ATTR) === ROWS_MODE) return true;
-  return el.getBoundingClientRect().height * THRESHOLD > innerHeight * ROOT_SHARE;
-}
-
-function observe(el, blockObserver, rowObserver) {
-  if (!revealsByRows(el)) return blockObserver.observe(el);
-  for (const child of el.children) rowObserver.observe(child);
-}
-
-const targets = document.querySelectorAll(SELECTOR);
+const blocks = document.querySelectorAll(BLOCK_SELECTOR);
+const cards = document.querySelectorAll(CARD_SELECTOR);
 
 if (reduceMotion) {
-  targets.forEach(reveal);
+  for (const el of [...blocks, ...cards]) show(el);
 } else {
-  const blockObserver = new IntersectionObserver(revealBlocks, {
-    rootMargin: "0px 0px -10% 0px",
-    threshold: THRESHOLD,
-  });
-  // Без порога и без укороченного вьюпорта: хватает первого пикселя карточки.
+  const blockObserver = new IntersectionObserver(revealBlocks, BLOCK_OBSERVER_OPTIONS);
+  // Без порога и без укороченного вьюпорта: карточке хватает первого пикселя.
   const rowObserver = new IntersectionObserver(revealRows);
-  targets.forEach((el) => observe(el, blockObserver, rowObserver));
+  blocks.forEach((el) => blockObserver.observe(el));
+  cards.forEach((el) => rowObserver.observe(el));
 }
