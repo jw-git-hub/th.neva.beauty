@@ -37,7 +37,10 @@
   <div class="section-head" data-reveal>
     <p class="eyebrow">Бренд</p><h2>{{ brand.heading }}</h2><p>{{ brand.lead }}</p>
   </div>
-  <div class="product-grid" data-reveal-children>
+  {#- rows: сетка раскрывается рядами по мере прокрутки, а не целиком —
+      в ней до трёх-четырёх рядов, и общий порог держал первый ряд невидимым
+      на пол-экрана (см. reveal.js). #}
+  <div class="product-grid" data-reveal-children="rows">
     {% for item in brand.products %}
     {%- set product = brand.name ~ ' ' ~ item.title ~ ', ' ~ item.volume %}
     <div class="product-card card">
