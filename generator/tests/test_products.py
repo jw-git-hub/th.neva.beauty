@@ -12,8 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import schema
-from build import (PRODUCTS_FOOTER_AFTER, PRODUCTS_NAV_LABEL, PRODUCTS_URL, build_llms,
-                   build_nav, product_items, product_span)
+from build import (PRODUCTS_NAV_LABEL, PRODUCTS_URL, build_llms, build_nav,
+                   product_items, product_span)
 
 BASE = "https://th.neva.beauty"
 
@@ -107,17 +107,10 @@ NAV_SERVICES = {"uhod-za-volosami": {"title": "Уход за волосами"}}
 
 
 def test_shop_stands_right_after_home_not_next_to_cosmetology():
-    """В меню витрина идёт сразу за «Главной». «Косметика» и «Косметология» рядом
+    """В меню и в подвале витрина идёт сразу за «Главной». «Косметика» и «Косметология» рядом
     различаются одной буквой, поэтому соседями они стоять не должны."""
     labels = [item["label"] for item in build_nav(NAV_CATEGORIES, NAV_SERVICES)]
     assert labels == ["Главная", PRODUCTS_NAV_LABEL, "Волосы", "Косметология"]
-
-
-def test_footer_keeps_shop_after_hair_services():
-    """Подвал перечисляет услуги по разделам: витрина там остаётся за «Волосами»."""
-    footer = build_nav(NAV_CATEGORIES, NAV_SERVICES, PRODUCTS_FOOTER_AFTER)
-    assert [item["label"] for item in footer] == [
-        "Главная", "Волосы", PRODUCTS_NAV_LABEL, "Косметология"]
 
 
 def test_llms_lists_goods_with_prices():
