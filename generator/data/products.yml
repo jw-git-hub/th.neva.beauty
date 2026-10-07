@@ -7,6 +7,9 @@
 # Цены — данные заказчика, в той же форме, что в prices.json: число и знак бата.
 # Названия — официальные, как на сайтах брендов (us.davines.com, lebel.co.jp),
 # а не как на ценнике: по ним товар ищут и сверяют состав.
+# Исключение — viege Hair Treatment Soft / Volume: так напечатано на тубе,
+# а на lebel.co.jp те же позиции сокращены до «S» и «V» — буква без расшифровки
+# покупателю ничего не говорит.
 # source — адрес, откуда взят исходный рендер; по нему make_product_images.py
 # пересобирает мастер-кадры, не заставляя искать картинку заново.
 
@@ -14,7 +17,7 @@ page:
   seo_title: "Косметика для волос на Самуи: Davines и LEBEL — Neva Beauty"
   seo_desc: >-
     Профессиональный уход для волос Davines и LEBEL в салоне Neva Beauty
-    на Самуи: шампуни, маски, масла. Цены 1100–2100 ฿,
+    на Самуи: шампуни, маски, масла. Цены 400–2100 ฿,
     забрать в салоне или доставка по Таиланду.
   h1: "Косметика для волос Davines и LEBEL на Самуи"
   intro: >-
@@ -198,28 +201,99 @@ brands:
     slug: "lebel"
     heading: "LEBEL — японский профессиональный уход"
     lead: >-
-      Марка из Японии, на которой в салоне тоже работают. На полке две позиции:
-      эссенция для ослабленных волос и шампунь на растительных экстрактах
-      для чувствительной кожи головы.
+      Марка из Японии, на которой в салоне тоже работают. На полке две серии:
+      viege — шампунь и уход после него на растительных компонентах, и IAU —
+      три несмываемых ухода Essence под разные волосы и еженедельный домашний
+      уход Cell Care.
     products:
-      - title: "IAU Essence Forti"
-        kind: "Несмываемый уход"
-        volume: "100 ml"
-        price: "1100 ฿"
-        desc: >-
-          Несмываемая гель-эссенция для волос, которые с возрастом повреждаются
-          легче: укрепляет, добавляет мягкости и блеска.
-        image: "lebel-iau-essence-forti"
-        image_alt: "Флакон эссенции LEBEL IAU Essence Forti, 100 ml"
-        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_f.png"
-
       - title: "viege Shampoo"
         kind: "Шампунь"
         volume: "240 ml"
-        price: "1200 ฿"
+        price: "1410 ฿"
         desc: >-
           Шампунь на растительных экстрактах — люффа, перилла, солодка.
           Деликатно моет чувствительную кожу головы, аромат грейпфрута и зелени.
         image: "lebel-viege-shampoo"
         image_alt: "Флакон шампуня LEBEL viege Shampoo, 240 ml"
         source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_viege_s.png"
+
+      - title: "viege Hair Treatment Soft"
+        kind: "Смываемый уход"
+        volume: "240 ml"
+        price: "1410 ฿"
+        desc: >-
+          Уход после шампуня для волос, которые с возрастом истончились и начали
+          виться: укрепляет волос изнутри и смягчает непослушную волну.
+          Версия Soft добавляет мягкости.
+        image: "lebel-viege-hair-treatment-soft"
+        image_alt: "Туба ухода LEBEL viege Hair Treatment Soft, 240 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_viege_t_s.png"
+
+      - title: "viege Hair Treatment Volume"
+        kind: "Смываемый уход"
+        volume: "240 ml"
+        price: "1410 ฿"
+        desc: >-
+          Уход после шампуня для волос, которые с возрастом истончились и начали
+          виться: укрепляет волос изнутри и смягчает непослушную волну.
+          Версия Volume добавляет упругости.
+        image: "lebel-viege-hair-treatment-volume"
+        image_alt: "Туба ухода LEBEL viege Hair Treatment Volume, 240 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_viege_t_v.png"
+
+      - title: "IAU Essence Forti"
+        kind: "Несмываемый уход"
+        volume: "100 ml"
+        price: "1300 ฿"
+        desc: >-
+          Несмываемый крем-гель для волос, которым не хватает объёма, и для лёгких
+          укладок: придаёт волосам упругость и оставляет их приятными на ощупь.
+        image: "lebel-iau-essence-forti"
+        image_alt: "Флакон эссенции LEBEL IAU Essence Forti, 100 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_f.png"
+
+      - title: "IAU Essence Moist"
+        kind: "Несмываемый уход"
+        volume: "100 ml"
+        price: "1300 ฿"
+        desc: >-
+          Несмываемое молочко для волос, склонных к сухости, и для волнистых
+          укладок: не липнет, волосы послушно ложатся до самых кончиков.
+        image: "lebel-iau-essence-moist"
+        image_alt: "Флакон эссенции LEBEL IAU Essence Moist, 100 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_m.png"
+
+      - title: "IAU Essence Sleek"
+        kind: "Несмываемый уход"
+        volume: "100 ml"
+        price: "1300 ฿"
+        desc: >-
+          Несмываемое масло для пушащихся волос и прямых укладок: пальцы легко
+          проходят сквозь пряди, волосы лежат собранно до кончиков.
+        image: "lebel-iau-essence-sleek"
+        image_alt: "Флакон эссенции LEBEL IAU Essence Sleek, 100 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_es_s.png"
+
+      - title: "IAU Cell Care 5M"
+        kind: "Еженедельный уход"
+        volume: "40 ml"
+        price: "400 ฿"
+        desc: >-
+          Домашний уход из системы IAU Cell Care: раз в неделю вместо обычного
+          кондиционера или маски, тюбика хватает примерно на четыре раза.
+          Версия M (Melt) оставляет волосы увлажнёнными и мягкими.
+        image: "lebel-iau-cell-care-5m"
+        image_alt: "Тюбик ухода LEBEL IAU Cell Care 5M, 40 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_cc_5m.png"
+
+      - title: "IAU Cell Care 5S"
+        kind: "Еженедельный уход"
+        volume: "40 ml"
+        price: "400 ฿"
+        desc: >-
+          Домашний уход из системы IAU Cell Care: раз в неделю вместо обычного
+          кондиционера или маски, тюбика хватает примерно на четыре раза.
+          Версия S (Silky) оставляет волосы гладкими и лёгкими.
+        image: "lebel-iau-cell-care-5s"
+        image_alt: "Тюбик ухода LEBEL IAU Cell Care 5S, 40 ml"
+        source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_cc_5s.png"

@@ -46,15 +46,15 @@
         {#- Объём поднят в заголовок: «OI Oil» на полке два, и различал их только
             объём — третьей строкой карточки, мельче и тише цены. Строка
             с линейкой бренда снята: она повторяла начало названия во всех
-            двенадцати карточках («LOVE CURL» над «LOVE CURL Shampoo»)
+            карточках («LOVE CURL» над «LOVE CURL Shampoo»)
             и набиралась цветом с контрастом 2,3:1 при кегле 13 px. #}
         <h3>{{ item.title }} <span class="product-card__vol">{{ item.volume }}</span></h3>
         <p class="product-card__kind">{{ item.kind }}</p>
         <p class="product-card__desc">{{ item.desc }}</p>
         <p class="product-card__foot">
           <span class="product-card__price">{{ item.price | price }}</span>
-          {#- Подпись у всех двенадцати ссылок одна, и списком ссылок страницы
-              она читается как двенадцать одинаковых пунктов. aria-label
+          {#- Подпись у всех ссылок одна, и списком ссылок страницы
+              она читается как столбец одинаковых пунктов. aria-label
               называет товар — экранный диктор произносит, о чём спрашивают. #}
           <a class="product-card__more" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Интересует ' ~ product) | urlencode }}" target="_blank" rel="noopener" aria-label="Спросить о наличии: {{ product }}">Спросить о наличии {{ icon('arrow-right') }}</a>
         </p>
