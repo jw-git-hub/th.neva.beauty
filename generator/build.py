@@ -17,11 +17,15 @@ RELATED_COUNT = 3  # сколько карточек «Смотрите такж
 PRODUCTS_URL = "/kosmetika/"
 PRODUCTS_NAV_LABEL = "Косметика"
 PRODUCTS_NAV_TITLE = "Косметика для волос"
-# Пункт встаёт сразу после «Волос»: товар на витрине — уход за волосами, рядом
-# со своим разделом он читается как продолжение. В конце списка он оказался бы
-# соседом «Косметологии», а «Косметика» и «Косметология» в одной строке меню
-# различаются одной буквой в середине слова.
-PRODUCTS_NAV_AFTER = "volosy"
+# В меню шапки и дровера пункт стоит сразу за «Главной» (задача 131): витрину
+# должно быть видно первой, а не между разделами услуг. В конец списка его
+# ставить нельзя — там он оказался бы соседом «Косметологии», а «Косметика»
+# и «Косметология» в одной строке меню различаются одной буквой в середине слова.
+NAV_HOME = "home"
+PRODUCTS_NAV_AFTER = NAV_HOME
+# В подвале список называется «Услуги» и идёт по разделам, поэтому там витрина
+# остаётся за услугами для волос: товар на ней — уход за волосами.
+PRODUCTS_FOOTER_AFTER = "volosy"
 
 # Цвет фона бренда (токен --bg). Один и тот же для meta theme-color и для манифеста:
 # браузер красит им адресную строку и заставку, и оба должны совпадать с реальным
@@ -708,17 +712,21 @@ def build_sitemap(urls, base_url, journal):
             + rows + '\n</urlset>\n')
 
 
-def build_nav(categories, services):
+def build_nav(categories, services, shop_after=PRODUCTS_NAV_AFTER):
+    """Пункты навигации по порядку; shop_after — после чего встаёт витрина:
+    NAV_HOME или slug раздела."""
     # label — короткая подпись для верхней панели, title — полное название для дровера/страниц
+    shop = {"label": PRODUCTS_NAV_LABEL, "title": PRODUCTS_NAV_TITLE, "url": PRODUCTS_URL}
     nav = [{"label": "Главная", "title": "Главная", "url": "/"}]
+    if shop_after == NAV_HOME:
+        nav.append(shop)
     for cat in categories:
         item = {"label": cat.get("nav_label", cat["title"]), "title": cat["title"], "url": cat["url"]}
         if cat["is_page"]:
             item["children"] = [{"label": services[svc_slug]["title"], "slug": svc_slug} for svc_slug in cat["services"]]
         nav.append(item)
-        if cat["slug"] == PRODUCTS_NAV_AFTER:
-            nav.append({"label": PRODUCTS_NAV_LABEL, "title": PRODUCTS_NAV_TITLE,
-                        "url": PRODUCTS_URL})
+        if cat["slug"] == shop_after:
+            nav.append(shop)
     return nav
 
 def main():
@@ -740,6 +748,8 @@ def main():
     enrich_categories(content)
     fill_related(content)
     site["nav"] = build_nav(content["categories"], content["services"])
+    site["footer_nav"] = build_nav(content["categories"], content["services"],
+                                   PRODUCTS_FOOTER_AFTER)
     # Темы, в которых компетентен салон, — ровно названия его услуг: список
     # уходит в Organization.knowsAbout и собирается здесь, чтобы не разойтись
     # с составом сайта после добавления или снятия услуги.
