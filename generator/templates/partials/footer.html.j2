@@ -5,12 +5,19 @@
     <div class="site-footer__col">
       <span class="site-footer__logo brand-mark">{{ brand_mark(site.brand, site.brand_location) }}</span>
       {{ loc_list(site, base_path) }}
+      {#- Витрина — не услуга: в списке «Услуги» она стояла строкой среди
+          процедур, и там её не находили. Блок свой, с заголовком, и идёт перед
+          услугами — в том же порядке, что в меню. #}
+      <nav class="site-footer__shop" aria-label="{{ site.shop.label }}">
+        <h2 class="site-footer__title">{{ site.shop.label }}</h2>
+        <a class="site-footer__link" href="{{ base_path }}{{ site.shop.url }}">{{ site.shop.title }}</a>
+      </nav>
     </div>
     <nav class="site-footer__col site-footer__col--wide" aria-label="Услуги">
       <h2 class="site-footer__title">Услуги</h2>
       {% for item in site.nav %}
         {% if item.children %}{% for c in item.children %}<a class="site-footer__link" href="{{ base_path }}/{{ c.slug }}/">{{ c.label }}</a>{% endfor %}
-        {% elif item.url and item.url != "/" %}<a class="site-footer__link" href="{{ base_path }}{{ item.url }}">{{ item.label }}</a>
+        {% elif item.url and item.url not in ["/", site.shop.url] %}<a class="site-footer__link" href="{{ base_path }}{{ item.url }}">{{ item.label }}</a>
         {% endif %}
       {% endfor %}
     </nav>

@@ -310,7 +310,8 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 .site-footer__inner{display:grid;grid-template-columns:1fr;gap:var(--sp-8);padding-bottom:var(--sp-12)}
 @media(min-width:768px){.site-footer__inner{grid-template-columns:1.1fr 1.7fr .9fr}}
 .site-footer__logo{margin-bottom:var(--sp-3)}
-.site-footer__places{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-6)}
+/* Блоки с заголовком под фирменным замком: салоны и витрина. */
+.site-footer__places,.site-footer__shop{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-6)}
 .site-footer__place{display:flex;align-items:center;gap:.5rem;font-size:var(--fs-300);color:var(--ink);
   transition:color var(--t-fast) var(--ease)}
 .site-footer__place:hover{color:var(--rose)}
