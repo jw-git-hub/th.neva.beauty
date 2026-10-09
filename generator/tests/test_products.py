@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import schema
 from build import (PRODUCTS_NAV_LABEL, PRODUCTS_URL, build_llms, build_nav,
-                   product_items, product_span)
+                   position_count, product_items, product_span)
 
 BASE = "https://th.neva.beauty"
 
@@ -130,6 +130,13 @@ def test_llms_lists_goods_with_prices():
     assert BASE + PRODUCTS_URL in text
     assert "OI Oil, 135 ml — 1900 ฿" in text
     assert "цены 1200–1900 ฿" in text
+
+
+def test_position_count_agrees_with_number():
+    """«24 позиций» — ошибка согласования, которую видно в первой же строке раздела."""
+    assert [position_count(n) for n in (1, 2, 5, 11, 12, 18, 21, 24, 25, 111, 112)] == [
+        "1 позиция", "2 позиции", "5 позиций", "11 позиций", "12 позиций", "18 позиций",
+        "21 позиция", "24 позиции", "25 позиций", "111 позиций", "112 позиций"]
 
 
 def test_llms_stays_silent_without_goods():

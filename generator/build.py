@@ -541,6 +541,18 @@ def product_span(items, currency_sign):
     return format_price(f"{values[0]}–{values[-1]} {currency_sign}")
 
 
+def position_count(count):
+    """«1 позиция», «24 позиции», «18 позиций» — число с согласованным словом."""
+    tail, teen = count % 10, count % 100
+    if tail == 1 and teen != 11:
+        word = "позиция"
+    elif 2 <= tail <= 4 and not 12 <= teen <= 14:
+        word = "позиции"
+    else:
+        word = "позиций"
+    return f"{count} {word}"
+
+
 def build_llms(site, content, prices, products=None):
     """llms.txt — выжимка сайта для ИИ-ассистентов (llmstxt.org).
 
@@ -596,7 +608,7 @@ def build_llms(site, content, prices, products=None):
         items = product_items(products, base)
         page = products["page"]
         lines += ["", "## Косметика на продажу",
-                  f"- [{page['h1']}]({base}{PRODUCTS_URL}) — {len(items)} позиций, "
+                  f"- [{page['h1']}]({base}{PRODUCTS_URL}) — {position_count(len(items))}, "
                   f"цены {product_span(items, sign)}",
                   "- Корзины на сайте нет: заказ оформляют в мессенджере, товар "
                   "отдают в салоне или отправляют доставкой по Таиланду."]

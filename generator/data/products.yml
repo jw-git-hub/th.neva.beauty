@@ -10,23 +10,29 @@
 # Исключение — viege Hair Treatment Soft / Volume: так напечатано на тубе,
 # а на lebel.co.jp те же позиции сокращены до «S» и «V» — буква без расшифровки
 # покупателю ничего не говорит.
+# Второе исключение — Ph. Hubby и From The Factory: названы как на упаковке,
+# которая стоит на полке. У Ph. Hubby на коробке «1g Sun Cream …», а на
+# en.phhubby.com то же средство написано то «Suncream», то «Sun Cream».
+# «DT Cream» и «Eye Serum» бренд сейчас продаёт как Dual Touch Cream
+# и Eye Revive Serum, и на его рендерах уже новые этикетки.
 # source — адрес, откуда взят исходный рендер; по нему make_product_images.py
 # пересобирает мастер-кадры, не заставляя искать картинку заново.
 
 page:
-  seo_title: "Косметика для волос на Самуи: Davines и LEBEL — Neva Beauty"
+  seo_title: "Косметика на Самуи: Davines, LEBEL, Ph. Hubby — Neva Beauty"
   seo_desc: >-
-    Профессиональный уход для волос Davines и LEBEL в салоне Neva Beauty
-    на Самуи: шампуни, маски, масла. Цены 400–2100 ฿,
-    забрать в салоне или доставка по Таиланду.
-  h1: "Косметика для волос Davines и LEBEL на Самуи"
-  intro: >-
-    Davines и LEBEL — марки, на которых работают мастера салона. То, что стоит
-    на полке, можно забрать домой. Корзины на сайте нет: напишите в мессенджер,
-    а дальше как удобно — заберёте в салоне или отправим доставкой по Таиланду.
+    Уход для волос Davines и LEBEL, корейская защита от солнца Ph. Hubby
+    и уход для лица From The Factory в Neva Beauty на Самуи.
+    Цены 400–2100 ฿, доставка по Таиланду.
+  h1: "Косметика на Самуи: Davines, LEBEL, Ph.\u00A0Hubby и From The Factory"
+  intro: "Davines и LEBEL — уход для волос, на этих марках работают мастера салона.
+    Ph.\u00A0Hubby и From The Factory — корейская защита от солнца и уход для лица.
+    То, что стоит на полке, можно забрать домой. Корзины на сайте нет: напишите
+    в мессенджер, а дальше как удобно — заберёте в салоне или отправим доставкой
+    по Таиланду."
   booking_title: "Заберите уход в салоне или закажите доставку"
   booking_lead: >-
-    Напишите, какое средство вам нужно или что происходит с волосами, —
+    Напишите, какое средство вам нужно, или опишите волосы или кожу —
     подберём, отложим и договоримся, как вам его передать.
   # Общий блок внизу страницы подписан «Запись» и заканчивается правилом
   # «перенести или отменить запись можно не позднее чем за сутки». Здесь ничего
@@ -41,7 +47,7 @@ page:
   steps:
     - icon: message-circle
       title: "Напишите в мессенджер"
-      text: "Скажите, что нужно, или опишите волосы — подскажем, что подойдёт."
+      text: "Скажите, что нужно, или опишите волосы или кожу — подскажем, что подойдёт."
     - icon: check
       title: "Отложим за вами"
       text: "Проверим, что средство на полке, и оставим его до вашего визита."
@@ -63,7 +69,7 @@ page:
     - biozavivka-volos
     - tokio-inkarami
 
-  faq_title: "Частые вопросы о косметике для волос"
+  faq_title: "Частые вопросы о косметике"
   faq:
     - q: "Это оригинальная косметика?"
       a: >-
@@ -297,3 +303,91 @@ brands:
         image: "lebel-iau-cell-care-5s"
         image_alt: "Тюбик ухода LEBEL IAU Cell Care 5S, 40 ml"
         source: "https://www.lebel.co.jp/cms/wp-content/uploads/2020/10/hc_iau_cc_5s.png"
+
+  - name: "Ph. Hubby"
+    slug: "ph-hubby"
+    heading: "Ph. Hubby — корейская защита от солнца по грамму"
+    lead: >-
+      Корейская марка, специализация которой — солнцезащита. Её идея — точная
+      доза: на лицо за одно нанесение нужен примерно грамм крема. Поэтому крем
+      расфасован в стики по 1 g, а к тубе приложена мерная ложка.
+      У всех средств SPF 50+ PA++++.
+    products:
+      - title: "1g Sun Cream Intensive Protection"
+        kind: "Солнцезащитный крем в стиках"
+        volume: "50 × 1 g"
+        price: "1510 ฿"
+        desc: >-
+          Увлажняющий крем с SPF 50+ PA++++ для сухой кожи, не липнет. В коробке
+          50 стиков по грамму: один стик — одно нанесение на лицо, удобно носить
+          с собой. На упаковке пометка Reef-Safe.
+        image: "ph-hubby-intensive-protection-50"
+        image_alt: "Коробка солнцезащитного крема Ph. Hubby 1g Sun Cream Intensive Protection, 50 стиков по 1 g"
+        source: "https://en.phhubby.com/web/product/big/202508/d3221e445b6f34180a1c91ab15b84c6e.png"
+
+      - title: "1g Sun Cream Intensive Protection"
+        kind: "Солнцезащитный крем в тубе"
+        volume: "50 g"
+        price: "1090 ฿"
+        desc: >-
+          Тот же увлажняющий крем с SPF 50+ PA++++ для сухой кожи, только в тубе.
+          В комплекте мерная ложка на 1 g — столько нужно на лицо за одно
+          нанесение.
+        image: "ph-hubby-intensive-protection-tube"
+        image_alt: "Туба солнцезащитного крема Ph. Hubby 1g Sun Cream Intensive Protection, 50 g"
+        source: "https://en.phhubby.com/web/product/big/202508/61de6f9fd037e97bb0d9d7612fcd46a6.png"
+
+      - title: "1g Sun Cream Soft Matte"
+        kind: "Солнцезащитный крем в стиках"
+        volume: "50 × 1 g"
+        price: "1510 ฿"
+        desc: >-
+          Полуматовый крем с SPF 50+ PA++++ для жирной и комбинированной кожи:
+          впитывает себум и ложится как праймер, поэтому хорошо сидит под
+          макияжем. В коробке 50 стиков по грамму.
+        image: "ph-hubby-soft-matte-50"
+        image_alt: "Коробка солнцезащитного крема Ph. Hubby 1g Sun Cream Soft Matte, 50 стиков по 1 g"
+        source: "https://en.phhubby.com/web/product/big/202508/8ebc65bcd84926c0c048b23a1b595cf5.png"
+
+      - title: "UV Essential Shield"
+        kind: "Солнцезащитная эссенция"
+        volume: "50 ml"
+        price: "1690 ฿"
+        desc: >-
+          Жидкое молочко с SPF 50+ PA++++ для любого типа кожи: быстро
+          впитывается и увлажняет. Производитель относит средство к reef-safe.
+          Обновлять каждые 3–4 часа, на активном солнце — чаще.
+        image: "ph-hubby-uv-essential-shield"
+        image_alt: "Флакон солнцезащитной эссенции Ph. Hubby UV Essential Shield, 50 ml"
+        source: "https://en.phhubby.com/web/product/big/202508/7c690c03c8905a9aaf88af561ed4e1d9.png"
+
+  - name: "From The Factory"
+    slug: "from-the-factory"
+    heading: "From The Factory — корейский уход для лица без лишнего"
+    lead: >-
+      Корейская марка с простой идеей: меньше расходов на рекламу и упаковку —
+      больше внимания самому средству. На полке крем для лица и сыворотка
+      для кожи вокруг глаз.
+    products:
+      - title: "DT Cream"
+        kind: "Крем для лица"
+        volume: "50 g"
+        price: "990 ฿"
+        desc: >-
+          Увлажняющий крем со скваланом и растительным воском: в банке плотный,
+          на коже распределяется легко и удерживает влагу в течение дня.
+          С отдушкой.
+        image: "from-the-factory-dt-cream"
+        image_alt: "Банка крема для лица From The Factory DT Cream, 50 g"
+        source: "https://fromthefactory.co.kr/web/product/medium/202607/c90f390dceb0b70c8e69513d4ace695c.jpg"
+
+      - title: "Eye Serum"
+        kind: "Сыворотка для кожи вокруг глаз"
+        volume: "30 g"
+        price: "1090 ฿"
+        desc: >-
+          Лёгкая сыворотка для кожи вокруг глаз с B-Circadin — растительным
+          экстрактом леспедецы. Увлажняет и освежает уставшую кожу.
+        image: "from-the-factory-eye-serum"
+        image_alt: "Флакон сыворотки для кожи вокруг глаз From The Factory Eye Serum, 30 g"
+        source: "https://fromthefactory.co.kr/web/product/medium/202607/a46d9a06f2564dae2d35ed28b2e5aae4.jpg"
