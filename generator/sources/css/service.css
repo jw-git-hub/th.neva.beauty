@@ -25,6 +25,18 @@
 .svc-benefit{padding:var(--sp-4)}
 .svc-benefit__icon{width:56px;height:56px}
 .svc-benefit__icon .icon{width:24px;height:24px}
+/* Три плитки: в сетке 2×2 третья висела бы одна, поэтому до 768 px они идут
+   одной колонкой шириной с заголовок секции, дальше — тремя. Правила стоят
+   после общих и перекрывают их порядком, а не весом селектора. */
+.svc-benefits--three{grid-template-columns:1fr;max-width:640px;margin-inline:auto}
+@media(min-width:768px){.svc-benefits--three{grid-template-columns:repeat(3,1fr);max-width:none}}
+/* Строка-вывод под плитками обзора относится ко всему блоку, поэтому не плитка.
+   Чёрточка над ней — та же, что у надзаголовка секции. */
+.svc-overview__note{max-width:640px;margin:var(--sp-10) auto 0;text-align:center;
+  font-family:var(--font-head);font-size:var(--fs-600);font-weight:600;
+  line-height:1.25;text-wrap:balance}
+.svc-overview__note::before{content:"";display:block;width:26px;height:1px;
+  margin:0 auto var(--sp-5);background:var(--rose);opacity:.45}
 
 /* ===== ФАКТЫ НАД ПРАЙСОМ ===== */
 /* Длительность и «что входит» стоят над таблицей и ровно по её ширине: клиент

@@ -2,6 +2,16 @@
 {% from "partials/faq.html.j2" import faq_list %}
 {% from "partials/booking.html.j2" import booking, cta_inline %}
 {% from "partials/picture.html.j2" import responsive_img %}
+{# Плитки с иконкой — общие для обзора услуг и преимуществ. Обычно их четыре;
+   где страница даёт три, сетка идёт в три колонки: в четырёх пустовала бы
+   последняя. #}
+{% macro tiles(items) %}
+  <div class="svc-benefits{{ ' svc-benefits--three' if items | length == 3 }}" data-reveal-children>
+    {% for item in items %}
+    <div class="svc-benefit"><span class="svc-benefit__icon">{{ icon(item.icon) }}</span><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
+    {% endfor %}
+  </div>
+{%- endmacro %}
 {% block content %}
 <section class="svc-hero">
   <div class="container">
@@ -29,14 +39,26 @@
   </div>
 </section>
 
+{#- Обзор «что делают в салоне» есть там, где страница собирает сразу несколько
+    услуг. Он стоит перед преимуществами и лежит на тонированной полосе: обе
+    секции — заголовок и плитки, и на одном фоне подряд они сливались в одну. #}
+{%- if svc.overview %}
+
+<section class="section benefits-section">
+  <div class="container">
+    <div class="section-head" data-reveal><p class="eyebrow">В салоне</p><h2>{{ svc.overview_title }}</h2></div>
+    {{- tiles(svc.overview) }}
+    {%- if svc.overview_note %}
+    <p class="svc-overview__note" data-reveal>{{ svc.overview_note }}</p>
+    {%- endif %}
+  </div>
+</section>
+{%- endif %}
+
 {% if svc.benefits %}
 <section class="section container">
   <div class="section-head" data-reveal><p class="eyebrow">Преимущества</p><h2>{{ svc.benefits_title }}</h2></div>
-  <div class="svc-benefits" data-reveal-children>
-    {% for b in svc.benefits %}
-    <div class="svc-benefit"><span class="svc-benefit__icon">{{ icon(b.icon) }}</span><h3>{{ b.title }}</h3><p>{{ b.text }}</p></div>
-    {% endfor %}
-  </div>
+  {{- tiles(svc.benefits) }}
 </section>
 {% endif %}
 
