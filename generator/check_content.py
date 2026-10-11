@@ -242,6 +242,31 @@ def check_preloaded_image(path, soup):
             report(rel(path), f"{preload_attr} предзагрузки не совпадает с {img_attr} картинки: {href}")
 
 
+# Сколько байт документа может стоять перед ссылкой на стили. HTML приезжает
+# порциями, и всё, что лежит перед ней, отодвигает первую отрисовку; сейчас
+# перед ссылкой только doctype, <html>, charset и viewport — около 140 байт.
+STYLESHEET_WITHIN_BYTES = 200
+
+
+def check_stylesheet_first(path, text):
+    """Ссылка на CSS стоит в первых байтах документа, раньше метатегов и JSON-LD."""
+    offset = text.encode("utf-8").find(b'<link rel="stylesheet"')
+    if not 0 <= offset <= STYLESHEET_WITHIN_BYTES:
+        report(rel(path), f"ссылка на CSS на байте {offset}, "
+                          f"должна быть в первых {STYLESHEET_WITHIN_BYTES}")
+
+
+def check_reveal_fallback(path, soup):
+    """Появления не должны прятать страницу, если их скрипт не загрузился.
+
+    Блоки скрывает стиль, а показывает reveal.js. Без onerror у его тега сорванная
+    загрузка оставляет контент невидимым: на витрине так пропадало 97 % текста."""
+    hidden_by_style = soup.select_one("[data-reveal], [data-reveal-children]")
+    script = soup.select_one("script#reveal-js")
+    if hidden_by_style and not (script and script.get("onerror")):
+        report(rel(path), "у тега reveal.js нет onerror: без скрипта блоки останутся скрытыми")
+
+
 def check_srcset(path, soup):
     """Каждый файл из srcset существует, а ширина в дескрипторе — настоящая.
 
@@ -563,6 +588,8 @@ def main():
         check_images(path, soup)
         check_brand_assets(path, soup)
         check_srcset(path, soup)
+        check_stylesheet_first(path, text)
+        check_reveal_fallback(path, soup)
         check_font_coverage(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)

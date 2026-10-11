@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -12,7 +11,17 @@
   
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/manrope-var.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/cormorant-600.woff2" crossorigin>
-  <script>document.documentElement.classList.add('js')</script>
+  
+  <script>
+  (function (root) {
+    var REVEAL_TIMEOUT_MS = 4000;
+    root.classList.add('js');
+    setTimeout(function () {
+      var script = document.getElementById('reveal-js');
+      if (!script || !script.dataset.ready) root.classList.remove('js');
+    }, REVEAL_TIMEOUT_MS);
+  })(document.documentElement);
+  </script>
   
   <script>
   (function () {
@@ -1086,11 +1095,11 @@
 </head>
 <body>
   <div class="aurora" aria-hidden="true">
-  <span class="aurora__blob" style="--x:12%;--y:8%;--size:48vw;--tint:var(--rose-soft);--op:.62;--dur:34s;--delay:0s;--dx:6vw;--dy:4vh"></span>
-  <span class="aurora__blob" style="--x:78%;--y:2%;--size:42vw;--tint:#F1D3C5;--op:.66;--dur:42s;--delay:-9s;--dx:-5vw;--dy:5vh"></span>
-  <span class="aurora__blob" style="--x:62%;--y:52%;--size:54vw;--tint:var(--rose);--op:.40;--dur:46s;--delay:-18s;--dx:-7vw;--dy:-5vh"></span>
-  <span class="aurora__blob" style="--x:4%;--y:60%;--size:44vw;--tint:var(--taupe);--op:.44;--dur:38s;--delay:-5s;--dx:6vw;--dy:-6vh"></span>
-  <span class="aurora__blob" style="--x:40%;--y:82%;--size:46vw;--tint:var(--rose-soft);--op:.54;--dur:40s;--delay:-22s;--dx:4vw;--dy:4vh"></span>
+  <span class="aurora__blob" style="--x:12%;--y:8%;--size:48vw;--tint:var(--rose-soft);--op:.62"></span>
+  <span class="aurora__blob" style="--x:78%;--y:2%;--size:42vw;--tint:#F1D3C5;--op:.66"></span>
+  <span class="aurora__blob" style="--x:62%;--y:52%;--size:54vw;--tint:var(--rose);--op:.40"></span>
+  <span class="aurora__blob" style="--x:4%;--y:60%;--size:44vw;--tint:var(--taupe);--op:.44"></span>
+  <span class="aurora__blob" style="--x:40%;--y:82%;--size:46vw;--tint:var(--rose-soft);--op:.54"></span>
 </div>
   
 <header class="site-header" data-header>
@@ -2372,7 +2381,7 @@
   </div>
 </footer>
   <script type="module" src="/assets/js/nav.js?v=18b29e8e"></script>
-  <script type="module" src="/assets/js/reveal.js?v=7e14d867"></script>
+  <script type="module" id="reveal-js" src="/assets/js/reveal.js?v=7e14d867" onload="this.dataset.ready='1'" onerror="document.documentElement.classList.remove('js')"></script>
   
   
 <!-- Yandex.Metrika counter --><script>
