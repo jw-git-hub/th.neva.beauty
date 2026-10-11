@@ -82,7 +82,10 @@
   display:flex;flex-direction:column;gap:2px;
   opacity:0;visibility:hidden;transform:translateY(8px);
   transition:opacity var(--t-fast) var(--ease),visibility var(--t-fast),transform var(--t-fast) var(--ease)}
-.loc.is-open .loc__menu{opacity:1;visibility:visible;transform:translateY(0)}
+/* Показать — значит перестать прятать: inherit, а не visible. Потомок с visible
+   виден и сквозь спрятанного предка; так на соседнем сайте курсор из закрытого
+   меню мигал посреди страницы. Проверка сборки держит это правило. */
+.loc.is-open .loc__menu{opacity:1;visibility:inherit;transform:translateY(0)}
 .loc__lead{padding:.3rem .75rem .55rem;margin:0 0 var(--sp-2);border-bottom:1px solid var(--line);
   font-size:var(--fs-200);letter-spacing:.14em;text-transform:uppercase;color:var(--rose)}
 .loc__item{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:10px;
@@ -179,7 +182,7 @@
    больше. Последний ребёнок `.nav` — ссылка «Макияж» без дропдауна, поэтому
    `:last-of-type`, а не `:last-child`. */
 .nav__group:last-of-type .nav__menu{left:auto;right:0}
-.nav__group:hover .nav__menu,.nav__group.is-open .nav__menu{opacity:1;visibility:visible;transform:translateY(0)}
+.nav__group:hover .nav__menu,.nav__group.is-open .nav__menu{opacity:1;visibility:inherit;transform:translateY(0)}
 .nav__group:hover .nav__chev,.nav__group.is-open .nav__chev{transform:rotate(180deg)}
 .nav__sub{position:relative;padding:.6rem .75rem .6rem .9rem;border-radius:10px;font-size:var(--fs-300);color:var(--ink);
   transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
@@ -227,8 +230,8 @@
 .overlay{position:fixed;inset:0;background:rgba(58,44,42,.5);z-index:var(--z-overlay);
   backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
   opacity:0;visibility:hidden;transition:opacity var(--t-mid) var(--ease),visibility var(--t-mid)}
-.overlay.is-open{opacity:1;visibility:visible}
-.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(86vw,360px);z-index:var(--z-drawer);
+.overlay.is-open{opacity:1;visibility:inherit}
+.drawer{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:min(86vw,360px);z-index:var(--z-drawer);
   background:var(--bg);box-shadow:-20px 0 60px rgba(74,59,56,.18);overflow:hidden;
   display:flex;flex-direction:column;
   /* Закрытое меню стоит вплотную за правым краем, а его тень — 20 px сдвига
@@ -240,7 +243,7 @@
   transition:transform var(--t-mid) var(--ease),visibility var(--t-mid)}
 /* У открытого меню visibility не анимируется: в первый миг перехода значение
    ещё hidden, и nav.js, который сразу ставит фокус на первую ссылку, промахивался. */
-.drawer.is-open{visibility:visible;transform:translateX(0);
+.drawer.is-open{visibility:inherit;transform:translateX(0);
   transition:transform var(--t-mid) var(--ease)}
 .drawer__top{flex:none;display:flex;align-items:center;justify-content:space-between;
   padding:var(--sp-6) var(--sp-6) var(--sp-4);border-bottom:1px solid var(--line)}
@@ -254,6 +257,8 @@
 /* contain: докрутив список до конца, палец не должен утаскивать за собой страницу. */
 .drawer__nav{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
+  /* Пункт в фокусе, вставший на край списка, терял сторону рамки фокуса. */
+  scroll-padding-block:var(--sp-2);
   display:flex;flex-direction:column;gap:2px;padding:var(--sp-4) var(--sp-5) var(--sp-2)}
 .drawer__group{display:flex;flex-direction:column;gap:2px;padding-top:var(--sp-4);margin-top:var(--sp-2);
   border-top:1px solid var(--line)}

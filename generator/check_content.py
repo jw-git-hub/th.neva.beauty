@@ -301,6 +301,23 @@ def check_font_coverage(path, soup):
         report(rel(path), f"знаков нет в шрифтах сайта: {''.join(missing)}")
 
 
+_KEYFRAMES_RE = re.compile(r"@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}")
+_VISIBLE_RULE_RE = re.compile(r"([^{}]+)\{[^{}]*visibility\s*:\s*visible")
+
+
+def check_no_visibility_visible():
+    """В собранном CSS нет `visibility:visible` — показывают через `inherit`.
+
+    Потомок с `visible` виден, даже когда предок спрятан через `hidden`: значок
+    из закрытого меню светится посреди страницы, и мышью его в инструментах не
+    выбрать. `inherit` слушается того, в чём лежит. Внутри @keyframes значение
+    допустимо — там оно часть анимации, а не способ показать."""
+    bundle = SITE / "assets" / "css" / "bundle.min.css"
+    css = _KEYFRAMES_RE.sub("", bundle.read_text(encoding="utf-8"))
+    for selector in _VISIBLE_RULE_RE.findall(css):
+        report("bundle.min.css", f"visibility:visible у {selector.strip()!r} — нужно inherit")
+
+
 def check_css_variables():
     """Каждая var(--x) без запасного значения объявлена в CSS сайта.
 
@@ -600,6 +617,7 @@ def main():
         check_visible_date(path, soup)
         check_price_question(path, soup)
     check_css_variables()
+    check_no_visibility_visible()
     check_verification(files)
     check_page_dates()
     check_duplicates("title", titles)
