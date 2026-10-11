@@ -243,6 +243,13 @@ def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
             for item in faq]
 
 
+def render_tiles(tiles, contacts, base_path=""):
+    """Плитки с иконкой, готовые к выводу: в тексте плитки может стоять ссылка
+    на соседнюю страницу, и ей нужен тот же префикс base_path, что и в FAQ."""
+    return [{**tile, "text": Markup(render_rich_text(tile["text"], contacts, base_path))}
+            for tile in tiles]
+
+
 # Число цены: первая цифра и дальше цифры с разделителями разрядов (обычный
 # и неразрывный пробел). «1 600 000» — одно число, «600 -1200» — два.
 _PRICE_NUMBER_RE = re.compile(r"\d[\d\s ]*")
@@ -520,12 +527,14 @@ def product_items(products, base_url):
     Витрина сгруппирована по брендам, а разметке, выжимке для ИИ и парити-тесту
     цен нужен ровно плоский список — иначе вложенность разбирал бы каждый сам."""
     items = []
+    google_categories = products.get("google_categories", {})
     for brand in products["brands"]:
         for item in brand["products"]:
             values = price_values(item["price"])
             items.append({**item,
                           "brand": brand["name"],
                           "brand_slug": brand["slug"],
+                          "google_category": google_categories.get(item["kind"]),
                           "price_value": values[0] if values else None,
                           "image_url": f"{base_url}/assets/img/{item['image']}.webp"})
     return items
@@ -836,6 +845,9 @@ def main():
                 page_url=url, image=hero, channel=booking_channel,
                 category=cat["title"]),
         ]
+        for tiles_field in ("overview", "benefits"):
+            if svc.get(tiles_field):
+                svc[tiles_field] = render_tiles(svc[tiles_field], site["contacts"], base_path)
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
             nodes.append(schema.faq_node(svc["faq"], url))

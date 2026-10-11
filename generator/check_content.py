@@ -185,6 +185,20 @@ def check_brand_in_title(path, soup):
         report(rel(path), f"title не заканчивается на {BRAND_SUFFIX!r}: {title!r}")
 
 
+def check_brand_in_lead(path, soup, brand_full):
+    """Первый абзац после h1 называет салон полным именем.
+
+    Верх страницы попадает в ответы ИИ чаще всего, и цитируют его без страницы
+    вокруг: «мастера салона» в отрыве от шапки — ничьи мастера. Витрина прожила
+    так с запуска до задачи 141: в её тексте название не встречалось ни разу."""
+    if soup.select_one('meta[name="robots"][content*="noindex"]'):
+        return
+    h1 = soup.select_one("main h1")
+    lead = h1.find_next("p") if h1 else None
+    if not lead or brand_full not in lead.get_text(" ", strip=True):
+        report(rel(path), f"первый абзац после h1 не называет салон: нет {brand_full!r}")
+
+
 def check_og_title(path, soup):
     """og:title — заголовок карточки в мессенджере, он есть всегда."""
     if not og_content(soup, "og:title"):
@@ -531,6 +545,7 @@ def main():
     if not files:
         print("Сайт не собран — нечего проверять. Запустите generator/build.py")
         return 1
+    brand_full = yaml.safe_load(SITE_YML.read_text(encoding="utf-8"))["brand_full"]
     for path in files:
         text = path.read_text(encoding="utf-8")
         soup = BeautifulSoup(text, "html.parser")
@@ -543,6 +558,7 @@ def main():
         check_heading_order(path, soup)
         collect_h2(path, soup, headings)
         check_brand_in_title(path, soup)
+        check_brand_in_lead(path, soup, brand_full)
         check_og_title(path, soup)
         check_images(path, soup)
         check_brand_assets(path, soup)

@@ -9,6 +9,8 @@ products.yml со страницей: плоский список, разбро�
 import sys
 from pathlib import Path
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import schema
@@ -16,6 +18,8 @@ from build import (PRODUCTS_NAV_LABEL, PRODUCTS_URL, build_llms, build_nav,
                    position_count, product_items, product_span)
 
 BASE = "https://th.neva.beauty"
+SHELF = yaml.safe_load(
+    (Path(__file__).resolve().parent.parent / "data/products.yml").read_text(encoding="utf-8"))
 
 PRODUCTS = {
     "page": {"h1": "Косметика для волос", "seo_title": "Косметика — Neva Beauty"},
@@ -84,6 +88,29 @@ def test_offer_is_limited_to_the_delivery_country():
     within = schema.product_node(item, "THB", {"@id": "#business"}, BASE, "TH")["offers"]
     assert "eligibleRegion" not in without
     assert within["eligibleRegion"] == {"@type": "Country", "name": "TH"}
+
+
+def test_category_is_a_google_taxonomy_code_not_russian_text():
+    """Вид кириллицей Google в category отмечает как недопустимое значение:
+    в разметку идёт код таксономии, русское название — подписью к нему."""
+    shelf = {**PRODUCTS, "google_categories": {"Масло": 486}}
+    item = product_items(shelf, BASE)[0]
+    category = schema.product_node(item, "THB", {"@id": "#business"}, BASE)["category"]
+    assert category == {"@type": "CategoryCode",
+                        "inCodeSet": schema.GOOGLE_TAXONOMY_URL,
+                        "codeValue": "486",
+                        "name": "Масло"}
+
+
+def test_product_without_a_code_carries_no_category():
+    item = product_items(PRODUCTS, BASE)[0]
+    assert "category" not in schema.product_node(item, "THB", {"@id": "#business"}, BASE)
+
+
+def test_every_kind_on_the_shelf_has_a_google_category():
+    """Новый вид товара без кода молча остался бы в разметке без категории."""
+    kinds = {item["kind"] for item in product_items(SHELF, BASE)}
+    assert kinds - set(SHELF["google_categories"]) == set()
 
 
 def test_product_list_holds_every_position_in_order():

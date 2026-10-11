@@ -393,10 +393,11 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 .faq__item[open] .faq__q::after{transform:rotate(45deg)}
 .faq__a{color:var(--muted);margin-top:var(--sp-3);max-width:64ch}
 /* Ссылка внутри абзаца — единственное место на сайте, где нужно подчёркивание:
-   в сплошном тексте ссылку не видно ни по цвету, ни по положению. */
-.faq__a a{color:var(--rose-deep);text-decoration:underline;
+   в сплошном тексте ссылку не видно ни по цвету, ни по положению. Абзац плитки
+   на странице услуги — такой же сплошной текст. */
+:is(.faq__a,.svc-benefit p) a{color:var(--rose-deep);text-decoration:underline;
   text-decoration-thickness:1px;text-underline-offset:2px}
-.faq__a a:hover{color:var(--rose)}
+:is(.faq__a,.svc-benefit p) a:hover{color:var(--rose)}
 
 /* ===== BOOKING ===== */
 /* Три канала кнопками — как на vn.neva.beauty, вплоть до отступа --sp-6

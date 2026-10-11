@@ -34,6 +34,10 @@ PRODUCTS_ID = "#products"
 # и eligibleRegion честно ограничивает предложение страной доставки.
 IN_STOCK = "https://schema.org/InStock"
 NEW_CONDITION = "https://schema.org/NewCondition"
+# Таксономия, из которой берутся коды категорий товара. Google принимает
+# в category либо код отсюда, либо свой текст латиницей; русское «Шампунь»
+# он считает недопустимым значением.
+GOOGLE_TAXONOMY_URL = "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
 
 
 def _postal_address(addr):
@@ -222,6 +226,22 @@ def item_list_node(name, items, page_url=None):
     }
 
 
+def product_category(item):
+    """Категория товара кодом Google Product Taxonomy; вид по-русски — подписью.
+
+    Позиция без кода остаётся без категории: поле необязательное, а свой текст
+    кириллицей Google отмечает как недопустимое значение."""
+    code = item.get("google_category")
+    if code is None:
+        return None
+    return {
+        "@type": "CategoryCode",
+        "inCodeSet": GOOGLE_TAXONOMY_URL,
+        "codeValue": str(code),
+        "name": item["kind"],
+    }
+
+
 def product_node(item, currency, seller_ref, offer_url, region=None):
     """Product с ценой — одна позиция витрины.
 
@@ -241,15 +261,18 @@ def product_node(item, currency, seller_ref, offer_url, region=None):
     }
     if region:
         offer["eligibleRegion"] = {"@type": "Country", "name": region}
-    return {
+    node = {
         "@type": "Product",
         "name": f"{item['brand']} {item['title']}, {item['volume']}",
         "description": _plain(item["desc"]),
         "brand": {"@type": "Brand", "name": item["brand"]},
-        "category": item["kind"],
         "image": item["image_url"],
         "offers": offer,
     }
+    category = product_category(item)
+    if category:
+        node["category"] = category
+    return node
 
 
 def product_list_node(name, items, currency, seller_ref, page_url, region=None):
