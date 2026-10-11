@@ -156,4 +156,5 @@ def test_uncapitalize_keeps_entity_spelling_inside_string():
 
 
 def test_format_date_ru_renders_visible_stamp():
-    assert format_date_ru("2026-08-31") == "31 августа 2026 года"
+    """Число не отрывается от месяца, год — от слова «года»: пробелы неразрывные."""
+    assert format_date_ru("2026-08-31") == "31\u00a0августа 2026\u00a0года"

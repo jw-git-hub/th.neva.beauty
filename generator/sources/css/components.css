@@ -385,7 +385,10 @@ html.no-scroll,body.no-scroll{overflow:hidden;overscroll-behavior:none}
 .breadcrumbs--lead{padding-top:var(--sp-8)}
 
 /* ===== FAQ (used by home/category) ===== */
-.faq{display:grid;gap:var(--sp-3);max-width:760px;margin-inline:auto}
+/* minmax(0,…): колонка сетки по умолчанию не уже самого длинного неразрывного
+   куска, а типограф склеивает предлоги с соседним словом — на 320 px вопрос
+   распирал страницу на 17 px. */
+.faq{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-3);max-width:760px;margin-inline:auto}
 .faq__item{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm);padding:var(--sp-5) var(--sp-6)}
 .faq__q{font-size:var(--fs-500);font-weight:600;color:var(--ink);cursor:pointer;list-style:none;

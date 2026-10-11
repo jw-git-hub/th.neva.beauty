@@ -4,6 +4,7 @@ from pathlib import Path
 from markupsafe import Markup
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import images, schema
+from typograph import typograph_html
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT.parent / "th.neva.beauty"
@@ -68,6 +69,12 @@ def env():
     e.globals["lastmod_placeholder"] = LASTMOD_PLACEHOLDER
     e.globals["lastmod_human_placeholder"] = LASTMOD_HUMAN_PLACEHOLDER
     return e
+
+def render_html(template, **context):
+    """Страница из шаблона, прошедшая типограф. Неразрывные пробелы встают
+    в готовую разметку до того, как с неё снимут отпечаток для даты изменения."""
+    return typograph_html(template.render(**context))
+
 
 def write(path: Path, html: str):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -661,9 +668,12 @@ MONTHS_RU = ("января", "февраля", "марта", "апреля", "м
 
 
 def format_date_ru(iso_date):
-    """«2026-08-31» → «31 августа 2026 года»."""
+    """«2026-08-31» → «31 августа 2026 года», число не отрывается от слова.
+
+    Неразрывные пробелы ставятся здесь, а не типографом: дата подставляется
+    на место заглушки уже после него."""
     year, month, day = (int(part) for part in iso_date.split("-"))
-    return f"{day} {MONTHS_RU[month - 1]} {year} года"
+    return f"{day}{NBSP}{MONTHS_RU[month - 1]} {year}{NBSP}года"
 
 
 def page_digest(html):
@@ -809,7 +819,7 @@ def main():
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
             "hero_stem": "hero", "hero_slot": "home_hero",
             "og_image_alt": site["og_image"]["default_alt"]}
-    write_page(OUT/"index.html", "/", e.get_template("home.html.j2").render(
+    write_page(OUT/"index.html", "/", render_html(e.get_template("home.html.j2"),
         site=site, page=page, home=content["home"], categories=content["categories"],
         prices=prices),
         journal, history, today)
@@ -858,7 +868,7 @@ def main():
                 "hero_stem": svc["hero_image"], "hero_slot": "service_hero",
                 "og_image": og_image_path(slug),
                 "og_image_alt": svc.get("image_alt") or f"{svc['title']} — {site['brand_full']}"}
-        write_page(OUT/slug/"index.html", f"/{slug}/", tpl.render(
+        write_page(OUT/slug/"index.html", f"/{slug}/", render_html(tpl,
             site=site, page=page, svc=svc, slug=slug, category=cat,
             sections=price_view(sections), services=content["services"]),
             journal, history, today)
@@ -893,7 +903,7 @@ def main():
                 "schema_json": schema.render(site, nodes),
                 "og_image": og_image_path(cat["slug"]),
                 "og_image_alt": cat.get("image_alt") or f"{cat['title']} — {site['brand_full']}"}
-        write_page(OUT/cat["slug"]/"index.html", cat["url"], cat_tpl.render(
+        write_page(OUT/cat["slug"]/"index.html", cat["url"], render_html(cat_tpl,
             site=site, page=page, cat=cat, services=content["services"],
             categories=content["categories"]),
             journal, history, today)
@@ -924,7 +934,7 @@ def main():
             # обложка, и описывать её должен её собственный alt из site.yml.
             "og_image_alt": f"{shop['h1']} — {site['brand_full']}" if shop_og else None}
     write_page(OUT/"kosmetika"/"index.html", PRODUCTS_URL,
-               e.get_template("products.html.j2").render(
+               render_html(e.get_template("products.html.j2"),
                    site=site, page=page, page_data=shop, brands=products["brands"],
                    services=[{"slug": slug, "title": content["services"][slug]["title"]}
                              for slug in shop["services"]]),
@@ -934,13 +944,13 @@ def main():
             "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "
                         "переписка остаётся в мессенджерах, счёт визитов обезличен.",
             "schema_json": base_schema, "noindex": True}
-    write(OUT/"privacy"/"index.html", e.get_template("privacy.html.j2").render(site=site, page=page))
+    write(OUT/"privacy"/"index.html", render_html(e.get_template("privacy.html.j2"), site=site, page=page))
     # 404 (служебная — не индексируем)
     page = {"url": "/404.html", "seo_title": f"Страница не найдена — {site['brand']}",
             "seo_desc": "Такой страницы нет. Загляните в услуги и цены "
                         f"салона {site['brand_full']}.",
             "schema_json": base_schema, "noindex": True}
-    write(OUT/"404.html", e.get_template("404.html.j2").render(site=site, page=page))
+    write(OUT/"404.html", render_html(e.get_template("404.html.j2"), site=site, page=page))
     # sitemap (собирается после страниц: дата берётся из отпечатка готового HTML)
     cat_urls = [cat["url"] for cat in content["categories"] if cat["is_page"]]
     # /privacy/ и /404.html — noindex, в sitemap не включаем

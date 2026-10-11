@@ -17,6 +17,8 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from fontTools.ttLib import TTFont
 
+from typograph import typograph_html
+
 ROOT = Path(__file__).resolve().parent
 SITE = ROOT.parent / "th.neva.beauty"
 BASE_URL = "https://th.neva.beauty"
@@ -87,6 +89,15 @@ def font_charset():
 _font_charset = set()
 
 
+NBSP = "\u00a0"
+
+
+def plain(text):
+    """Текст страницы с обычными пробелами. Типограф сборки ставит неразрывные
+    после предлогов и перед тире; для сверки со строкой из данных это тот же пробел."""
+    return text.replace(NBSP, " ")
+
+
 def report(page, message):
     problems.append(f"{page}: {message}")
 
@@ -132,6 +143,16 @@ def check_placeholders(path, text):
     в тексте страницы и в JSON-LD, а сборка при этом проходит молча."""
     for token in sorted(set(PLACEHOLDER_RE.findall(text))):
         report(rel(path), f"нераскрытый плейсхолдер в тексте: {token}")
+
+
+def check_typography(path, text):
+    """Страница прошла типограф: повторный проход ничего в ней не меняет.
+
+    Страница, собранная в обход render_html, выходит с обычными пробелами —
+    предлоги снова повисают в конце строк, а глазами в коде этого не видно."""
+    if typograph_html(text) != text:
+        report(rel(path), "страница не прошла типограф: остались обычные пробелы "
+                          "после предлогов, перед тире или после чисел")
 
 
 def check_doubled_words(path, soup):
@@ -195,7 +216,7 @@ def check_brand_in_lead(path, soup, brand_full):
         return
     h1 = soup.select_one("main h1")
     lead = h1.find_next("p") if h1 else None
-    if not lead or brand_full not in lead.get_text(" ", strip=True):
+    if not lead or brand_full not in plain(lead.get_text(" ", strip=True)):
         report(rel(path), f"первый абзац после h1 не называет салон: нет {brand_full!r}")
 
 
@@ -410,7 +431,7 @@ def check_faq(path, soup):
         for node in graph:
             if node.get("@type") == "FAQPage":
                 marked += [q["name"] for q in node["mainEntity"]]
-    visible = [h.get_text(strip=True) for h in soup.select(".faq__q h3")]
+    visible = [plain(h.get_text(strip=True)) for h in soup.select(".faq__q h3")]
     if marked != visible:
         report(rel(path), f"вопросы FAQ в разметке {marked} ≠ заголовки на странице {visible}")
 
@@ -591,10 +612,11 @@ def main():
     for path in files:
         text = path.read_text(encoding="utf-8")
         soup = BeautifulSoup(text, "html.parser")
-        check_forbidden(path, text)
-        check_entity_spelling(path, text)
+        check_forbidden(path, plain(text))
+        check_entity_spelling(path, plain(text))
         check_placeholders(path, text)
         check_placeholder_leak(path, text)
+        check_typography(path, text)
         check_doubled_words(path, soup)
         check_headings(path, soup)
         check_heading_order(path, soup)
