@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from fontTools.ttLib import TTFont
 
+from build import indexnow_key_file
 from typograph import typograph_html
 
 ROOT = Path(__file__).resolve().parent
@@ -517,6 +518,17 @@ def check_verification(files):
                 report(rel(path), f"мета-тег {tag} вне главной страницы")
 
 
+def check_indexnow_key():
+    """Файл ключа IndexNow лежит в корне сайта и содержит ровно ключ из site.yml.
+
+    Без него Bing и Яндекс отклоняют сообщения деплоя об изменённых страницах,
+    а сайт при этом выкладывается как обычно — сбой видно только в задаче отправки.
+    """
+    key = (yaml.safe_load(SITE_YML.read_text(encoding="utf-8")).get("indexnow_key") or "").strip()
+    key_file = SITE / indexnow_key_file(key)
+    if not key or not key_file.is_file() or key_file.read_text(encoding="utf-8") != key:
+        report(key_file.name, "нет файла ключа IndexNow с ключом из site.yml")
+
 def check_page_dates():
     """dateModified в разметке совпадает с lastmod той же страницы в sitemap.
 
@@ -641,6 +653,7 @@ def main():
     check_css_variables()
     check_no_visibility_visible()
     check_verification(files)
+    check_indexnow_key()
     check_page_dates()
     check_duplicates("title", titles)
     check_title_prefixes(titles)

@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Jinja2-templates-B41717?logo=jinja&logoColor=white" alt="Jinja2">
   <img src="https://img.shields.io/badge/SEO-JSON--LD%20/%20schema.org-FF9900" alt="JSON-LD">
-  <img src="https://img.shields.io/badge/Tests-157%20unit%20%2B%202%20end--to--end-0A9396" alt="157 unit tests and 2 end-to-end checks">
+  <img src="https://img.shields.io/badge/Tests-164%20unit%20%2B%202%20end--to--end-0A9396" alt="164 unit tests and 2 end-to-end checks">
   <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions">
   <img src="https://img.shields.io/badge/Hosting-GitHub%20Pages-222?logo=github&logoColor=white" alt="GitHub Pages">
   <img src="https://img.shields.io/badge/Lighthouse-A11y%20100%20%C2%B7%20SEO%20100%20%C2%B7%20Perf%2093--99-0CCE6B?logo=lighthouse&logoColor=white" alt="Lighthouse: A11y 100, SEO 100, Performance 93-99">
@@ -78,7 +78,7 @@ the deploy pipeline** — a wrong price or a broken link physically cannot reach
 | **Styling** | Plain CSS, ten cascade layers, minified into one bundle via `rcssmin` |
 | **Fonts** | Self-hosted Cormorant + Manrope: instanced and subset from variable masters (`fontTools`) |
 | **Graphics** | Inline SVG icons, responsive `WebP` (`Pillow`), decorative CSS backdrop with pointer parallax |
-| **Testing** | 157 unit tests (`pytest`) + `check_prices.py` and `check_content.py` over the built site (BeautifulSoup4) |
+| **Testing** | 164 unit tests (`pytest`) + `check_prices.py` and `check_content.py` over the built site (BeautifulSoup4) |
 | **Analytics** | Yandex.Metrica |
 | **CI/CD** | GitHub Actions → GitHub Pages, custom domain via `CNAME` |
 
@@ -193,6 +193,7 @@ flowchart LR
 │  ├─ schema.py               #   JSON-LD (schema.org) assembly
 │  ├─ images.py               #   width ladder and sizes for responsive images
 │  ├─ typograph.py            #   non-breaking spaces: prepositions, dashes, numbers
+│  ├─ indexnow.py             #   changed pages for Bing and Yandex after deploy
 │  ├─ check_prices.py         #   price-parity test
 │  ├─ check_content.py        #   end-to-end page quality checks
 │  ├─ make_images.py          #   WebP derivative slicing (run manually)
@@ -206,7 +207,7 @@ flowchart LR
 │  │  └─ lastmod.json         #   page digest journal for the sitemap
 │  ├─ sources/                #   build inputs: css · icons · img · fonts
 │  ├─ templates/              #   Jinja2 templates and partials
-│  └─ tests/                  #   157 unit tests (pytest)
+│  └─ tests/                  #   164 unit tests (pytest)
 │
 ├─ th.neva.beauty/            # Generated site (served by GitHub Pages)
 │  ├─ index.html · <services>/ · <categories>/ · kosmetika/
@@ -250,6 +251,11 @@ Pushing to `main` triggers GitHub Actions: the workflow installs dependencies, r
 `build.py`, runs all three checks, uploads the `th.neva.beauty/` folder as an artifact
 and deploys to GitHub Pages. The production domain `th.neva.beauty` is wired up
 via `CNAME`.
+
+After the deploy a separate job tells Bing and Yandex via IndexNow which pages
+changed: `indexnow.py` compares every built page with the live one (asset
+fingerprints stripped) while the build is still running. To submit every sitemap
+page, run the workflow manually with the `indexnow_all` box ticked.
 
 ---
 

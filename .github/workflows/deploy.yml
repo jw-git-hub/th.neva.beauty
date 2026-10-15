@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      indexnow_all:
+        description: "IndexNow: отправить все страницы sitemap, а не только изменённые"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -18,6 +23,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      indexnow_payload: ${{ steps.indexnow.outputs.payload }}
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -43,6 +50,15 @@ jobs:
       - name: Unit tests
         run: pytest generator/tests -q
 
+      # Какие страницы изменились, видно только сейчас: после выкладки на сайте уже
+      # новые. Сбой здесь не должен остановить деплой — отправка лишь ускоряет обход.
+      - name: Changed pages for IndexNow
+        id: indexnow
+        continue-on-error: true
+        run: |
+          payload=$(python generator/indexnow.py ${{ inputs.indexnow_all && '--all' || '' }})
+          echo "payload=$payload" >> "$GITHUB_OUTPUT"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5.0.0
         with:
@@ -58,3 +74,19 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5.0.0
+
+  # Bing и Яндекс узнают об изменённых страницах сразу, а не при следующем обходе.
+  # Отдельной задачей: если отправка не прошла, выложенный сайт это не задевает.
+  indexnow:
+    needs: [build, deploy]
+    if: needs.build.outputs.indexnow_payload != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Bing and Yandex via IndexNow
+        env:
+          PAYLOAD: ${{ needs.build.outputs.indexnow_payload }}
+        run: >-
+          curl --fail-with-body --silent --show-error --retry 3
+          --header 'Content-Type: application/json; charset=utf-8'
+          --data "$PAYLOAD" https://api.indexnow.org/indexnow
+          --write-out 'HTTP %{http_code}\n'

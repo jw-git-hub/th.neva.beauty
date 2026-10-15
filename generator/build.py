@@ -730,6 +730,11 @@ def build_manifest(site, base_path):
     return json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
 
 
+def indexnow_key_file(key):
+    """Имя файла с ключом IndexNow в корне сайта — по нему поисковик проверяет ключ."""
+    return f"{key}.txt"
+
+
 def build_sitemap(urls, base_url, journal):
     """sitemap.xml по журналу, заполненному при записи страниц."""
     rows = "\n".join(
@@ -961,6 +966,8 @@ def main():
     write(OUT/"site.webmanifest", build_manifest(site, base_path))
     # llms.txt — выжимка сайта для ИИ-ассистентов
     write(OUT/"llms.txt", build_llms(site, content, prices, products))
+    # ключ IndexNow — файл в корне, без перевода строки: содержимое сверяется с ключом как есть
+    write(OUT/indexnow_key_file(site["indexnow_key"]), site["indexnow_key"])
     # CNAME — боевой домен для GitHub Pages. Кладём в артефакт, иначе workflow-деплой
     # каждый раз сбрасывает кастомный домен в настройках Pages. Хост берём из base_url.
     write(OUT/"CNAME", urllib.parse.urlsplit(base_url).netloc + "\n")

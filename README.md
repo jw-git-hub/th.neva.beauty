@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Jinja2-шаблоны-B41717?logo=jinja&logoColor=white" alt="Jinja2">
   <img src="https://img.shields.io/badge/SEO-JSON--LD%20/%20schema.org-FF9900" alt="JSON-LD">
-  <img src="https://img.shields.io/badge/Тесты-157%20unit%20%2B%202%20сквозные-0A9396" alt="157 unit-тестов и 2 сквозные проверки">
+  <img src="https://img.shields.io/badge/Тесты-164%20unit%20%2B%202%20сквозные-0A9396" alt="164 unit-теста и 2 сквозные проверки">
   <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions">
   <img src="https://img.shields.io/badge/Хостинг-GitHub%20Pages-222?logo=github&logoColor=white" alt="GitHub Pages">
   <img src="https://img.shields.io/badge/Lighthouse-A11y%20100%20%C2%B7%20SEO%20100%20%C2%B7%20Perf%2093--99-0CCE6B?logo=lighthouse&logoColor=white" alt="Lighthouse: A11y 100, SEO 100, Performance 93-99">
@@ -78,7 +78,7 @@
 | **Стили** | Чистый CSS, десять слоёв по каскаду, минификация `rcssmin` в один бандл |
 | **Шрифты** | Самохостинг Cormorant + Manrope: инстансы и сабсеты из вариативных мастеров (`fontTools`) |
 | **Графика** | SVG-иконки inline, адаптивный `WebP` (`Pillow`), декоративный CSS-фон с pointer-parallax |
-| **Тесты** | 157 unit-тестов (`pytest`) + `check_prices.py` и `check_content.py` по собранному сайту (BeautifulSoup4) |
+| **Тесты** | 164 unit-теста (`pytest`) + `check_prices.py` и `check_content.py` по собранному сайту (BeautifulSoup4) |
 | **Аналитика** | Яндекс.Метрика |
 | **CI/CD** | GitHub Actions → GitHub Pages, кастомный домен через `CNAME` |
 
@@ -192,6 +192,7 @@ flowchart LR
 │  ├─ schema.py               #   сборка JSON-LD (schema.org)
 │  ├─ images.py               #   таблица ширин и sizes для адаптивных картинок
 │  ├─ typograph.py            #   неразрывные пробелы: предлоги, тире, числа
+│  ├─ indexnow.py             #   изменённые страницы для Bing и Яндекса после деплоя
 │  ├─ check_prices.py         #   парити-тест цен
 │  ├─ check_content.py        #   сквозные проверки качества страниц
 │  ├─ make_images.py          #   нарезка WebP-производных (запуск вручную)
@@ -205,7 +206,7 @@ flowchart LR
 │  │  └─ lastmod.json         #   журнал отпечатков страниц для sitemap
 │  ├─ sources/                #   исходники: css · icons · img · fonts
 │  ├─ templates/              #   Jinja2-шаблоны и партиалы
-│  └─ tests/                  #   157 unit-тестов (pytest)
+│  └─ tests/                  #   164 unit-теста (pytest)
 │
 ├─ th.neva.beauty/            # Сгенерированный сайт (раздаётся GitHub Pages)
 │  ├─ index.html · <услуги>/ · <разделы>/ · kosmetika/
@@ -248,6 +249,11 @@ python -m http.server -d th.neva.beauty 8000
 Пуш в `main` запускает GitHub Actions: workflow ставит зависимости, гоняет `build.py`,
 прогоняет все три проверки, публикует папку `th.neva.beauty/` артефактом и деплоит
 на GitHub Pages. Боевой домен `th.neva.beauty` подключён через `CNAME`.
+
+После выкладки отдельная задача сообщает Bing и Яндексу по протоколу IndexNow,
+какие страницы изменились: `indexnow.py` ещё в сборке сравнивает каждую страницу
+с живой версией без отпечатков ассетов. Отправить все страницы sitemap — ручной
+запуск workflow с флажком `indexnow_all`.
 
 ---
 
