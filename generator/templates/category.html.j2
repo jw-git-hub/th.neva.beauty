@@ -9,7 +9,10 @@
     <span class="breadcrumbs__sep" aria-hidden="true">/</span>
     <span aria-current="page">{{ cat.title }}</span>
   </nav>
-  <div class="section-head" data-reveal>
+  {#- Заголовок первого экрана без появления, как на главной и в услугах: он и так
+      перед глазами, а ожидание reveal.js откладывало его отрисовку на 0,5 с
+      (LCP 2056 → 1496 мс на телефоне, задача 141). Карточки ниже появляются как прежде. #}
+  <div class="section-head">
     <p class="eyebrow">Направление</p><h1>{{ cat.h1 | default(cat.title, true) }}</h1><p>{{ cat.intro }}</p>
     {# Кнопка в шапке раздела: до неё первая точка записи на странице лежала
        на 5.5 экрана, а из поиска сюда приходят не реже, чем на услугу. #}

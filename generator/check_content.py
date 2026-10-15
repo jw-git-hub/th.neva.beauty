@@ -289,6 +289,15 @@ def check_reveal_fallback(path, soup):
         report(rel(path), "у тега reveal.js нет onerror: без скрипта блоки останутся скрытыми")
 
 
+def check_h1_shown_at_once(path, soup):
+    """Заголовок страницы не ждёт reveal.js: первый экран и так перед глазами.
+
+    Пока скрипт не загрузился и не сработал наблюдатель, блок с атрибутом появления
+    прозрачен — на разделах это откладывало отрисовку h1 на 0,5 с (задача 141)."""
+    h1 = soup.find("h1")
+    if h1 and h1.find_parent(attrs={"data-reveal": True}):
+        report(rel(path), "h1 внутри блока с data-reveal — первый экран ждёт скрипт появлений")
+
 def check_srcset(path, soup):
     """Каждый файл из srcset существует, а ширина в дескрипторе — настоящая.
 
@@ -641,6 +650,7 @@ def main():
         check_srcset(path, soup)
         check_stylesheet_first(path, text)
         check_reveal_fallback(path, soup)
+        check_h1_shown_at_once(path, soup)
         check_font_coverage(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)
