@@ -29,7 +29,7 @@
         <p class="eyebrow">{{ svc.category }}</p>
         <h1>{{ svc.h1 | default(svc.title, true) }}</h1>
         <p class="svc-hero__intro">{{ svc.intro }}</p>
-        <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ svc.title) | urlencode }}" target="_blank" rel="noopener">Записаться</a>
+        <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ svc.title) | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'hero') }}>Записаться</a>
       </div>
       <div class="svc-hero__media">
         <span class="svc-hero__blob" aria-hidden="true"></span>

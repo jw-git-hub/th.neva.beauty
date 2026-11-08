@@ -22,7 +22,7 @@
     </nav>
     {# Кнопка только на десктопе — как на vn.neva.beauty: до 1024 px в шапке
        остаются логотип и бургер, запись идёт из первого экрана и из дровера. #}
-    <a class="btn btn--primary site-header__cta" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">Записаться</a>
+    <a class="btn btn--primary site-header__cta" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'header') }}>Записаться</a>
     <button class="burger" data-drawer-open aria-label="Открыть меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>

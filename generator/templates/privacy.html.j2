@@ -81,9 +81,9 @@
     <h2>Вопросы и просьбы</h2>
     <p>Спросить, что у нас есть о вас, или попросить удалить переписку можно там же, где вы нам пишете:</p>
     <ul>
-      <li>WhatsApp: <a href="{{ site.contacts.whatsapp_url }}">{{ site.business.telephone }}</a></li>
-      <li>Telegram: <a href="{{ site.contacts.telegram_url }}">{{ site.contacts.telegram_url | handle }}</a></li>
-      <li>Instagram: <a href="{{ site.contacts.instagram_url }}">{{ site.contacts.instagram_url | handle }}</a></li>
+      <li>WhatsApp: <a href="{{ site.contacts.whatsapp_url }}" {{ contact_marks('whatsapp', 'privacy') }}>{{ site.business.telephone }}</a></li>
+      <li>Telegram: <a href="{{ site.contacts.telegram_url }}" {{ contact_marks('telegram', 'privacy') }}>{{ site.contacts.telegram_url | handle }}</a></li>
+      <li>Instagram: <a href="{{ site.contacts.instagram_url }}" {{ contact_marks('instagram', 'privacy') }}>{{ site.contacts.instagram_url | handle }}</a></li>
     </ul>
 
     <h2>Изменения</h2>

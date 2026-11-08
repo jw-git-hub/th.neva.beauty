@@ -15,8 +15,8 @@
     <div class="contact-strip__item">{{ icon('map-pin') }}<span>{{ site.location }}</span></div>
     <div class="contact-strip__item">{{ icon('clock') }}<span>{{ site.hours }}</span></div>
     <div class="contact-strip__actions">
-      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }}<span>Telegram</span></a>
-      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }}<span>WhatsApp</span></a>
+      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener" {{ contact_marks('telegram', 'strip') }}>{{ icon('send') }}<span>Telegram</span></a>
+      <a class="btn btn--ghost btn--sm" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'strip') }}>{{ icon('message-circle') }}<span>WhatsApp</span></a>
     </div>
   </div>
 </section>

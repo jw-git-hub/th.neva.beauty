@@ -23,9 +23,9 @@
     </nav>
     <div class="site-footer__col">
       <h2 class="site-footer__title">Контакты</h2>
-      <a class="site-footer__link" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
-      <a class="site-footer__link" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">Telegram</a>
-      <a class="site-footer__link" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">Instagram</a>
+      <a class="site-footer__link" href="{{ site.contacts.whatsapp_url }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'footer') }}>WhatsApp</a>
+      <a class="site-footer__link" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener" {{ contact_marks('telegram', 'footer') }}>Telegram</a>
+      <a class="site-footer__link" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener" {{ contact_marks('instagram', 'footer') }}>Instagram</a>
     </div>
   </div>
   <div class="site-footer__bottom container">

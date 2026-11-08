@@ -79,7 +79,7 @@ the deploy pipeline** — a wrong price or a broken link physically cannot reach
 | **Fonts** | Self-hosted Cormorant + Manrope: instanced and subset from variable masters (`fontTools`) |
 | **Graphics** | Inline SVG icons, responsive `WebP` (`Pillow`), decorative CSS backdrop with pointer parallax |
 | **Testing** | 164 unit tests (`pytest`) + `check_prices.py` and `check_content.py` over the built site (BeautifulSoup4) |
-| **Analytics** | Yandex.Metrica |
+| **Analytics** | Yandex.Metrica: clicks on contact links are sent as the `contact` goal (channel, page, button place; `contacts by page` branch), exits to other sites as visit params `exits by page` |
 | **CI/CD** | GitHub Actions → GitHub Pages, custom domain via `CNAME` |
 
 ---
@@ -165,6 +165,11 @@ flowchart LR
   from Yandex.Metrica, the deliberate price of having analytics. Two "obvious"
   optimisations were A/B tested and rejected on measurement: inlining CSS into `<head>`
   made LCP worse, and deferring Metrica changed nothing.
+  Clicks on contact links (WhatsApp, Telegram, Instagram) are counted by one handler in
+  `partials/metrika.html.j2`: `generator/contacts.py` puts `data-contact` and `data-place` marks on
+  the links, and the `contact` goal carries channel, page and button place, with a
+  `contacts by page` branch for page-to-messenger pairs. Exits to other sites, `mailto:` and `tel:`
+  go out as visit params `exits by page`. `check_content.py` fails on a contact link without marks.
 
 - **📅 Honest `lastmod` in the sitemap.** A page's date changes only when its content
   changed: the build compares a digest of the HTML against a journal, with asset

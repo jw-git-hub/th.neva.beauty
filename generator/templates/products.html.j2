@@ -21,7 +21,7 @@
   <div class="section-head">
     <p class="eyebrow">Витрина</p><h1>{{ page_data.h1 }}</h1><p>{{ page_data.intro }}</p>
     <p class="section-head__action">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу купить косметику' | urlencode }}" target="_blank" rel="noopener">Написать в WhatsApp</a>
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу купить косметику' | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'hero') }}>Написать в WhatsApp</a>
     </p>
   </div>
   {#- Заголовок обещает несколько брендов, а до второго на телефоне 7,5 тысячи
@@ -57,7 +57,7 @@
           {#- Подпись у всех ссылок одна, и списком ссылок страницы
               она читается как столбец одинаковых пунктов. aria-label
               называет товар — экранный диктор произносит, о чём спрашивают. #}
-          <a class="product-card__more" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Интересует ' ~ product) | urlencode }}" target="_blank" rel="noopener" aria-label="Спросить о наличии: {{ product }}">Спросить о наличии {{ icon('arrow-right') }}</a>
+          <a class="product-card__more" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Интересует ' ~ product) | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'product') }} aria-label="Спросить о наличии: {{ product }}">Спросить о наличии {{ icon('arrow-right') }}</a>
         </p>
       </div>
     </div>

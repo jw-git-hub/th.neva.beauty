@@ -21,7 +21,7 @@
       <h1 class="hero__title">{% for line in home.hero_title_lines %}<span>{{ line }}</span>{{ " " }}{% endfor %}</h1>
       <p class="hero__sub">{{ home.hero_sub }}</p>
       <div class="hero__actions">
-        <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener">Записаться</a>
+        <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ 'Здравствуйте! Хочу записаться' | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'hero') }}>Записаться</a>
         <a class="btn btn--ghost" href="#services">Услуги</a>
       </div>
     </div>

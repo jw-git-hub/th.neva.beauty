@@ -21,9 +21,9 @@
   <div class="container booking">
     <div class="section-head" data-reveal><p class="eyebrow">{{ eyebrow | default('Запись', true) }}</p><h2>{{ title }}</h2><p>{{ lead }}</p></div>
     <div class="booking__actions">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} WhatsApp</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener">{{ icon('send') }} Telegram</a>
-      <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener">{{ icon('instagram') }} Instagram</a>
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'booking') }}>{{ icon('message-circle') }} WhatsApp</a>
+      <a class="btn btn--ghost" href="{{ site.contacts.telegram_url }}" target="_blank" rel="noopener" {{ contact_marks('telegram', 'booking') }}>{{ icon('send') }} Telegram</a>
+      <a class="btn btn--ghost" href="{{ site.contacts.instagram_url }}" target="_blank" rel="noopener" {{ contact_marks('instagram', 'booking') }}>{{ icon('instagram') }} Instagram</a>
     </div>
     {#- Правило переноса — про запись на процедуру. Страница, где ничего
         не записывают, отдаёт пустую строку и обходится без него. #}
@@ -43,6 +43,6 @@
 {%- set message = ('Здравствуйте! Хочу записаться на: ' ~ subject) if subject else 'Здравствуйте! Хочу записаться' %}
 <p class="cta-inline{{ ' cta-inline--wide' if wide }}">
   <span class="cta-inline__text">{{ text }}</span>
-  <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener">{{ icon('message-circle') }} Записаться</a>
+  <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ message | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'inline') }}>{{ icon('message-circle') }} Записаться</a>
 </p>
 {% endmacro %}

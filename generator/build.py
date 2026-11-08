@@ -4,6 +4,7 @@ from pathlib import Path
 from markupsafe import Markup
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import images, schema
+from contacts import fill_contact_links, tracking_attrs
 from typograph import typograph_html
 
 ROOT = Path(__file__).resolve().parent
@@ -16,6 +17,9 @@ RELATED_COUNT = 3  # сколько карточек «Смотрите такж
 # Витрина товара. Адрес и подписи — здесь, а не в products.yml: страница одна,
 # и её место в меню это решение о структуре сайта, а не данные о товаре.
 PRODUCTS_URL = "/kosmetika/"
+# Места ссылок связи в тексте из yml (см. contacts.PLACES).
+FAQ_PLACE = "faq"
+TILE_PLACE = "text"
 PRODUCTS_NAV_LABEL = "Косметика"
 PRODUCTS_NAV_TITLE = "Косметика для волос"
 # В меню шапки и дровера пункт стоит сразу за «Главной» (задача 131): между
@@ -63,6 +67,7 @@ def env():
     e.filters["price"] = format_price
     e.tests["match"] = lambda s, pat: re.match(pat, s) is not None
     e.globals["icon"] = icon
+    e.globals["contact_marks"] = tracking_attrs
     e.globals["theme_color"] = THEME_COLOR
     # Заглушки даты изменения: настоящую дату подставляет write_page уже в готовый
     # HTML — иначе подстановка даты сама делала бы страницу изменённой (см. ниже).
@@ -224,11 +229,13 @@ def render_page_prices(entry, index):
         entry[field] = render_prices(entry[field], index)
 
 
-def render_rich_text(text, contacts, base_path="", prices_index=None):
+def render_rich_text(text, contacts, place, base_path="", prices_index=None):
     """Финализирует HTML-текст страницы: подставляет URL мессенджеров вместо
     плейсхолдеров {whatsapp}/{telegram}/{instagram} (единый источник — site.yml),
     цены из прайса вместо {price:...} и префиксует внутренние ссылки href="/..."
-    на base_path — чтобы они работали и на превью по подпути."""
+    на base_path — чтобы они работали и на превью по подпути. Ссылки связи в href
+    получают метки для Метрики; place — где в странице стоит текст (contacts.PLACES)."""
+    text = fill_contact_links(text, contacts, place)
     tokens = {
         "{whatsapp}": contacts["whatsapp_url"],
         "{telegram}": contacts["telegram_url"],
@@ -246,14 +253,14 @@ def render_rich_text(text, contacts, base_path="", prices_index=None):
 def render_faq_contacts(faq, contacts, base_path="", prices_index=None):
     """Ответы FAQ, готовые к выводу: те же подстановки, что и в остальном тексте."""
     return [{"q": item["q"],
-             "a": render_rich_text(item["a"], contacts, base_path, prices_index)}
+             "a": render_rich_text(item["a"], contacts, FAQ_PLACE, base_path, prices_index)}
             for item in faq]
 
 
 def render_tiles(tiles, contacts, base_path=""):
     """Плитки с иконкой, готовые к выводу: в тексте плитки может стоять ссылка
     на соседнюю страницу, и ей нужен тот же префикс base_path, что и в FAQ."""
-    return [{**tile, "text": Markup(render_rich_text(tile["text"], contacts, base_path))}
+    return [{**tile, "text": Markup(render_rich_text(tile["text"], contacts, TILE_PLACE, base_path))}
             for tile in tiles]
 
 
@@ -818,7 +825,7 @@ def main():
     if home_faq:
         home["faq"] = render_faq_contacts(home_faq, site["contacts"], base_path, prices_index)
         home_nodes.append(schema.faq_node(home["faq"], home_url))
-    page = {"url": "/", "seo_title": home["seo_title"],
+    page = {"id": "home", "url": "/", "seo_title": home["seo_title"],
             "seo_desc": home["seo_desc"], "og_title": home.get("og_title"),
             "schema_json": schema.render(site, home_nodes),
             "hero_image": "/assets/img/hero.webp",  # LCP-элемент → preload в base.html.j2
@@ -866,7 +873,7 @@ def main():
         if svc.get("faq"):
             svc["faq"] = render_faq_contacts(svc["faq"], site["contacts"], base_path, prices_index)
             nodes.append(schema.faq_node(svc["faq"], url))
-        page = {"url": f"/{slug}/", "seo_title": svc["seo_title"], "seo_desc": svc["seo_desc"],
+        page = {"id": slug, "url": f"/{slug}/", "seo_title": svc["seo_title"], "seo_desc": svc["seo_desc"],
                 "og_title": svc.get("og_title") or og_title(svc, site),
                 "schema_json": schema.render(site, nodes),
                 "hero_image": f"/assets/img/{svc['hero_image']}.webp",  # LCP → preload
@@ -903,7 +910,7 @@ def main():
         if cat.get("faq"):
             cat["faq"] = render_faq_contacts(cat["faq"], site["contacts"], base_path, prices_index)
             nodes.append(schema.faq_node(cat["faq"], url))
-        page = {"url": cat["url"], "seo_title": cat["seo_title"], "seo_desc": cat["seo_desc"],
+        page = {"id": cat["slug"], "url": cat["url"], "seo_title": cat["seo_title"], "seo_desc": cat["seo_desc"],
                 "og_title": cat.get("og_title") or og_title(cat, site),
                 "schema_json": schema.render(site, nodes),
                 "og_image": og_image_path(cat["slug"]),
@@ -931,7 +938,7 @@ def main():
         schema.faq_node(shop["faq"], url),
     ]
     shop_og = og_image_path("kosmetika")
-    page = {"url": PRODUCTS_URL, "seo_title": shop["seo_title"], "seo_desc": shop["seo_desc"],
+    page = {"id": PRODUCTS_URL.strip("/"), "url": PRODUCTS_URL, "seo_title": shop["seo_title"], "seo_desc": shop["seo_desc"],
             "og_title": og_title(shop, site),
             "schema_json": schema.render(site, nodes),
             "og_image": shop_og,
@@ -945,13 +952,13 @@ def main():
                              for slug in shop["services"]]),
                journal, history, today)
     # privacy (служебная — не индексируем; seo_desc нужен для превью ссылки в мессенджере)
-    page = {"url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
+    page = {"id": "privacy", "url": "/privacy/", "seo_title": f"Политика конфиденциальности — {site['brand']}",
             "seo_desc": f"Сайт {site['brand_full']} не собирает данные: форм нет, "
                         "переписка остаётся в мессенджерах, счёт визитов обезличен.",
             "schema_json": base_schema, "noindex": True}
     write(OUT/"privacy"/"index.html", render_html(e.get_template("privacy.html.j2"), site=site, page=page))
     # 404 (служебная — не индексируем)
-    page = {"url": "/404.html", "seo_title": f"Страница не найдена — {site['brand']}",
+    page = {"id": "404", "url": "/404.html", "seo_title": f"Страница не найдена — {site['brand']}",
             "seo_desc": "Такой страницы нет. Загляните в услуги и цены "
                         f"салона {site['brand_full']}.",
             "schema_json": base_schema, "noindex": True}

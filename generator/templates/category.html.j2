@@ -17,7 +17,7 @@
     {# Кнопка в шапке раздела: до неё первая точка записи на странице лежала
        на 5.5 экрана, а из поиска сюда приходят не реже, чем на услугу. #}
     <p class="section-head__action">
-      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ cat.title) | urlencode }}" target="_blank" rel="noopener">Записаться</a>
+      <a class="btn btn--primary" href="{{ site.contacts.whatsapp_url }}?text={{ ('Здравствуйте! Хочу записаться на: ' ~ cat.title) | urlencode }}" target="_blank" rel="noopener" {{ contact_marks('whatsapp', 'hero') }}>Записаться</a>
     </p>
   </div>
   <h2 class="visually-hidden">Услуги раздела «{{ cat.title }}»</h2>

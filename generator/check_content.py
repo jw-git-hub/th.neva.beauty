@@ -18,6 +18,7 @@ from PIL import Image
 from fontTools.ttLib import TTFont
 
 from build import indexnow_key_file
+from contacts import CHANNELS, PLACES
 from typograph import typograph_html
 
 ROOT = Path(__file__).resolve().parent
@@ -60,6 +61,9 @@ ENTITY_SPELLING = {
 
 # Плейсхолдеры контента, которые обязана раскрыть сборка (build.py: render_faq_contacts).
 PLACEHOLDER_RE = re.compile(r"\{(?:whatsapp|telegram|instagram|price:[^}]*)\}")
+
+# Хосты ссылок связи: по ним проверка узнаёт ссылку, которой нужны метки для Метрики.
+CONTACT_HOST_RE = re.compile(r"(^|\.)(wa\.me|t\.me|instagram\.com)$")
 
 # Слово, повторённое подряд через пробел (обычный или неразрывный).
 DOUBLED_WORD_RE = re.compile(r"\b(\w+)[  ]+\1\b", re.IGNORECASE)
@@ -419,6 +423,19 @@ def check_links(path, soup):
             report(rel(path), f"битая внутренняя ссылка: {href}")
 
 
+def check_contact_marks(path, soup):
+    """Каждая ссылка связи несёт метки для Метрики (contacts.py).
+
+    Ссылка без data-contact и data-place в статистике не видна: клик по ней
+    не станет целью contact. Ссылка, собранная мимо contact_marks или
+    fill_contact_links, остаётся такой молча."""
+    for a in soup.select("a[href]"):
+        if not CONTACT_HOST_RE.search(urlsplit(a["href"]).hostname or ""):
+            continue
+        if a.get("data-contact") not in CHANNELS or a.get("data-place") not in PLACES:
+            report(rel(path), f"ссылка связи без меток для Метрики: {a['href']}")
+
+
 def check_schema(path, soup):
     for script in soup.select('script[type="application/ld+json"]'):
         try:
@@ -654,6 +671,7 @@ def main():
         check_font_coverage(path, soup)
         check_preloaded_image(path, soup)
         check_links(path, soup)
+        check_contact_marks(path, soup)
         check_schema(path, soup)
         check_meta(path, soup, titles, descriptions)
         check_open_graph(path, soup)
