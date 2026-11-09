@@ -55,7 +55,7 @@ def test_pricier_variant_skips_addon_sibling():
 
 def test_item_label_gets_ot_when_tier_exists():
     label = item_price_label(PRICES, "uhod-za-volosami", "Балаяж, шатуш", "฿")
-    assert label == f"от{NBSP}7000{NBSP}฿"
+    assert label == f"от{NBSP}8000{NBSP}฿"
 
 
 def test_item_label_stays_exact_without_tier():
@@ -64,13 +64,13 @@ def test_item_label_stays_exact_without_tier():
 
 
 def test_item_label_does_not_double_ot():
-    """Цена «от 3000 ฿» уже в прайсе — второе «от» приписывать нельзя."""
+    """Цена «от 4000 ฿» уже в прайсе — второе «от» приписывать нельзя."""
     label = item_price_label(PRICES, "tokio-inkarami", "Короткие волосы", "฿")
-    assert label == f"от{NBSP}3000{NBSP}฿"
+    assert label == f"от{NBSP}4000{NBSP}฿"
 
 
 def test_span_collapses_to_ot_when_top_is_open_ended():
-    assert price_span([PRICES["tokio-inkarami"]], "฿") == f"от{NBSP}3000{NBSP}฿"
+    assert price_span([PRICES["tokio-inkarami"]], "฿") == f"от{NBSP}4000{NBSP}฿"
 
 
 def test_span_stays_a_range_when_top_is_exact():
