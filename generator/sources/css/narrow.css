@@ -1,0 +1,90 @@
+/* ===== УЗКИЕ ЭКРАНЫ: 250–349 px ===== */
+/* Обложки телефонов-раскладушек — 280–344 px, 250 — запас владельца. Шире 350 px
+   вид не меняется: всё здесь — только под этими медиазапросами, и слой стоит
+   последним в каскаде (CSS_BUNDLE_ORDER в build.py), поэтому перекрывает общие
+   правила порядком, а не весом селектора.
+
+   Замер задачи 144 (все страницы, Chromium и WebKit): до правки на 250 и 280 px
+   страница ехала вбок до 320 px. Распирали её длинные слова в h1 («Профессиональный»),
+   склейки типографа в вопросах FAQ («или электроэпиляцию»), таблицы прайса и
+   спрятанное меню салонов шириной 232 px. В шапке на 250 px кнопка меню
+   сжималась до 20 px и её полоски пропадали, в открытом меню кнопка закрытия
+   сжималась до 12 px и уезжала за край. */
+
+@media (max-width:349.98px){
+  /* Поля 16 px вместо 24: на 250 px контенту остаётся 218 px, а не 202. */
+  .container,.legal-page{padding-inline:var(--sp-4)}
+
+  /* Заголовок растёт с окном и упирается в прежние 36 px: на 250 px — 24 px.
+     9.6vw подобраны по самому длинному слову заголовков — «Профессиональный»
+     с открывающей кавычкой: оно влезает в колонку с запасом от 250 px.
+     minmax(0,…) — страховка: слово длиннее порвёт overflow-wrap, но колонка
+     и страница не разъедутся. */
+  .svc-hero__inner,.hero__inner{grid-template-columns:minmax(0,1fr)}
+  .svc-hero__text h1,.section-head :is(h1,h2){font-size:min(2.25rem,9.6vw)}
+  .legal-page h1{font-size:min(1.75rem,9vw)}
+
+  /* FAQ: «+» стоит в строке вопроса, и вопрос с длинной склейкой выталкивал его
+     за карточку. min-width:0 даёт вопросу сжаться и перенестись. Размер вопроса
+     растёт с окном от 16 px (до 281 px) до прежних 20 px (с 332 px) так, что
+     самая длинная склейка, «или электроэпиляцию», от 280 px встаёт в строку
+     целиком, без переноса по слогам. */
+  .faq__item{padding-inline:var(--sp-4)}
+  .faq__q{gap:var(--sp-3);font-size:clamp(var(--fs-400),8vw - 6.5px,var(--fs-500))}
+  .faq__q h3{min-width:0}
+
+  /* Прайс: поля таблицы и отступ цены от названия — 12 px вместо 20 и 16. */
+  .pricelist__table{padding-inline:var(--sp-3)}
+  .pricelist__price{padding-left:var(--sp-3)}
+
+  /* Меню салонов спрятано, но ширину страницы задаёт и спрятанным. */
+  .loc__menu{min-width:min(232px,calc(100vw - 2 * var(--sp-4)))}
+
+  /* Кнопки меню и закрытия встают полосками и крестиком на линию поля, как
+     текст страницы, — зона нажатия 44 px остаётся, место отдаёт поле. */
+  .burger{margin-right:-10px}
+  .drawer__close{margin-right:calc(var(--sp-3) * -1)}
+
+  /* Ящик меню — во всю ширину: в 86% от 250 px замок с кнопкой закрытия
+     (190 + 44 px) не помещался. */
+  .drawer{width:100%}
+  .drawer__top,.drawer__footer{padding-inline:var(--sp-4)}
+  .drawer__socials{gap:var(--sp-1)}
+  .drawer__socials a{padding-inline:0}
+}
+
+@media (max-width:299.98px){
+  /* Замок (цветок, название, город) не помещается рядом с кнопкой меню:
+     203 px при 218 на всю шапку. Уменьшается целиком, в той же пропорции. */
+  .brand-mark{--brand-scale:.85;font-size:calc(1rem * var(--brand-scale));gap:calc(.8rem * var(--brand-scale))}
+  .brand-mark__name{font-size:calc(var(--fs-600) * var(--brand-scale))}
+  .brand-mark__loc{font-size:calc(.6875rem * var(--brand-scale))}
+  .brand-mark__loc::before{width:calc(1.6rem * var(--brand-scale))}
+}
+
+@media (max-width:279.98px){
+  /* Вопросу FAQ не хватает и 16 px: «или электроэпиляцию»,
+     «без предварительной» шире строки, и без переноса по слогам их рвал бы
+     overflow-wrap — без дефиса, в любом месте. Перенос только здесь, ниже самой
+     узкой обложки: Chrome переносит жадно, заполняя строку, даже когда слово
+     влезло бы на следующую, а Safari считает склейку «что подойдёт» одним словом
+     и делит её как «что по-дойдёт». Границы 14 6 6 не дают делить короткие слова
+     («во-лос»), из-за которых переносы на сайте когда-то сняли (base.css). */
+  .faq__q h3{hyphens:auto;-webkit-hyphens:auto;hyphenate-limit-chars:14 6 6;
+    -webkit-hyphenate-limit-before:6;-webkit-hyphenate-limit-after:6}
+
+  /* Цена — под названием, во всех строках сразу. «35 ฿/минута» и «600–1200 ฿»
+     не переносятся, и рядом с ними названию оставалось меньше 90 px: «Классическое»
+     и «Одноразовая» распирали таблицу за край. Разделитель переезжает с ячеек
+     на строку: ячейки теперь одна под другой. Ролей ARIA, как у таблицы
+     на /privacy/, здесь не нужно: семантику таблицы при display:block теряет
+     Safari, а его уже 320 px не бывает; Chrome её сохраняет (проверено
+     по дереву доступности, задача 144). */
+  .pricelist__table,.pricelist__table tbody,.pricelist__row,
+  .pricelist__name,.pricelist__price{display:block}
+  .pricelist__row{padding-block:var(--sp-4);border-bottom:1px dashed var(--line)}
+  .pricelist__row:last-child{border-bottom:none}
+  .pricelist__row>*{border-bottom:none}
+  .pricelist__name{padding:0}
+  .pricelist__price{padding:var(--sp-1) 0 0;text-align:left}
+}

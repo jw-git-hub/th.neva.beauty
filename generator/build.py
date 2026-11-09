@@ -38,7 +38,8 @@ THEME_COLOR = "#FBF4F0"
 # минифицированный файл → один render-blocking запрос вместо шести, общий кэш на
 # весь сайт. fonts первым (@font-face), затем токены/база, затем постраничные слои.
 CSS_BUNDLE_ORDER = ["fonts", "tokens", "base", "components",
-                    "aurora", "reveal", "home", "service", "products", "legal"]
+                    "aurora", "reveal", "home", "service", "products", "legal",
+                    "narrow"]
 
 def icon(name, cls="icon"):
     svg = (ICONS / f"{name}.svg").read_text(encoding="utf-8")
